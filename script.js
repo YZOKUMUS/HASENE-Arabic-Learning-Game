@@ -333,9 +333,11 @@ class ArabicLearningGame {
         const questionCount = 10;
         this.questions = [];
         
-        // Get random words from data
-        const shuffledWords = [...this.wordData].sort(() => Math.random() - 0.5);
-        const selectedWords = shuffledWords.slice(0, questionCount);
+        // Load learning statistics
+        const wordStats = JSON.parse(localStorage.getItem('wordStats')) || {};
+        
+        // Smart word selection algorithm
+        const selectedWords = this.selectSmartWords(questionCount, wordStats);
         
         selectedWords.forEach(word => {
             let question = {
@@ -356,6 +358,107 @@ class ArabicLearningGame {
         });
         
         console.log(`Generated ${this.questions.length} questions for ${this.gameMode} mode`);
+    }
+    
+    selectSmartWords(count, wordStats) {
+        const weightedWords = [];
+        
+        this.wordData.forEach(word => {
+            const stats = wordStats[word.kelime] || { 
+                correct: 0, 
+                wrong: 0, 
+                lastSeen: 0,
+                difficulty: 1
+            };
+            
+            // Calculate priority weight
+            let weight = 1;
+            
+            // Recently wrong words get higher priority (3x)
+            if (stats.wrong > stats.correct) {
+                weight *= 3;
+            }
+            
+            // Words never seen get medium priority (2x)
+            if (stats.correct === 0 && stats.wrong === 0) {
+                weight *= 2;
+            }
+            
+            // Time-based repetition (Spaced Repetition)
+            const daysSinceLastSeen = (Date.now() - stats.lastSeen) / (1000 * 60 * 60 * 24);
+            if (daysSinceLastSeen > 7) {
+                weight *= 1.5; // Review old words
+            }
+            
+            // Difficulty multiplier (harder words appear more)
+            weight *= stats.difficulty;
+            
+            // Add to weighted pool multiple times based on weight
+            for (let i = 0; i < Math.ceil(weight); i++) {
+                weightedWords.push(word);
+            }
+        });
+        
+        // Shuffle and select unique words
+        const shuffled = weightedWords.sort(() => Math.random() - 0.5);
+        const selected = [];
+        const usedWords = new Set();
+        
+        for (let word of shuffled) {
+            if (!usedWords.has(word.kelime) && selected.length < count) {
+                selected.push(word);
+                usedWords.add(word.kelime);
+            }
+        }
+        
+        // Fill remaining slots with random words if needed
+        while (selected.length < count) {
+            const randomWord = this.wordData[Math.floor(Math.random() * this.wordData.length)];
+            if (!usedWords.has(randomWord.kelime)) {
+                selected.push(randomWord);
+                usedWords.add(randomWord.kelime);
+            }
+        }
+        
+        return selected;
+    }
+    
+    updateWordStats(word, isCorrect) {
+        // Load existing stats
+        const wordStats = JSON.parse(localStorage.getItem('wordStats')) || {};
+        
+        // Initialize word stats if not exists
+        if (!wordStats[word.kelime]) {
+            wordStats[word.kelime] = {
+                correct: 0,
+                wrong: 0,
+                lastSeen: Date.now(),
+                difficulty: 1,
+                firstSeen: Date.now()
+            };
+        }
+        
+        const stats = wordStats[word.kelime];
+        
+        // Update statistics
+        if (isCorrect) {
+            stats.correct++;
+            // Reduce difficulty if answered correctly multiple times
+            if (stats.correct > stats.wrong + 2) {
+                stats.difficulty = Math.max(0.5, stats.difficulty * 0.8);
+            }
+        } else {
+            stats.wrong++;
+            // Increase difficulty for wrong answers
+            stats.difficulty = Math.min(3.0, stats.difficulty * 1.3);
+        }
+        
+        stats.lastSeen = Date.now();
+        
+        // Save updated stats
+        localStorage.setItem('wordStats', JSON.stringify(wordStats));
+        
+        console.log(`Word stats updated for ${word.kelime}: ${stats.correct}✓ ${stats.wrong}✗ (difficulty: ${stats.difficulty.toFixed(1)})`);
     }
     
     getWrongAnswers(correctAnswer, count) {
@@ -439,9 +542,10 @@ class ArabicLearningGame {
             setTimeout(() => this.playAudio(), 500);
         }
         
-        // Show options
+        // Show options, hide input and Arabic keyboard
         document.getElementById('optionsContainer').style.display = 'grid';
         document.getElementById('inputContainer').style.display = 'none';
+        document.getElementById('arabicKeyboard').style.display = 'none';
         
         const optionsContainer = document.getElementById('optionsContainer');
         optionsContainer.innerHTML = '';
@@ -463,13 +567,15 @@ class ArabicLearningGame {
         document.getElementById('questionText').textContent = question.word.anlam;
         document.getElementById('audioBtn').style.display = 'inline-block';
         
-        // Show input
+        // Show input and Arabic keyboard
         document.getElementById('optionsContainer').style.display = 'none';
         document.getElementById('inputContainer').style.display = 'flex';
+        document.getElementById('arabicKeyboard').style.display = 'block';
         
         const input = document.getElementById('answerInput');
         input.value = '';
-        input.placeholder = 'Arapça kelimeyi yazın...';
+        input.placeholder = 'Arapça klavyeyi kullanın...';
+        input.setAttribute('readonly', 'true');
         input.focus();
         
         // Store current audio URL
@@ -517,6 +623,9 @@ class ArabicLearningGame {
     
     processAnswer(isCorrect, selectedButton = null) {
         const question = this.questions[this.currentQuestion];
+        
+        // Update word statistics for smart repetition
+        this.updateWordStats(question.word, isCorrect);
         
         // Update statistics
         this.totalAnswers++;
@@ -708,8 +817,22 @@ class ArabicLearningGame {
         this.totalHasene += this.gameHasene;
         this.dailyHasene += this.gameHasene;
         
-        // Update words learned (rough estimate)
-        const newWordsLearned = Math.floor(this.score / 2);
+        // Update words learned (intelligent calculation)
+        let newWordsLearned = 0;
+        
+        // Base learning: 1 word per correct answer
+        newWordsLearned = this.score;
+        
+        // Bonus for high accuracy (8+ correct = extra understanding)
+        if (this.score >= 8) {
+            newWordsLearned += Math.floor((this.score - 7) * 0.5);
+        }
+        
+        // Perfect game bonus (mastery level)
+        if (this.score === 10) {
+            newWordsLearned += 2; // Total becomes 12 words for perfect
+        }
+        
         this.wordsLearned += newWordsLearned;
         
         // Check for level up
@@ -1155,9 +1278,9 @@ ArabicLearningGame.prototype.unlockAchievement = function(achievement) {
 ArabicLearningGame.prototype.showAchievementUnlock = function(achievement) {
     const modal = document.getElementById('achievementUnlockModal');
     
-    document.getElementById('unlockIcon').className = achievement.icon;
-    document.getElementById('unlockTitle').textContent = achievement.title;
-    document.getElementById('unlockDesc').textContent = achievement.description;
+    document.getElementById('unlockedAchievementIcon').className = achievement.icon;
+    document.getElementById('unlockedAchievementTitle').textContent = achievement.title;
+    document.getElementById('unlockedAchievementDesc').textContent = achievement.description;
     
     modal.style.display = 'flex';
     
@@ -1341,3 +1464,39 @@ if ('serviceWorker' in navigator) {
             });
     });
 }
+
+// Arabic Virtual Keyboard Functions
+function addChar(char) {
+    const input = document.getElementById('answerInput');
+    input.value += char;
+    input.focus();
+}
+
+function deleteLastChar() {
+    const input = document.getElementById('answerInput');
+    input.value = input.value.slice(0, -1);
+    input.focus();
+}
+
+function clearInput() {
+    const input = document.getElementById('answerInput');
+    input.value = '';
+    input.focus();
+}
+
+// Initialize Arabic keyboard event listeners
+function initArabicKeyboard() {
+    const keyButtons = document.querySelectorAll('.key-btn[data-char]');
+    keyButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const char = this.getAttribute('data-char');
+            addChar(char);
+        });
+    });
+}
+
+// Initialize keyboard when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    initArabicKeyboard();
+});
+

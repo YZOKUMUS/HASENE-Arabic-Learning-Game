@@ -181,8 +181,69 @@
 
                 <!-- Text Input Mode -->
                 <div class="input-container" id="inputContainer" style="display: none;">
-                    <input type="text" id="answerInput" placeholder="Cevabınızı yazın..." onkeypress="checkEnter(event)">
+                    <input type="text" id="answerInput" placeholder="Arapça kelimeyi yazın..." onkeypress="checkEnter(event)" readonly>
                     <button class="check-btn" onclick="checkAnswer()">Kontrol Et</button>
+                    
+                    <!-- Arabic Virtual Keyboard -->
+                    <div class="arabic-keyboard" id="arabicKeyboard">
+                        <div class="keyboard-row">
+                            <button class="key-btn" data-char="ء">ء</button>
+                            <button class="key-btn" data-char="ا">ا</button>
+                            <button class="key-btn" data-char="ب">ب</button>
+                            <button class="key-btn" data-char="ت">ت</button>
+                            <button class="key-btn" data-char="ث">ث</button>
+                            <button class="key-btn" data-char="ج">ج</button>
+                            <button class="key-btn" data-char="ح">ح</button>
+                            <button class="key-btn" data-char="خ">خ</button>
+                        </div>
+                        <div class="keyboard-row">
+                            <button class="key-btn" data-char="د">د</button>
+                            <button class="key-btn" data-char="ذ">ذ</button>
+                            <button class="key-btn" data-char="ر">ر</button>
+                            <button class="key-btn" data-char="ز">ز</button>
+                            <button class="key-btn" data-char="س">س</button>
+                            <button class="key-btn" data-char="ش">ش</button>
+                            <button class="key-btn" data-char="ص">ص</button>
+                        </div>
+                        <div class="keyboard-row">
+                            <button class="key-btn" data-char="ض">ض</button>
+                            <button class="key-btn" data-char="ط">ط</button>
+                            <button class="key-btn" data-char="ظ">ظ</button>
+                            <button class="key-btn" data-char="ع">ع</button>
+                            <button class="key-btn" data-char="غ">غ</button>
+                            <button class="key-btn" data-char="ف">ف</button>
+                            <button class="key-btn" data-char="ق">ق</button>
+                        </div>
+                        <div class="keyboard-row">
+                            <button class="key-btn" data-char="ك">ك</button>
+                            <button class="key-btn" data-char="ل">ل</button>
+                            <button class="key-btn" data-char="م">م</button>
+                            <button class="key-btn" data-char="ن">ن</button>
+                            <button class="key-btn" data-char="ه">ه</button>
+                            <button class="key-btn" data-char="و">و</button>
+                            <button class="key-btn" data-char="ي">ي</button>
+                        </div>
+                        <div class="keyboard-row hemze-row">
+                            <button class="key-btn hemze" data-char="أ">أ</button>
+                            <button class="key-btn hemze" data-char="إ">إ</button>
+                            <button class="key-btn hemze" data-char="ؤ">ؤ</button>
+                            <button class="key-btn hemze" data-char="ئ">ئ</button>
+                        </div>
+                        <div class="keyboard-row harakat-row">
+                            <button class="key-btn haraka" data-char="َ">َ</button>
+                            <button class="key-btn haraka" data-char="ُ">ُ</button>
+                            <button class="key-btn haraka" data-char="ِ">ِ</button>
+                            <button class="key-btn haraka" data-char="ْ">ْ</button>
+                            <button class="key-btn haraka" data-char="ً">ً</button>
+                            <button class="key-btn haraka" data-char="ٌ">ٌ</button>
+                            <button class="key-btn haraka" data-char="ٍ">ٍ</button>
+                        </div>
+                        <div class="keyboard-row special-row">
+                            <button class="key-btn space-btn" onclick="addChar(' ')">Boşluk</button>
+                            <button class="key-btn backspace-btn" onclick="deleteLastChar()">⌫</button>
+                            <button class="key-btn clear-btn" onclick="clearInput()">Temizle</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -200,9 +261,6 @@
                 <div class="feedback-text" id="feedbackText">Doğru!</div>
                 <div class="feedback-meaning" id="feedbackMeaning">خَتَمَ = mühürlemiştir</div>
                 <div class="feedback-actions">
-                    <button class="feedback-audio" onclick="playFeedbackAudio()">
-                        <i class="fas fa-volume-up"></i>
-                    </button>
                     <button class="continue-btn" id="continueBtn" onclick="nextQuestion()" style="display: none;">Devam Et</button>
                 </div>
             </div>
