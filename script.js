@@ -1,0 +1,1343 @@
+// Duolingo-style Game Logic
+class ArabicLearningGame {
+    constructor() {
+        this.wordData = [];
+        this.currentQuestion = 0;
+        this.score = 0;
+        this.hearts = 3;
+        this.gameXP = 0;
+        this.totalHasene = parseInt(localStorage.getItem('totalHasene')) || 0;
+        this.streak = parseInt(localStorage.getItem('streak')) || 0;
+        this.level = Math.floor(this.totalHasene / 1000) + 1;
+        this.dailyHasene = parseInt(localStorage.getItem('dailyHasene')) || 0;
+        this.lastPlayDate = localStorage.getItem('lastPlayDate') || '';
+        this.wordsLearned = parseInt(localStorage.getItem('wordsLearned')) || 0;
+        this.totalAnswers = parseInt(localStorage.getItem('totalAnswers')) || 0;
+        this.correctAnswers = parseInt(localStorage.getItem('correctAnswers')) || 0;
+        this.gameMode = 'translation';
+        this.questions = [];
+        this.currentAudio = null;
+        
+        // Calendar variables
+        const now = new Date();
+        this.currentCalendarMonth = now.getMonth();
+        this.currentCalendarYear = now.getFullYear();
+        
+        this.initializeAchievements();
+        this.init();
+    }
+    
+    initializeAchievements() {
+        // Başarımları tanımla - İslami Temalar 🕌📿
+        this.achievements = {
+            firstGame: {
+                id: 'firstGame',
+                title: '🕌 İlk Namaz',
+                description: 'İlk öğrenme yolculuğunuzu başlattınız!',
+                icon: 'fas fa-play',
+                condition: () => this.stats.gamesPlayed >= 1
+            },
+            streak3: {
+                id: 'streak3',
+                title: '📿 Sabırlı Mümin',
+                description: '3 gün üst üste sebat gösterdiniz!',
+                icon: 'fas fa-fire',
+                condition: () => this.stats.currentStreak >= 3
+            },
+            streak7: {
+                id: 'streak7',
+                title: '🕌 Haftalık Mücahit',
+                description: '7 gün üst üste ilimle mücadele ettiniz!',
+                icon: 'fas fa-medal',
+                condition: () => this.stats.currentStreak >= 7
+            },
+            hasene100: {
+                id: 'hasene100',
+                title: '📿 Hasene Toplayıcısı',
+                description: '100 hasene ile sevap defterin güzelleşti!',
+                icon: 'fas fa-gem',
+                condition: () => this.stats.totalHasene >= 100
+            },
+            hasene500: {
+                id: 'hasene500',
+                title: '🕌 Hasene Sultanı',
+                description: '500 hasene! Allah razı olsun!',
+                icon: 'fas fa-crown',
+                condition: () => this.stats.totalHasene >= 500
+            },
+            perfect10: {
+                id: 'perfect10',
+                title: '📿 Kemâl Sahibi',
+                description: 'Mükemmel performans! 10/10 doğru!',
+                icon: 'fas fa-star',
+                condition: () => this.stats.perfectGames >= 1
+            },
+            speedster: {
+                id: 'speedster',
+                title: '🕌 Çevik Talebe',
+                description: 'Hızlı öğrenme! Ortalama 3 saniye!',
+                icon: 'fas fa-bolt',
+                condition: () => this.stats.averageTime <= 3000
+            },
+            wordMaster: {
+                id: 'wordMaster',
+                title: '📿 İlim Hazinesi',
+                description: '50 kelime! İlim tahsil etmeye devam!',
+                icon: 'fas fa-book',
+                condition: () => this.stats.wordsLearned >= 50
+            }
+        };
+
+        // İstatistikler
+        this.stats = {
+            gamesPlayed: parseInt(localStorage.getItem('gamesPlayed')) || 0,
+            totalHasene: this.totalHasene,
+            currentStreak: this.streak,
+            perfectGames: parseInt(localStorage.getItem('perfectGames')) || 0,
+            averageTime: parseInt(localStorage.getItem('averageTime')) || 0,
+            wordsLearned: this.wordsLearned,
+            totalAnswers: this.totalAnswers,
+            correctAnswers: this.correctAnswers
+        };
+
+        // Başarım verilerini yükle
+        this.unlockedAchievements = JSON.parse(localStorage.getItem('unlockedAchievements')) || [];
+    }
+    
+    setupAchievementListeners() {
+        // Achievements button
+        const achievementsBtn = document.getElementById('achievementsBtn');
+        if (achievementsBtn) {
+            achievementsBtn.addEventListener('click', () => {
+                this.showAchievements();
+            });
+        }
+        
+        // Stats button  
+        const statsBtn = document.getElementById('statsBtn');
+        if (statsBtn) {
+            statsBtn.addEventListener('click', () => {
+                this.showStats();
+            });
+        }
+        
+        // Close modal on overlay click (for .modal class)
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+    }
+    
+    async init() {
+        // Show loading screen
+        this.showScreen('loadingScreen');
+        
+        try {
+            // Start loading animation
+            this.startLoadingAnimation();
+            
+            // Load word data
+            await this.loadWordData();
+            
+            // Check daily streak
+            this.checkDailyStreak();
+            
+            // Update UI
+            this.updateUI();
+            
+            // Complete loading animation
+            this.completeLoadingAnimation();
+        } catch (error) {
+            console.error('Game initialization failed:', error);
+            alert('Oyun yüklenirken bir hata oluştu. Lütfen sayfayı yenileyin.');
+        }
+    }
+    
+    async loadWordData() {
+        try {
+            const response = await fetch('data.json');
+            if (!response.ok) {
+                throw new Error('Data file could not be loaded');
+            }
+            this.wordData = await response.json();
+            console.log(`${this.wordData.length} words loaded successfully`);
+        } catch (error) {
+            console.error('Error loading word data:', error);
+            // Fallback data if file loading fails
+            this.wordData = [
+                {
+                    "sure_no": 1,
+                    "sure_adi": "Fâtiha Sûresi",
+                    "kelime": "نَعْبُدُ",
+                    "anlam": "kulluk ederiz",
+                    "ses_dosyasi": "https://audios.quranwbw.com/words/1/001_005_002.mp3?version=2"
+                },
+                {
+                    "sure_no": 1,
+                    "sure_adi": "Fâtiha Sûresi",
+                    "kelime": "نَسْتَعِينُ",
+                    "anlam": "yardım dileriz",
+                    "ses_dosyasi": "https://audios.quranwbw.com/words/1/001_005_004.mp3?version=2"
+                },
+                {
+                    "sure_no": 2,
+                    "sure_adi": "Bakara Sûresi",
+                    "kelime": "خَتَمَ",
+                    "anlam": "mühürlemiştir",
+                    "ses_dosyasi": "https://audios.quranwbw.com/words/2/002_007_001.mp3?version=2"
+                },
+                {
+                    "sure_no": 2,
+                    "sure_adi": "Bakara Sûresi",
+                    "kelime": "هُدًى",
+                    "anlam": "hidayet",
+                    "ses_dosyasi": "https://audios.quranwbw.com/words/2/002_002_003.mp3?version=2"
+                },
+                {
+                    "sure_no": 2,
+                    "sure_adi": "Bakara Sûresi",
+                    "kelime": "يُؤْمِنُونَ",
+                    "anlam": "iman ederler",
+                    "ses_dosyasi": "https://audios.quranwbw.com/words/2/002_003_003.mp3?version=2"
+                },
+                {
+                    "sure_no": 2,
+                    "sure_adi": "Bakara Sûresi",
+                    "kelime": "الصَّلَاةَ",
+                    "anlam": "namazı",
+                    "ses_dosyasi": "https://audios.quranwbw.com/words/2/002_003_005.mp3?version=2"
+                },
+                {
+                    "sure_no": 2,
+                    "sure_adi": "Bakara Sûresi",
+                    "kelime": "يُنفِقُونَ",
+                    "anlam": "infak ederler",
+                    "ses_dosyasi": "https://audios.quranwbw.com/words/2/002_003_007.mp3?version=2"
+                },
+                {
+                    "sure_no": 2,
+                    "sure_adi": "Bakara Sûresi",
+                    "kelime": "الْآخِرَةِ",
+                    "anlam": "ahirete",
+                    "ses_dosyasi": "https://audios.quranwbw.com/words/2/002_004_004.mp3?version=2"
+                },
+                {
+                    "sure_no": 2,
+                    "sure_adi": "Bakara Sûresi",
+                    "kelime": "يُوقِنُونَ",
+                    "anlam": "yakîn ederler",
+                    "ses_dosyasi": "https://audios.quranwbw.com/words/2/002_004_012.mp3?version=2"
+                },
+                {
+                    "sure_no": 2,
+                    "sure_adi": "Bakara Sûresi",
+                    "kelime": "مُفْلِحُونَ",
+                    "anlam": "kurtuluşa erenler",
+                    "ses_dosyasi": "https://audios.quranwbw.com/words/2/002_005_004.mp3?version=2"
+                }
+            ];
+            console.log(`${this.wordData.length} fallback words loaded`);
+        }
+    }
+    
+    showScreen(screenId) {
+        // Hide all screens
+        document.querySelectorAll('.screen').forEach(screen => {
+            screen.style.display = 'none';
+        });
+        
+        // Show requested screen
+        const targetScreen = document.getElementById(screenId);
+        if (targetScreen) {
+            targetScreen.style.display = 'flex';
+            targetScreen.scrollTop = 0;
+        }
+    }
+    
+    countArabicLetters(arabicText) {
+        // Remove Arabic diacritics (harakat) and count only letters
+        const arabicLettersOnly = arabicText.replace(/[\u064B-\u0652\u0670\u0640]/g, '');
+        // Count Arabic letters (U+0627 to U+06FF range)
+        const arabicLetterCount = (arabicLettersOnly.match(/[\u0627-\u06FF]/g) || []).length;
+        return arabicLetterCount;
+    }
+    
+    checkDailyStreak() {
+        const today = new Date().toDateString();
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        
+        if (this.lastPlayDate !== today) {
+            if (this.lastPlayDate === yesterday.toDateString()) {
+                // Played yesterday, continue streak
+                this.streak++;
+            } else if (this.lastPlayDate !== '') {
+                // Missed a day, reset streak
+                this.streak = 1;
+            } else {
+                // First time playing
+                this.streak = 0;
+            }
+            
+            // Reset daily Hasene
+            this.dailyHasene = 0;
+            localStorage.setItem('dailyHasene', '0');
+        }
+        
+        localStorage.setItem('lastPlayDate', today);
+        localStorage.setItem('streak', this.streak.toString());
+    }
+    
+    updateUI() {
+        // Update main menu stats
+        document.getElementById('streakCount').textContent = this.streak;
+        document.getElementById('streakDisplay').textContent = `${this.streak} gün`;
+        document.getElementById('haseneCount').textContent = this.totalHasene;
+        document.getElementById('levelCount').textContent = this.level;
+        document.getElementById('dailyHasene').textContent = this.dailyHasene;
+        document.getElementById('wordsLearned').textContent = this.wordsLearned;
+        
+        // Update accuracy rate
+        const accuracy = this.totalAnswers > 0 ? Math.round((this.correctAnswers / this.totalAnswers) * 100) : 0;
+        document.getElementById('accuracyRate').textContent = `${accuracy}%`;
+        
+        // Update daily progress (günlük hedef 100 hasene)
+        const dailyProgress = Math.min((this.dailyHasene / 100) * 100, 100);
+        document.getElementById('dailyProgress').style.width = `${dailyProgress}%`;
+    }
+    
+    startGame(mode = 'translation') {
+        this.gameMode = mode;
+        this.currentQuestion = 0;
+        this.score = 0;
+        this.hearts = 5;
+        this.gameHasene = 0;
+        
+        // Generate questions
+        this.generateQuestions();
+        
+        // Setup game UI
+        this.setupGameUI();
+        
+        // Show first question
+        this.showQuestion();
+        
+        // Show game screen
+        this.showScreen('gameScreen');
+    }
+    
+    generateQuestions() {
+        const questionCount = 10;
+        this.questions = [];
+        
+        // Get random words from data
+        const shuffledWords = [...this.wordData].sort(() => Math.random() - 0.5);
+        const selectedWords = shuffledWords.slice(0, questionCount);
+        
+        selectedWords.forEach(word => {
+            let question = {
+                word: word,
+                correctAnswer: word.anlam,
+                type: this.gameMode
+            };
+            
+            // Generate wrong options for multiple choice
+            if (this.gameMode === 'translation' || this.gameMode === 'listening') {
+                const wrongAnswers = this.getWrongAnswers(word.anlam, 3);
+                const allOptions = [word.anlam, ...wrongAnswers];
+                question.options = allOptions.sort(() => Math.random() - 0.5);
+                question.correctIndex = question.options.indexOf(word.anlam);
+            }
+            
+            this.questions.push(question);
+        });
+        
+        console.log(`Generated ${this.questions.length} questions for ${this.gameMode} mode`);
+    }
+    
+    getWrongAnswers(correctAnswer, count) {
+        const wrongAnswers = [];
+        const allAnswers = this.wordData.map(word => word.anlam).filter(answer => answer !== correctAnswer);
+        
+        for (let i = 0; i < count && i < allAnswers.length; i++) {
+            const randomIndex = Math.floor(Math.random() * allAnswers.length);
+            const wrongAnswer = allAnswers[randomIndex];
+            
+            if (!wrongAnswers.includes(wrongAnswer)) {
+                wrongAnswers.push(wrongAnswer);
+            } else {
+                i--; // Try again if duplicate
+            }
+        }
+        
+        return wrongAnswers;
+    }
+    
+    setupGameUI() {
+        // Update progress
+        document.getElementById('totalQuestions').textContent = this.questions.length;
+        document.getElementById('currentQuestion').textContent = '1';
+        document.getElementById('gameProgress').style.width = '0%';
+        
+        // Reset hearts
+        for (let i = 1; i <= 5; i++) {
+            const heart = document.getElementById(`heart${i}`);
+            if (heart) {
+                heart.classList.remove('lost');
+            }
+        }
+        
+        // Reset Hasene display
+        document.getElementById('gameHasene').textContent = '0';
+        
+        // Setup question type display
+        const questionTypeTexts = {
+            'translation': 'Arapça kelimeyi çevir',
+            'listening': 'Sesi dinle ve anlamını bul',
+            'writing': 'Türkçe anlamı verilen kelimeyi yaz'
+        };
+        document.getElementById('questionType').textContent = questionTypeTexts[this.gameMode];
+    }
+    
+    showQuestion() {
+        if (this.currentQuestion >= this.questions.length) {
+            this.completeGame();
+            return;
+        }
+        
+        const question = this.questions[this.currentQuestion];
+        
+        // Update progress
+        document.getElementById('currentQuestion').textContent = this.currentQuestion + 1;
+        const progress = ((this.currentQuestion) / this.questions.length) * 100;
+        document.getElementById('gameProgress').style.width = `${progress}%`;
+        
+        // Show question based on mode
+        if (this.gameMode === 'translation' || this.gameMode === 'listening') {
+            this.showMultipleChoiceQuestion(question);
+        } else if (this.gameMode === 'writing') {
+            this.showWritingQuestion(question);
+        }
+        
+        // Hide feedback and continue button
+        this.hideFeedback();
+        document.getElementById('continueBtn').style.display = 'none';
+    }
+    
+    showMultipleChoiceQuestion(question) {
+        // Show question text
+        if (this.gameMode === 'translation') {
+            document.getElementById('questionText').textContent = question.word.kelime;
+            document.getElementById('audioBtn').style.display = 'inline-block';
+        } else if (this.gameMode === 'listening') {
+            document.getElementById('questionText').textContent = '🎧 Sesi dinleyin';
+            document.getElementById('audioBtn').style.display = 'inline-block';
+            // Auto-play audio for listening mode
+            setTimeout(() => this.playAudio(), 500);
+        }
+        
+        // Show options
+        document.getElementById('optionsContainer').style.display = 'grid';
+        document.getElementById('inputContainer').style.display = 'none';
+        
+        const optionsContainer = document.getElementById('optionsContainer');
+        optionsContainer.innerHTML = '';
+        
+        question.options.forEach((option, index) => {
+            const button = document.createElement('button');
+            button.className = 'option-btn';
+            button.textContent = option;
+            button.onclick = () => this.selectOption(button, index);
+            optionsContainer.appendChild(button);
+        });
+        
+        // Store current audio URL
+        this.currentAudio = question.word.ses_dosyasi;
+    }
+    
+    showWritingQuestion(question) {
+        // Show Turkish meaning, ask for Arabic word
+        document.getElementById('questionText').textContent = question.word.anlam;
+        document.getElementById('audioBtn').style.display = 'inline-block';
+        
+        // Show input
+        document.getElementById('optionsContainer').style.display = 'none';
+        document.getElementById('inputContainer').style.display = 'flex';
+        
+        const input = document.getElementById('answerInput');
+        input.value = '';
+        input.placeholder = 'Arapça kelimeyi yazın...';
+        input.focus();
+        
+        // Store current audio URL
+        this.currentAudio = question.word.ses_dosyasi;
+    }
+    
+    selectOption(button, index) {
+        const question = this.questions[this.currentQuestion];
+        
+        // Disable all options
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.classList.add('disabled');
+        });
+        
+        // Mark selected option
+        button.classList.add('selected');
+        
+        // Check answer
+        const isCorrect = index === question.correctIndex;
+        this.processAnswer(isCorrect, button);
+    }
+    
+    checkAnswer() {
+        const input = document.getElementById('answerInput');
+        const userAnswer = input.value.trim();
+        const question = this.questions[this.currentQuestion];
+        
+        if (!userAnswer) {
+            input.focus();
+            return;
+        }
+        
+        // For writing mode, check if the Arabic word is correct
+        const isCorrect = userAnswer === question.word.kelime;
+        
+        input.disabled = true;
+        this.processAnswer(isCorrect);
+    }
+    
+    checkEnter(event) {
+        if (event.key === 'Enter') {
+            this.checkAnswer();
+        }
+    }
+    
+    processAnswer(isCorrect, selectedButton = null) {
+        const question = this.questions[this.currentQuestion];
+        
+        // Update statistics
+        this.totalAnswers++;
+        localStorage.setItem('totalAnswers', this.totalAnswers.toString());
+        
+        if (isCorrect) {
+            this.score++;
+            this.correctAnswers++;
+            // Calculate hasene based on Arabic word length
+            const arabicWord = question.word.kelime;
+            const letterCount = this.countArabicLetters(arabicWord);
+            const earnedHasene = letterCount * 10;
+            this.gameHasene += earnedHasene;
+            console.log(`Word: ${arabicWord}, Letters: ${letterCount}, Hasene: ${earnedHasene}`);
+            
+            // Show correct feedback
+            this.showFeedback(true, question);
+            
+            // Play correct sound
+            this.playSound('correct');
+            
+            if (selectedButton) {
+                selectedButton.classList.add('correct');
+            }
+        } else {
+            this.hearts--;
+            
+            // Show incorrect feedback
+            this.showFeedback(false, question);
+            
+            // Play incorrect sound
+            this.playSound('incorrect');
+            
+            // Update hearts display
+            if (this.hearts >= 0) {
+                const heartIndex = 5 - this.hearts;
+                const heart = document.getElementById(`heart${heartIndex}`);
+                if (heart) {
+                    heart.classList.add('lost');
+                }
+            }
+            
+            if (selectedButton) {
+                selectedButton.classList.add('incorrect');
+                // Highlight correct answer
+                const correctIndex = question.correctIndex;
+                const options = document.querySelectorAll('.option-btn');
+                if (options[correctIndex]) {
+                    options[correctIndex].classList.add('correct');
+                }
+            }
+            
+            // Check if game over (disable heart system for now)
+            // if (this.hearts <= 0) {
+            //     setTimeout(() => {
+            //         this.gameOver();
+            //     }, 2000);
+            //     return;
+            // }
+        }
+        
+        localStorage.setItem('correctAnswers', this.correctAnswers.toString());
+        
+        // Update game Hasene display
+        document.getElementById('gameHasene').textContent = this.gameHasene;
+        
+        // Show continue button
+        setTimeout(() => {
+            console.log('Showing continue button...');
+            const continueBtn = document.getElementById('continueBtn');
+            if (continueBtn) {
+                continueBtn.style.display = 'inline-block';
+                console.log('Continue button displayed');
+            } else {
+                console.error('Continue button not found!');
+            }
+        }, 800);
+    }
+    
+    showFeedback(isCorrect, question) {
+        const feedback = document.getElementById('resultFeedback');
+        const icon = document.getElementById('feedbackIcon');
+        const text = document.getElementById('feedbackText');
+        const meaning = document.getElementById('feedbackMeaning');
+        
+        // Set content based on result
+        if (isCorrect) {
+            icon.className = 'feedback-icon correct';
+            icon.innerHTML = '<i class="fas fa-check"></i>';
+            text.textContent = 'Doğru!';
+            text.className = 'feedback-text correct';
+        } else {
+            icon.className = 'feedback-icon incorrect';
+            icon.innerHTML = '<i class="fas fa-times"></i>';
+            text.textContent = 'Yanlış!';
+            text.className = 'feedback-text incorrect';
+        }
+        
+        meaning.textContent = `${question.word.kelime} = ${question.word.anlam}`;
+        
+        // Hide continue button initially
+        const continueBtn = document.getElementById('continueBtn');
+        if (continueBtn) {
+            continueBtn.style.display = 'none';
+        }
+        
+        // Show feedback
+        feedback.style.display = 'block';
+        setTimeout(() => {
+            feedback.classList.add('show');
+        }, 100);
+        
+        // Store audio for feedback
+        this.currentAudio = question.word.ses_dosyasi;
+    }
+    
+    hideFeedback() {
+        const feedback = document.getElementById('resultFeedback');
+        feedback.classList.remove('show');
+        setTimeout(() => {
+            feedback.style.display = 'none';
+        }, 300);
+    }
+    
+    nextQuestion() {
+        console.log('nextQuestion called, current question:', this.currentQuestion);
+        
+        // Hide continue button
+        document.getElementById('continueBtn').style.display = 'none';
+        
+        this.hideFeedback();
+        this.currentQuestion++;
+        
+        // Reset input if in writing mode
+        const input = document.getElementById('answerInput');
+        input.disabled = false;
+        
+        setTimeout(() => {
+            this.showQuestion();
+        }, 300);
+    }
+    
+    skipQuestion() {
+        // Mark as incorrect but don't lose heart
+        const question = this.questions[this.currentQuestion];
+        this.totalAnswers++;
+        
+        // Show correct answer
+        this.showFeedback(false, question);
+        
+        // Show continue button
+        setTimeout(() => {
+            document.getElementById('continueBtn').style.display = 'inline-block';
+        }, 800);
+        
+        localStorage.setItem('totalAnswers', this.totalAnswers.toString());
+    }
+    
+    playAudio() {
+        if (this.currentAudio) {
+            const audio = document.getElementById('audioPlayer');
+            audio.src = this.currentAudio;
+            audio.play().catch(error => {
+                console.error('Audio playback failed:', error);
+            });
+        }
+    }
+    
+    playFeedbackAudio() {
+        this.playAudio();
+    }
+    
+    playSound(type) {
+        const audio = document.getElementById(type + 'Sound');
+        if (audio) {
+            audio.currentTime = 0;
+            audio.play().catch(error => {
+                console.error('Sound playback failed:', error);
+            });
+        }
+    }
+    
+    completeGame() {
+        // Calculate results
+        const totalQuestions = this.questions.length;
+        const accuracy = Math.round((this.score / totalQuestions) * 100);
+        
+        // Award Hasene and update stats
+        this.totalHasene += this.gameHasene;
+        this.dailyHasene += this.gameHasene;
+        
+        // Update words learned (rough estimate)
+        const newWordsLearned = Math.floor(this.score / 2);
+        this.wordsLearned += newWordsLearned;
+        
+        // Check for level up
+        const oldLevel = this.level;
+        this.level = Math.floor(this.totalHasene / 1000) + 1;
+        
+        // Update streak if daily goal is met (100 hasene)
+        if (this.dailyHasene >= 100 && this.streak === 0) {
+            this.streak = 1;
+        }
+        
+        // Save to localStorage
+        localStorage.setItem('totalHasene', this.totalHasene.toString());
+        localStorage.setItem('dailyHasene', this.dailyHasene.toString());
+        localStorage.setItem('wordsLearned', this.wordsLearned.toString());
+        localStorage.setItem('streak', this.streak.toString());
+        
+        // Store daily hasene in calendar data
+        const today = new Date().toDateString();
+        this.storeDailyHasene(today, this.gameHasene);
+        
+        // Update streak data if daily goal met
+        if (this.dailyHasene >= 100) {
+            this.updateStreakData(today, true);
+        }
+        
+        // Show results screen
+        this.showGameComplete(totalQuestions, accuracy, oldLevel);
+    }
+    
+    showGameComplete(totalQuestions, accuracy, oldLevel) {
+        // Update results display
+        document.getElementById('earnedHasene').textContent = this.gameHasene;
+        document.getElementById('correctAnswers').textContent = `${this.score}/${totalQuestions}`;
+        document.getElementById('gameAccuracy').textContent = `${accuracy}%`;
+        document.getElementById('finalStreak').textContent = `${this.streak} gün`;
+        
+        // Animate stars based on performance
+        const stars = document.querySelectorAll('.stars i');
+        stars.forEach((star, index) => {
+            star.style.opacity = '0.3';
+        });
+        
+        if (accuracy >= 90) {
+            stars.forEach(star => star.style.opacity = '1');
+        } else if (accuracy >= 70) {
+            stars[0].style.opacity = '1';
+            stars[1].style.opacity = '1';
+        } else if (accuracy >= 50) {
+            stars[0].style.opacity = '1';
+        }
+        
+        // Show complete screen
+        this.showScreen('gameComplete');
+        
+        // Check for level up
+        if (this.level > oldLevel) {
+            setTimeout(() => {
+                this.showLevelUp();
+            }, 2000);
+        } else if (this.dailyHasene >= 100 && this.streak > 0) {
+            setTimeout(() => {
+                this.showStreakModal();
+            }, 2000);
+        }
+    }
+    
+    showLevelUp() {
+        document.getElementById('newLevel').textContent = this.level;
+        document.getElementById('newLevelText').textContent = this.level;
+        document.getElementById('levelUpModal').style.display = 'flex';
+    }
+    
+    closeLevelUpModal() {
+        document.getElementById('levelUpModal').style.display = 'none';
+    }
+    
+    showStreakModal() {
+        document.getElementById('streakDays').textContent = this.streak;
+        document.getElementById('streakModal').style.display = 'flex';
+    }
+    
+    closeStreakModal() {
+        document.getElementById('streakModal').style.display = 'none';
+    }
+    
+    gameOver() {
+        // Update statistics
+        this.updateGameStats();
+        
+        alert('Oyun bitti! Tekrar deneyin.');
+        this.returnToMenu();
+    }
+    
+    updateGameStats() {
+        // Update basic stats
+        this.stats.gamesPlayed++;
+        localStorage.setItem('gamesPlayed', this.stats.gamesPlayed);
+        
+        // Check for perfect game
+        if (this.score >= 10) {
+            this.stats.perfectGames++;
+            localStorage.setItem('perfectGames', this.stats.perfectGames);
+        }
+        
+        // Update weekly data
+        const today = new Date().getDay();
+        let weeklyGames = JSON.parse(localStorage.getItem('weeklyGames')) || [0,0,0,0,0,0,0];
+        weeklyGames[today]++;
+        localStorage.setItem('weeklyGames', JSON.stringify(weeklyGames));
+        
+        // Update stats object
+        this.stats.totalHasene = this.totalHasene;
+        this.stats.currentStreak = this.streak;
+        this.stats.wordsLearned = this.wordsLearned;
+        this.stats.totalAnswers = this.totalAnswers;
+        this.stats.correctAnswers = this.correctAnswers;
+        
+        // Check for new achievements
+        this.checkNewAchievements();
+        
+        // Update notification badges
+        this.updateNotificationBadges();
+    }
+    
+    returnToMenu() {
+        // Update UI with latest stats
+        this.updateUI();
+        
+        // Update calendar
+        this.generateCalendar();
+        
+        // Show main menu
+        this.showScreen('mainMenu');
+    }
+    
+    // Calendar Management
+    generateCalendar() {
+        const now = new Date();
+        this.currentCalendarMonth = this.currentCalendarMonth || now.getMonth();
+        this.currentCalendarYear = this.currentCalendarYear || now.getFullYear();
+        
+        this.renderCalendar();
+    }
+    
+    renderCalendar() {
+        const monthNames = [
+            'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+            'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
+        ];
+        
+        const dayNames = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+        
+        // Update month header
+        document.getElementById('currentMonth').textContent = 
+            `${monthNames[this.currentCalendarMonth]} ${this.currentCalendarYear}`;
+        
+        const grid = document.getElementById('calendarGrid');
+        grid.innerHTML = '';
+        
+        // Add day headers
+        dayNames.forEach(day => {
+            const dayEl = document.createElement('div');
+            dayEl.className = 'calendar-day header';
+            dayEl.textContent = day;
+            grid.appendChild(dayEl);
+        });
+        
+        // Get first day of month and number of days
+        const firstDay = new Date(this.currentCalendarYear, this.currentCalendarMonth, 1);
+        const lastDay = new Date(this.currentCalendarYear, this.currentCalendarMonth + 1, 0);
+        const daysInMonth = lastDay.getDate();
+        
+        // Adjust for Monday start (getDay() returns 0 for Sunday)
+        let startDayOfWeek = firstDay.getDay() - 1;
+        if (startDayOfWeek < 0) startDayOfWeek = 6;
+        
+        // Add empty cells for previous month
+        for (let i = 0; i < startDayOfWeek; i++) {
+            const emptyDay = document.createElement('div');
+            emptyDay.className = 'calendar-day other-month';
+            grid.appendChild(emptyDay);
+        }
+        
+        // Add days of current month
+        const today = new Date();
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dayEl = document.createElement('div');
+            dayEl.className = 'calendar-day';
+            dayEl.textContent = day;
+            
+            const currentDate = new Date(this.currentCalendarYear, this.currentCalendarMonth, day);
+            const dateString = currentDate.toDateString();
+            
+            // Check if it's today
+            if (currentDate.toDateString() === today.toDateString()) {
+                dayEl.classList.add('today');
+            }
+            
+            // Check if it's in the future
+            if (currentDate > today) {
+                dayEl.classList.add('future');
+            } else {
+                // Get hasene data for this date
+                const haseneData = this.getDailyHasene(dateString);
+                
+                if (haseneData >= 100) {
+                    dayEl.classList.add('complete');
+                    if (this.isStreakDay(dateString)) {
+                        dayEl.classList.add('streak');
+                    }
+                } else if (haseneData > 0) {
+                    dayEl.classList.add('partial');
+                } else {
+                    dayEl.classList.add('empty');
+                }
+                
+                // Add tooltip
+                const tooltip = document.createElement('div');
+                tooltip.className = 'calendar-tooltip';
+                if (haseneData > 0) {
+                    tooltip.textContent = `${haseneData} hasene kazanıldı`;
+                } else {
+                    tooltip.textContent = 'Henüz oynanmadı';
+                }
+                dayEl.appendChild(tooltip);
+            }
+            
+            grid.appendChild(dayEl);
+        }
+    }
+    
+    getDailyHasene(dateString) {
+        // Get stored daily hasene data from localStorage
+        const haseneData = JSON.parse(localStorage.getItem('dailyHaseneData') || '{}');
+        return haseneData[dateString] || 0;
+    }
+    
+    storeDailyHasene(dateString, hasene) {
+        // Store daily hasene data
+        const haseneData = JSON.parse(localStorage.getItem('dailyHaseneData') || '{}');
+        haseneData[dateString] = (haseneData[dateString] || 0) + hasene;
+        localStorage.setItem('dailyHaseneData', JSON.stringify(haseneData));
+    }
+    
+    isStreakDay(dateString) {
+        // Check if this day is part of current streak
+        const streakData = JSON.parse(localStorage.getItem('streakData') || '{}');
+        return streakData[dateString] === true;
+    }
+    
+    updateStreakData(dateString, isStreak) {
+        // Update streak data
+        const streakData = JSON.parse(localStorage.getItem('streakData') || '{}');
+        streakData[dateString] = isStreak;
+        localStorage.setItem('streakData', JSON.stringify(streakData));
+    }
+    
+    // Loading Animation Functions
+    startLoadingAnimation() {
+        const progressBar = document.getElementById('loadingProgress');
+        const loadingText = document.getElementById('loadingText');
+        const loadingPercentage = document.getElementById('loadingPercentage');
+        
+        const loadingSteps = [
+            { text: "Arapça kelimeler yükleniyor...", duration: 2500 },
+            { text: "Ses dosyaları hazırlanıyor...", duration: 2200 },
+            { text: "Hasene sistemi aktifleştiriliyor...", duration: 2300 },
+            { text: "Streak takvimi oluşturuluyor...", duration: 2000 },
+            { text: "Başarım rozetleri kontrol ediliyor...", duration: 1800 },
+            { text: "Oyun hazırlanıyor...", duration: 2000 }
+        ];
+        
+        let currentStep = 0;
+        let progress = 0;
+        
+        const animateStep = () => {
+            if (currentStep < loadingSteps.length) {
+                const step = loadingSteps[currentStep];
+                loadingText.textContent = step.text;
+                
+                const targetProgress = ((currentStep + 1) / loadingSteps.length) * 100;
+                
+                const progressInterval = setInterval(() => {
+                    progress += 0.8;
+                    if (progress >= targetProgress) {
+                        progress = targetProgress;
+                        clearInterval(progressInterval);
+                        
+                        setTimeout(() => {
+                            currentStep++;
+                            animateStep();
+                        }, 300);
+                    }
+                    
+                    progressBar.style.width = progress + '%';
+                    loadingPercentage.textContent = Math.round(progress) + '%';
+                }, 30);
+            }
+        };
+        
+        setTimeout(() => {
+            animateStep();
+        }, 12000);
+    }
+    
+    completeLoadingAnimation() {
+        const loadingText = document.getElementById('loadingText');
+        const loadingPercentage = document.getElementById('loadingPercentage');
+        const progressBar = document.getElementById('loadingProgress');
+        
+        // Complete the progress
+        progressBar.style.width = '100%';
+        loadingPercentage.textContent = '100%';
+        loadingText.textContent = 'Hazır! Bismillah...';
+        
+        // Wait a bit then show main menu
+        setTimeout(() => {
+            this.showScreen('mainMenu');
+            // Setup event listeners after DOM is ready
+            setTimeout(() => this.setupAchievementListeners(), 200);
+        }, 1500);
+    }
+}
+
+// Global game instance
+let game;
+
+// Initialize game when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    game = new ArabicLearningGame();
+});
+
+// Global functions for HTML onclick events
+function startGame(mode = 'translation') {
+    if (game) {
+        game.startGame(mode);
+    }
+}
+
+function returnToMenu() {
+    if (game) {
+        game.returnToMenu();
+    }
+}
+
+function selectOption(button, index) {
+    if (game) {
+        game.selectOption(button, index);
+    }
+}
+
+function checkAnswer() {
+    if (game) {
+        game.checkAnswer();
+    }
+}
+
+// Modal close functions
+function closeAchievementsModal() {
+    document.getElementById('achievementsModal').style.display = 'none';
+}
+
+function closeStatsModal() {
+    document.getElementById('statsModal').style.display = 'none';
+}
+
+function closeAchievementUnlockModal() {
+    document.getElementById('achievementUnlockModal').style.display = 'none';
+}
+
+// Achievement functions for ArabicLearningGame class
+ArabicLearningGame.prototype.showAchievements = function() {
+    const modal = document.getElementById('achievementsModal');
+    const grid = document.querySelector('.achievements-grid');
+    
+    grid.innerHTML = '';
+    
+    Object.values(this.achievements).forEach(achievement => {
+        const isUnlocked = this.unlockedAchievements.includes(achievement.id);
+        const progress = this.getAchievementProgress(achievement);
+        
+        const item = document.createElement('div');
+        item.className = `achievement-item ${isUnlocked ? 'unlocked' : 'locked'}`;
+        
+        item.innerHTML = `
+            <i class="${achievement.icon} achievement-icon"></i>
+            <div class="achievement-title">${achievement.title}</div>
+            <div class="achievement-desc">${achievement.description}</div>
+            ${!isUnlocked && progress ? `<div class="achievement-progress">${progress}</div>` : ''}
+        `;
+        
+        grid.appendChild(item);
+    });
+    
+    modal.style.display = 'flex';
+};
+
+ArabicLearningGame.prototype.getAchievementProgress = function(achievement) {
+    const id = achievement.id;
+    
+    if (id === 'firstGame') {
+        return `${this.stats.gamesPlayed}/1`;
+    } else if (id === 'streak3') {
+        return `${this.stats.currentStreak}/3`;
+    } else if (id === 'streak7') {
+        return `${this.stats.currentStreak}/7`;
+    } else if (id === 'hasene100') {
+        return `${this.stats.totalHasene}/100`;
+    } else if (id === 'hasene500') {
+        return `${this.stats.totalHasene}/500`;
+    } else if (id === 'perfect10') {
+        return `${this.stats.perfectGames}/1`;
+    } else if (id === 'wordMaster') {
+        return `${this.stats.wordsLearned}/50`;
+    } else if (id === 'speedster') {
+        const avg = Math.round(this.stats.averageTime / 1000);
+        return avg > 3 ? `${avg}s/3s` : 'Tamamlandı!';
+    }
+    
+    return null;
+};
+
+ArabicLearningGame.prototype.checkNewAchievements = function() {
+    Object.values(this.achievements).forEach(achievement => {
+        if (!this.unlockedAchievements.includes(achievement.id) && achievement.condition()) {
+            this.unlockAchievement(achievement);
+        }
+    });
+};
+
+ArabicLearningGame.prototype.unlockAchievement = function(achievement) {
+    this.unlockedAchievements.push(achievement.id);
+    localStorage.setItem('unlockedAchievements', JSON.stringify(this.unlockedAchievements));
+    
+    // Show unlock animation
+    this.showAchievementUnlock(achievement);
+    
+    // Update notification badge
+    this.updateNotificationBadges();
+};
+
+ArabicLearningGame.prototype.showAchievementUnlock = function(achievement) {
+    const modal = document.getElementById('achievementUnlockModal');
+    
+    document.getElementById('unlockIcon').className = achievement.icon;
+    document.getElementById('unlockTitle').textContent = achievement.title;
+    document.getElementById('unlockDesc').textContent = achievement.description;
+    
+    modal.style.display = 'flex';
+    
+    // Auto close after 3 seconds
+    setTimeout(() => {
+        modal.style.display = 'none';
+    }, 3000);
+};
+
+ArabicLearningGame.prototype.showStats = function() {
+    const modal = document.getElementById('statsModal');
+    
+    // Update stat numbers - HTML ID'lere göre düzeltildi
+    document.getElementById('statTotalGames').textContent = this.stats.gamesPlayed;
+    document.getElementById('statTotalHasene').textContent = this.stats.totalHasene;
+    document.getElementById('statMaxStreak').textContent = this.stats.currentStreak;
+    
+    // Update charts
+    this.updateWeeklyChart();
+    this.updateGameModeStats();
+    
+    modal.style.display = 'flex';
+};
+
+ArabicLearningGame.prototype.updateWeeklyChart = function() {
+    const weeklyData = this.getWeeklyData();
+    const chartBars = document.querySelectorAll('.chart-bar');
+    
+    const maxValue = Math.max(...weeklyData, 1);
+    
+    chartBars.forEach((bar, index) => {
+        const value = weeklyData[index];
+        const height = (value / maxValue) * 100;
+        
+        bar.style.height = `${Math.max(height, 10)}px`;
+        bar.querySelector('.chart-value').textContent = value;
+    });
+};
+
+ArabicLearningGame.prototype.getWeeklyData = function() {
+    // Son 7 gün için veri (şimdilik rastgele, gerçek veriler eklenebilir)
+    const weeklyGames = JSON.parse(localStorage.getItem('weeklyGames')) || [0,0,0,0,0,0,0];
+    return weeklyGames;
+};
+
+ArabicLearningGame.prototype.updateGameModeStats = function() {
+    // Oyun modları istatistikleri (örnek veriler)
+    const modes = [
+        { name: 'Çeviri', class: 'translation', percentage: 75 },
+        { name: 'Dinleme', class: 'listening', percentage: 45 },
+        { name: 'Yazma', class: 'writing', percentage: 30 }
+    ];
+    
+    modes.forEach((mode, index) => {
+        const progressBar = document.querySelectorAll('.mode-bar')[index];
+        const percentageSpan = document.querySelectorAll('.mode-percentage')[index];
+        
+        if (progressBar && percentageSpan) {
+            progressBar.style.width = `${mode.percentage}%`;
+            percentageSpan.textContent = `${mode.percentage}%`;
+        }
+    });
+};
+
+ArabicLearningGame.prototype.updateNotificationBadges = function() {
+    const newAchievements = Object.values(this.achievements).filter(achievement => 
+        achievement.condition() && !this.unlockedAchievements.includes(achievement.id)
+    ).length;
+    
+    const badge = document.querySelector('.notification-badge');
+    if (newAchievements > 0) {
+        badge.style.display = 'flex';
+        badge.textContent = newAchievements;
+    } else {
+        badge.style.display = 'none';
+    }
+};
+
+ArabicLearningGame.prototype.showCalendar = function() {
+    const modal = document.getElementById('calendarModal');
+    
+    // Generate calendar
+    this.renderCalendar();
+    
+    modal.style.display = 'flex';
+};
+
+// Global functions for HTML onclick events
+function toggleCalendar() {
+    if (game) {
+        game.showCalendar();
+    }
+}
+
+function showAchievements() {
+    if (game) {
+        game.showAchievements();
+    }
+}
+
+function showStats() {
+    if (game) {
+        game.showStats();
+    }
+}
+
+function checkEnter(event) {
+    if (game) {
+        game.checkEnter(event);
+    }
+}
+
+function nextQuestion() {
+    console.log('nextQuestion function called');
+    if (game) {
+        console.log('Calling game.nextQuestion()');
+        game.nextQuestion();
+    } else {
+        console.error('Game instance not found');
+    }
+}
+
+function skipQuestion() {
+    if (game) {
+        game.skipQuestion();
+    }
+}
+
+function playAudio() {
+    if (game) {
+        game.playAudio();
+    }
+}
+
+function playFeedbackAudio() {
+    if (game) {
+        game.playFeedbackAudio();
+    }
+}
+
+function closeLevelUpModal() {
+    if (game) {
+        game.closeLevelUpModal();
+    }
+}
+
+function closeStreakModal() {
+    if (game) {
+        game.closeStreakModal();
+    }
+}
+
+function changeMonth(direction) {
+    if (game) {
+        game.currentCalendarMonth += direction;
+        if (game.currentCalendarMonth < 0) {
+            game.currentCalendarMonth = 11;
+            game.currentCalendarYear--;
+        } else if (game.currentCalendarMonth > 11) {
+            game.currentCalendarMonth = 0;
+            game.currentCalendarYear++;
+        }
+        game.renderCalendar();
+    }
+}
+
+// Calendar modal function
+function closeCalendarModal() {
+    document.getElementById('calendarModal').style.display = 'none';
+}
+
+// Service Worker Registration
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then(registration => {
+                console.log('SW registered: ', registration);
+            })
+            .catch(registrationError => {
+                console.log('SW registration failed: ', registrationError);
+            });
+    });
+}

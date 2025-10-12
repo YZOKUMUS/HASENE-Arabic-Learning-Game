@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Temp Icon Generator</title>
+</head>
+<body>
+    <canvas id="canvas" width="192" height="192"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Background gradient
+        const gradient = ctx.createLinearGradient(0, 0, 192, 192);
+        gradient.addColorStop(0, '#58cc02');
+        gradient.addColorStop(1, '#1cb0f6');
+        
+        // Draw background
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 192, 192);
+        
+        // Draw white book icon
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 120px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('ع', 96, 96);
+        
+        // Convert to data URL and save
+        const dataURL = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.download = 'icon-192.png';
+        link.href = dataURL;
+        link.click();
+    </script>
+</body>
+</html>
