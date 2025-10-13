@@ -72,7 +72,7 @@
                     <div class="progress-bar">
                         <div class="progress-fill" id="dailyProgress" style="width: 0%"></div>
                     </div>
-                    <p><span id="dailyHasene">0</span>/100 Hasene</p>
+                    <p><span id="dailyHasene">0</span>/1000 Hasene</p>
                 </div>
             </div>
 
@@ -90,6 +90,28 @@
                     <i class="fas fa-calendar-alt"></i>
                     <span>Takvim</span>
                 </button>
+            </div>
+
+            <!-- Zorluk Seçimi -->
+            <div class="difficulty-section">
+                <h3>🎯 Zorluk Seviyesi Seç</h3>
+                <div class="difficulty-buttons">
+                    <button class="difficulty-btn easy" id="easyBtn" onclick="setDifficulty('easy')">
+                        <i class="fas fa-seedling"></i>
+                        <span>Kolay</span>
+                        <small>Temel kelimeler</small>
+                    </button>
+                    <button class="difficulty-btn medium active" id="mediumBtn" onclick="setDifficulty('medium')">
+                        <i class="fas fa-leaf"></i>
+                        <span>Orta</span>
+                        <small>Karışık seviye</small>
+                    </button>
+                    <button class="difficulty-btn hard" id="hardBtn" onclick="setDifficulty('hard')">
+                        <i class="fas fa-fire"></i>
+                        <span>Zor</span>
+                        <small>İleri seviye</small>
+                    </button>
+                </div>
             </div>
 
             <div class="game-modes">
@@ -111,25 +133,6 @@
                     <p>Türkçe anlamı verilen kelimeyi yaz</p>
                 </button>
             </div>
-
-            <div class="stats-section">
-                <div class="stat-card">
-                    <i class="fas fa-calendar-check"></i>
-                    <h4>Günlük Streak</h4>
-                    <p id="streakDisplay">0 gün</p>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-brain"></i>
-                    <h4>Öğrenilen Kelimeler</h4>
-                    <p id="wordsLearned">0</p>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-percentage"></i>
-                    <h4>Doğruluk Oranı</h4>
-                    <p id="accuracyRate">0%</p>
-                </div>
-            </div>
-
 
         </div>
     </div>
@@ -165,6 +168,7 @@
             <div class="question-section">
                 <div class="question-type" id="questionType">Arapça kelimeyi çevir</div>
                 <div class="question-text" id="questionText">خَتَمَ</div>
+                <div class="word-id" id="wordId">ID: 2:7:1</div>
                 <button class="audio-btn" id="audioBtn" onclick="playAudio()">
                     <i class="fas fa-volume-up"></i>
                 </button>
@@ -428,6 +432,27 @@
                         <div>
                             <h3 id="statTotalGames">0</h3>
                             <p>Toplam Oyun</p>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-fire"></i>
+                        <div>
+                            <h3 id="statCurrentStreak">0</h3>
+                            <p>Günlük Streak</p>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-brain"></i>
+                        <div>
+                            <h3 id="statWordsLearned">0</h3>
+                            <p>Öğrenilen Kelimeler</p>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-percentage"></i>
+                        <div>
+                            <h3 id="statAccuracyRate">0%</h3>
+                            <p>Doğruluk Oranı</p>
                         </div>
                     </div>
                 </div>

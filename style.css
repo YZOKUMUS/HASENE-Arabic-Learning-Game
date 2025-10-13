@@ -383,6 +383,112 @@ body {
     font-size: 0.9rem;
 }
 
+/* Difficulty Section */
+.difficulty-section {
+    background: white;
+    padding: 25px;
+    border-radius: var(--border-radius-large);
+    box-shadow: var(--shadow-light);
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.difficulty-section h3 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.difficulty-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+}
+
+.difficulty-btn {
+    background: white;
+    border: 3px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 20px 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    font-family: var(--font-family);
+    position: relative;
+    overflow: hidden;
+}
+
+.difficulty-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+.difficulty-btn.active {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+.difficulty-btn.easy {
+    border-color: #4caf50;
+    color: #2e7d32;
+}
+
+.difficulty-btn.easy.active {
+    background: linear-gradient(135deg, #4caf50, #66bb6a);
+    color: white;
+    border-color: #4caf50;
+}
+
+.difficulty-btn.medium {
+    border-color: #ff9800;
+    color: #f57c00;
+}
+
+.difficulty-btn.medium.active {
+    background: linear-gradient(135deg, #ff9800, #ffb74d);
+    color: white;
+    border-color: #ff9800;
+}
+
+.difficulty-btn.hard {
+    border-color: #f44336;
+    color: #d32f2f;
+}
+
+.difficulty-btn.hard.active {
+    background: linear-gradient(135deg, #f44336, #ef5350);
+    color: white;
+    border-color: #f44336;
+}
+
+.difficulty-btn i {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.difficulty-btn span {
+    font-size: 1.1rem;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.difficulty-btn small {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    display: block;
+}
+
+.difficulty-btn.active small {
+    opacity: 0.9;
+}
+
 /* Stats Section */
 .stats-section {
     display: grid;
@@ -541,9 +647,18 @@ body {
     font-size: 2.2rem;
     font-weight: 700;
     color: var(--text-dark);
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     line-height: 1.2;
     font-family: 'Arial', sans-serif; /* Better for Arabic text */
+}
+
+.word-id {
+    font-size: 0.7rem;
+    color: #999;
+    font-weight: 400;
+    margin-bottom: 15px;
+    opacity: 0.7;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .audio-btn {
@@ -1506,36 +1621,42 @@ input:focus {
 
 .stats-summary {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
     margin-bottom: 30px;
 }
 
 .stat-item {
-    background: linear-gradient(135deg, var(--primary-blue), var(--primary-purple));
+    background: linear-gradient(135deg, #1cb0f6, #ce82ff);
     color: white;
     padding: 20px;
     border-radius: var(--border-radius);
     display: flex;
     align-items: center;
     gap: 15px;
+    box-shadow: var(--shadow-medium);
 }
 
 .stat-item i {
     font-size: 2rem;
-    opacity: 0.8;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
 .stat-item h3 {
     font-size: 1.8rem;
     font-weight: 800;
     margin: 0;
+    color: white !important;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
 .stat-item p {
     font-size: 0.9rem;
     margin: 0;
-    opacity: 0.9;
+    color: white !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    opacity: 0.95;
 }
 
 .stats-charts {

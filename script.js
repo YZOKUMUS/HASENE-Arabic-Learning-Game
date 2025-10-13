@@ -1,4 +1,4 @@
-// Duolingo-style Game Logic
+// Duolingo-style Game Logic - Updated
 class ArabicLearningGame {
     constructor() {
         this.wordData = [];
@@ -11,10 +11,11 @@ class ArabicLearningGame {
         this.level = Math.floor(this.totalHasene / 1000) + 1;
         this.dailyHasene = parseInt(localStorage.getItem('dailyHasene')) || 0;
         this.lastPlayDate = localStorage.getItem('lastPlayDate') || '';
-        this.wordsLearned = parseInt(localStorage.getItem('wordsLearned')) || 0;
+        this.wordsLearned = 0; // Dinamik olarak hesaplanacak
         this.totalAnswers = parseInt(localStorage.getItem('totalAnswers')) || 0;
         this.correctAnswers = parseInt(localStorage.getItem('correctAnswers')) || 0;
         this.gameMode = 'translation';
+        this.difficulty = localStorage.getItem('difficulty') || 'medium';
         this.questions = [];
         this.currentAudio = null;
         
@@ -148,6 +149,9 @@ class ArabicLearningGame {
             // Update UI
             this.updateUI();
             
+            // Initialize difficulty UI
+            this.initializeDifficultyUI();
+            
             // Complete loading animation
             this.completeLoadingAnimation();
         } catch (error) {
@@ -158,88 +162,26 @@ class ArabicLearningGame {
     
     async loadWordData() {
         try {
+            console.log('Data yükleniyor...');
             const response = await fetch('data.json');
             if (!response.ok) {
-                throw new Error('Data file could not be loaded');
+                throw new Error(`HTTP Error: ${response.status}`);
             }
             this.wordData = await response.json();
-            console.log(`${this.wordData.length} words loaded successfully`);
+            console.log(`✅ ${this.wordData.length} kelime başarıyla yüklendi!`);
+            
+            // Test: İlk 5 kelimeyi göster
+            console.log('İlk 5 kelime:', this.wordData.slice(0, 5));
+            
         } catch (error) {
-            console.error('Error loading word data:', error);
-            // Fallback data if file loading fails
-            this.wordData = [
-                {
-                    "sure_no": 1,
-                    "sure_adi": "Fâtiha Sûresi",
-                    "kelime": "نَعْبُدُ",
-                    "anlam": "kulluk ederiz",
-                    "ses_dosyasi": "https://audios.quranwbw.com/words/1/001_005_002.mp3?version=2"
-                },
-                {
-                    "sure_no": 1,
-                    "sure_adi": "Fâtiha Sûresi",
-                    "kelime": "نَسْتَعِينُ",
-                    "anlam": "yardım dileriz",
-                    "ses_dosyasi": "https://audios.quranwbw.com/words/1/001_005_004.mp3?version=2"
-                },
-                {
-                    "sure_no": 2,
-                    "sure_adi": "Bakara Sûresi",
-                    "kelime": "خَتَمَ",
-                    "anlam": "mühürlemiştir",
-                    "ses_dosyasi": "https://audios.quranwbw.com/words/2/002_007_001.mp3?version=2"
-                },
-                {
-                    "sure_no": 2,
-                    "sure_adi": "Bakara Sûresi",
-                    "kelime": "هُدًى",
-                    "anlam": "hidayet",
-                    "ses_dosyasi": "https://audios.quranwbw.com/words/2/002_002_003.mp3?version=2"
-                },
-                {
-                    "sure_no": 2,
-                    "sure_adi": "Bakara Sûresi",
-                    "kelime": "يُؤْمِنُونَ",
-                    "anlam": "iman ederler",
-                    "ses_dosyasi": "https://audios.quranwbw.com/words/2/002_003_003.mp3?version=2"
-                },
-                {
-                    "sure_no": 2,
-                    "sure_adi": "Bakara Sûresi",
-                    "kelime": "الصَّلَاةَ",
-                    "anlam": "namazı",
-                    "ses_dosyasi": "https://audios.quranwbw.com/words/2/002_003_005.mp3?version=2"
-                },
-                {
-                    "sure_no": 2,
-                    "sure_adi": "Bakara Sûresi",
-                    "kelime": "يُنفِقُونَ",
-                    "anlam": "infak ederler",
-                    "ses_dosyasi": "https://audios.quranwbw.com/words/2/002_003_007.mp3?version=2"
-                },
-                {
-                    "sure_no": 2,
-                    "sure_adi": "Bakara Sûresi",
-                    "kelime": "الْآخِرَةِ",
-                    "anlam": "ahirete",
-                    "ses_dosyasi": "https://audios.quranwbw.com/words/2/002_004_004.mp3?version=2"
-                },
-                {
-                    "sure_no": 2,
-                    "sure_adi": "Bakara Sûresi",
-                    "kelime": "يُوقِنُونَ",
-                    "anlam": "yakîn ederler",
-                    "ses_dosyasi": "https://audios.quranwbw.com/words/2/002_004_012.mp3?version=2"
-                },
-                {
-                    "sure_no": 2,
-                    "sure_adi": "Bakara Sûresi",
-                    "kelime": "مُفْلِحُونَ",
-                    "anlam": "kurtuluşa erenler",
-                    "ses_dosyasi": "https://audios.quranwbw.com/words/2/002_005_004.mp3?version=2"
-                }
-            ];
-            console.log(`${this.wordData.length} fallback words loaded`);
+            console.error('❌ Kelime verisi yükleme hatası:', error);
+            
+            // Show user-friendly error message
+            alert(`Oyun verileri yüklenemedi!\n\nLütfen:\n• İnternet bağlantınızı kontrol edin\n• Sayfayı yenileyin (F5)\n• Tarayıcı cache'ini temizleyin\n\nHata: ${error.message}`);
+            
+            // Set empty data to prevent further errors
+            this.wordData = [];
+            return;
         }
     }
     
@@ -294,22 +236,28 @@ class ArabicLearningGame {
     updateUI() {
         // Update main menu stats
         document.getElementById('streakCount').textContent = this.streak;
-        document.getElementById('streakDisplay').textContent = `${this.streak} gün`;
         document.getElementById('haseneCount').textContent = this.totalHasene;
         document.getElementById('levelCount').textContent = this.level;
         document.getElementById('dailyHasene').textContent = this.dailyHasene;
-        document.getElementById('wordsLearned').textContent = this.wordsLearned;
         
-        // Update accuracy rate
-        const accuracy = this.totalAnswers > 0 ? Math.round((this.correctAnswers / this.totalAnswers) * 100) : 0;
-        document.getElementById('accuracyRate').textContent = `${accuracy}%`;
+        // Gerçek öğrenilen kelimeleri hesapla ve güncelle
+        this.wordsLearned = this.calculateMasteredWords();
         
-        // Update daily progress (günlük hedef 100 hasene)
-        const dailyProgress = Math.min((this.dailyHasene / 100) * 100, 100);
+        // Update daily progress (günlük hedef 1000 hasene)
+        const dailyProgress = Math.min((this.dailyHasene / 1000) * 100, 100);
         document.getElementById('dailyProgress').style.width = `${dailyProgress}%`;
     }
     
     startGame(mode = 'translation') {
+        // Veri yüklenip yüklenmediğini kontrol et
+        if (!this.wordData || this.wordData.length === 0) {
+            console.error('Kelime verisi yüklenmemiş!');
+            alert('Kelime verisi henüz yüklenmedi. Lütfen bekleyiniz...');
+            return;
+        }
+        
+        console.log(`${mode} oyunu başlatılıyor... Toplam kelime: ${this.wordData.length}`);
+        
         this.gameMode = mode;
         this.currentQuestion = 0;
         this.score = 0;
@@ -333,11 +281,15 @@ class ArabicLearningGame {
         const questionCount = 10;
         this.questions = [];
         
+        console.log(`Sorular üretiliyor... Toplam kelime sayısı: ${this.wordData.length}`);
+        
         // Load learning statistics
         const wordStats = JSON.parse(localStorage.getItem('wordStats')) || {};
         
         // Smart word selection algorithm
         const selectedWords = this.selectSmartWords(questionCount, wordStats);
+        
+        console.log(`Seçilen kelime sayısı: ${selectedWords.length}`);
         
         selectedWords.forEach(word => {
             let question = {
@@ -361,9 +313,15 @@ class ArabicLearningGame {
     }
     
     selectSmartWords(count, wordStats) {
+        // Zorluk seviyesine göre kelime havuzunu filtrele
+        const difficultyWords = this.getDifficultyWords(this.wordData, this.difficulty);
+        
+        console.log(`Zorluk seviyesi: ${this.difficulty}`);
+        console.log(`Toplam kelime: ${this.wordData.length}, Filtrelenmiş: ${difficultyWords.length}`);
+        
         const weightedWords = [];
         
-        this.wordData.forEach(word => {
+        difficultyWords.forEach(word => {
             const stats = wordStats[word.kelime] || { 
                 correct: 0, 
                 wrong: 0, 
@@ -412,13 +370,15 @@ class ArabicLearningGame {
         }
         
         // Fill remaining slots with random words if needed
-        while (selected.length < count) {
-            const randomWord = this.wordData[Math.floor(Math.random() * this.wordData.length)];
+        while (selected.length < count && difficultyWords.length > 0) {
+            const randomWord = difficultyWords[Math.floor(Math.random() * difficultyWords.length)];
             if (!usedWords.has(randomWord.kelime)) {
                 selected.push(randomWord);
                 usedWords.add(randomWord.kelime);
             }
         }
+        
+        console.log(`Seçilen kelimeler: ${selected.length}/${count}`);
         
         return selected;
     }
@@ -463,11 +423,17 @@ class ArabicLearningGame {
     
     getWrongAnswers(correctAnswer, count) {
         const wrongAnswers = [];
-        const allAnswers = this.wordData.map(word => word.anlam).filter(answer => answer !== correctAnswer);
+        // Use difficulty-filtered words for wrong answers too
+        const difficultyWords = this.getDifficultyWords(this.wordData, this.difficulty);
+        const allAnswers = difficultyWords.map(word => word.anlam).filter(answer => answer !== correctAnswer);
         
-        for (let i = 0; i < count && i < allAnswers.length; i++) {
-            const randomIndex = Math.floor(Math.random() * allAnswers.length);
-            const wrongAnswer = allAnswers[randomIndex];
+        // If difficulty-filtered answers are too few, fallback to all words
+        const answersPool = allAnswers.length >= count ? allAnswers : 
+                           this.wordData.map(word => word.anlam).filter(answer => answer !== correctAnswer);
+        
+        for (let i = 0; i < count && i < answersPool.length; i++) {
+            const randomIndex = Math.floor(Math.random() * answersPool.length);
+            const wrongAnswer = answersPool[randomIndex];
             
             if (!wrongAnswers.includes(wrongAnswer)) {
                 wrongAnswers.push(wrongAnswer);
@@ -477,6 +443,28 @@ class ArabicLearningGame {
         }
         
         return wrongAnswers;
+    }
+    
+    calculateMasteredWords() {
+        // Kelime istatistiklerini yükle
+        const wordStats = JSON.parse(localStorage.getItem('wordStats')) || {};
+        let masteredCount = 0;
+        
+        // Her kelime için kontrol et
+        Object.keys(wordStats).forEach(word => {
+            const stats = wordStats[word];
+            
+            // En az 10 kez doğru cevaplamış ve hata oranı %20'nin altında
+            if (stats.correct >= 10) {
+                const accuracy = stats.correct / (stats.correct + stats.wrong);
+                if (accuracy >= 0.8) { // %80 doğruluk oranı
+                    masteredCount++;
+                }
+            }
+        });
+        
+        console.log(`📚 Öğrenilen kelimeler: ${masteredCount} (en az 10 kez doğru + %80 başarı)`);
+        return masteredCount;
     }
     
     setupGameUI() {
@@ -542,6 +530,9 @@ class ArabicLearningGame {
             setTimeout(() => this.playAudio(), 500);
         }
         
+        // Show word ID for debugging
+        document.getElementById('wordId').textContent = `ID: ${question.word.id}`;
+        
         // Show options, hide input and Arabic keyboard
         document.getElementById('optionsContainer').style.display = 'grid';
         document.getElementById('inputContainer').style.display = 'none';
@@ -566,6 +557,9 @@ class ArabicLearningGame {
         // Show Turkish meaning, ask for Arabic word
         document.getElementById('questionText').textContent = question.word.anlam;
         document.getElementById('audioBtn').style.display = 'inline-block';
+        
+        // Show word ID for debugging
+        document.getElementById('wordId').textContent = `ID: ${question.word.id}`;
         
         // Show input and Arabic keyboard
         document.getElementById('optionsContainer').style.display = 'none';
@@ -817,37 +811,27 @@ class ArabicLearningGame {
         this.totalHasene += this.gameHasene;
         this.dailyHasene += this.gameHasene;
         
-        // Update words learned (intelligent calculation)
-        let newWordsLearned = 0;
+        // Update words learned (mastery-based calculation)
+        // Gerçekten öğrenilen kelimeleri hesapla (en az 10 kez doğru)
+        this.wordsLearned = this.calculateMasteredWords();
         
-        // Base learning: 1 word per correct answer
-        newWordsLearned = this.score;
-        
-        // Bonus for high accuracy (8+ correct = extra understanding)
-        if (this.score >= 8) {
-            newWordsLearned += Math.floor((this.score - 7) * 0.5);
-        }
-        
-        // Perfect game bonus (mastery level)
-        if (this.score === 10) {
-            newWordsLearned += 2; // Total becomes 12 words for perfect
-        }
-        
-        this.wordsLearned += newWordsLearned;
+        // Oyun modu sayacını güncelle
+        const modeKey = this.gameMode + 'Games'; // translationGames, listeningGames, writingGames
+        const currentCount = parseInt(localStorage.getItem(modeKey)) || 0;
+        localStorage.setItem(modeKey, (currentCount + 1).toString());
         
         // Check for level up
         const oldLevel = this.level;
         this.level = Math.floor(this.totalHasene / 1000) + 1;
         
-        // Update streak if daily goal is met (100 hasene)
-        if (this.dailyHasene >= 100 && this.streak === 0) {
+        // Update streak if daily goal is met (1000 hasene)
+        if (this.dailyHasene >= 1000 && this.streak === 0) {
             this.streak = 1;
         }
         
         // Save to localStorage
         localStorage.setItem('totalHasene', this.totalHasene.toString());
         localStorage.setItem('dailyHasene', this.dailyHasene.toString());
-        localStorage.setItem('wordsLearned', this.wordsLearned.toString());
         localStorage.setItem('streak', this.streak.toString());
         
         // Store daily hasene in calendar data
@@ -855,9 +839,12 @@ class ArabicLearningGame {
         this.storeDailyHasene(today, this.gameHasene);
         
         // Update streak data if daily goal met
-        if (this.dailyHasene >= 100) {
+        if (this.dailyHasene >= 1000) {
             this.updateStreakData(today, true);
         }
+        
+        // Update game statistics and check achievements
+        this.updateGameStats();
         
         // Show results screen
         this.showGameComplete(totalQuestions, accuracy, oldLevel);
@@ -893,7 +880,7 @@ class ArabicLearningGame {
             setTimeout(() => {
                 this.showLevelUp();
             }, 2000);
-        } else if (this.dailyHasene >= 100 && this.streak > 0) {
+        } else if (this.dailyHasene >= 1000 && this.streak > 0) {
             setTimeout(() => {
                 this.showStreakModal();
             }, 2000);
@@ -947,7 +934,7 @@ class ArabicLearningGame {
         // Update stats object
         this.stats.totalHasene = this.totalHasene;
         this.stats.currentStreak = this.streak;
-        this.stats.wordsLearned = this.wordsLearned;
+        this.stats.wordsLearned = this.calculateMasteredWords(); // Dinamik hesaplama
         this.stats.totalAnswers = this.totalAnswers;
         this.stats.correctAnswers = this.correctAnswers;
         
@@ -1039,7 +1026,7 @@ class ArabicLearningGame {
                 // Get hasene data for this date
                 const haseneData = this.getDailyHasene(dateString);
                 
-                if (haseneData >= 100) {
+                if (haseneData >= 1000) {
                     dayEl.classList.add('complete');
                     if (this.isStreakDay(dateString)) {
                         dayEl.classList.add('streak');
@@ -1156,6 +1143,291 @@ class ArabicLearningGame {
             setTimeout(() => this.setupAchievementListeners(), 200);
         }, 1500);
     }
+
+    initializeDifficultyUI() {
+        // Kayıtlı zorluk seviyesini yükle
+        const savedDifficulty = localStorage.getItem('difficulty') || 'medium';
+        this.difficulty = savedDifficulty;
+        
+        // UI'da doğru butonu aktif yap
+        document.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        const activeBtn = document.getElementById(savedDifficulty + 'Btn');
+        if (activeBtn) {
+            activeBtn.classList.add('active');
+        }
+    }
+
+    // Achievement functions
+    showAchievements() {
+        const modal = document.getElementById('achievementsModal');
+        const grid = document.querySelector('.achievements-grid');
+        
+        grid.innerHTML = '';
+        
+        Object.values(this.achievements).forEach(achievement => {
+            const isUnlocked = this.unlockedAchievements.includes(achievement.id);
+            const progress = this.getAchievementProgress(achievement);
+            
+            const item = document.createElement('div');
+            item.className = `achievement-item ${isUnlocked ? 'unlocked' : 'locked'}`;
+            
+            item.innerHTML = `
+                <i class="${achievement.icon} achievement-icon"></i>
+                <div class="achievement-title">${achievement.title}</div>
+                <div class="achievement-desc">${achievement.description}</div>
+                ${!isUnlocked && progress ? `<div class="achievement-progress">${progress}</div>` : ''}
+            `;
+            
+            grid.appendChild(item);
+        });
+        
+        modal.style.display = 'flex';
+    }
+
+    getAchievementProgress(achievement) {
+        const id = achievement.id;
+        
+        if (id === 'firstGame') {
+            return `${this.stats.gamesPlayed}/1`;
+        } else if (id === 'streak3') {
+            return `${this.stats.currentStreak}/3`;
+        } else if (id === 'streak7') {
+            return `${this.stats.currentStreak}/7`;
+        } else if (id === 'hasene100') {
+            return `${this.stats.totalHasene}/100`;
+        } else if (id === 'hasene500') {
+            return `${this.stats.totalHasene}/500`;
+        } else if (id === 'perfect10') {
+            return `${this.stats.perfectGames}/1`;
+        } else if (id === 'wordMaster') {
+            return `${this.stats.wordsLearned}/50`;
+        } else if (id === 'speedster') {
+            const avg = Math.round(this.stats.averageTime / 1000);
+            return avg > 3 ? `${avg}s/3s` : 'Tamamlandı!';
+        }
+        
+        return null;
+    }
+
+    checkNewAchievements() {
+        console.log('🏆 Rozetler kontrol ediliyor...');
+        console.log('Stats:', this.stats);
+        console.log('Açılmış rozetler:', this.unlockedAchievements);
+        
+        Object.values(this.achievements).forEach(achievement => {
+            const condition = achievement.condition();
+            console.log(`Rozet ${achievement.id}: Koşul ${condition ? '✅' : '❌'}`);
+            
+            if (!this.unlockedAchievements.includes(achievement.id) && condition) {
+                console.log(`🎉 Yeni rozet açıldı: ${achievement.title}`);
+                this.unlockAchievement(achievement);
+            }
+        });
+    }
+
+    unlockAchievement(achievement) {
+        this.unlockedAchievements.push(achievement.id);
+        localStorage.setItem('unlockedAchievements', JSON.stringify(this.unlockedAchievements));
+        
+        // Show unlock animation
+        this.showAchievementUnlock(achievement);
+        
+        // Update notification badge
+        this.updateNotificationBadges();
+    }
+
+    showAchievementUnlock(achievement) {
+        const modal = document.getElementById('achievementUnlockModal');
+        
+        document.getElementById('unlockedAchievementIcon').className = achievement.icon;
+        document.getElementById('unlockedAchievementTitle').textContent = achievement.title;
+        document.getElementById('unlockedAchievementDesc').textContent = achievement.description;
+        
+        modal.style.display = 'flex';
+        
+        // Auto close after 3 seconds
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 3000);
+    }
+
+    showStats() {
+        const modal = document.getElementById('statsModal');
+        
+        // Update all stat numbers
+        document.getElementById('statTotalGames').textContent = this.stats.gamesPlayed;
+        document.getElementById('statTotalHasene').textContent = this.stats.totalHasene;
+        document.getElementById('statMaxStreak').textContent = this.stats.currentStreak;
+        document.getElementById('statCurrentStreak').textContent = this.stats.currentStreak + ' gün';
+        document.getElementById('statWordsLearned').textContent = this.stats.wordsLearned;
+        
+        // Doğruluk oranı hesaplama
+        const accuracyRate = this.stats.totalAnswers > 0 ? 
+            Math.round((this.stats.correctAnswers / this.stats.totalAnswers) * 100) : 0;
+        document.getElementById('statAccuracyRate').textContent = accuracyRate + '%';
+        
+        // Update charts
+        this.updateWeeklyChart();
+        this.updateGameModeStats();
+        
+        modal.style.display = 'flex';
+    }
+
+    updateWeeklyChart() {
+        const weeklyData = this.getWeeklyData();
+        const chartContainer = document.getElementById('weeklyChart');
+        
+        // Haftalık chart barları oluştur
+        chartContainer.innerHTML = '';
+        
+        const maxValue = Math.max(...weeklyData, 1);
+        const days = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+        
+        weeklyData.forEach((value, index) => {
+            const height = Math.max((value / maxValue) * 100, 10);
+            
+            const chartBar = document.createElement('div');
+            chartBar.className = 'chart-bar';
+            chartBar.style.height = `${height}px`;
+            
+            chartBar.innerHTML = `
+                <div class="chart-value">${value}</div>
+                <div class="chart-label">${days[index]}</div>
+            `;
+            
+            chartContainer.appendChild(chartBar);
+        });
+    }
+
+    getWeeklyData() {
+        // Son 7 gün için gerçek hasene verileri
+        const weeklyData = [];
+        const today = new Date();
+        
+        for (let i = 6; i >= 0; i--) {
+            const date = new Date(today);
+            date.setDate(date.getDate() - i);
+            const dateString = date.toDateString();
+            
+            const dailyHasene = this.getDailyHasene(dateString) || 0;
+            weeklyData.push(dailyHasene);
+        }
+        
+        return weeklyData;
+    }
+
+    updateGameModeStats() {
+        // Gerçek oyun modları istatistikleri
+        const translationGames = parseInt(localStorage.getItem('translationGames')) || 0;
+        const listeningGames = parseInt(localStorage.getItem('listeningGames')) || 0;
+        const writingGames = parseInt(localStorage.getItem('writingGames')) || 0;
+        
+        const totalGames = translationGames + listeningGames + writingGames || 1; // 0'a bölme hatası önleme
+        
+        const modes = [
+            { 
+                name: 'Çeviri', 
+                class: 'translation', 
+                percentage: Math.round((translationGames / totalGames) * 100),
+                count: translationGames
+            },
+            { 
+                name: 'Dinleme', 
+                class: 'listening', 
+                percentage: Math.round((listeningGames / totalGames) * 100),
+                count: listeningGames
+            },
+            { 
+                name: 'Yazma', 
+                class: 'writing', 
+                percentage: Math.round((writingGames / totalGames) * 100),
+                count: writingGames
+            }
+        ];
+        
+        modes.forEach((mode, index) => {
+            const progressBar = document.querySelectorAll('.mode-bar')[index];
+            const percentageSpan = document.querySelectorAll('.mode-percentage')[index];
+            
+            if (progressBar && percentageSpan) {
+                progressBar.style.width = `${mode.percentage}%`;
+                percentageSpan.textContent = `${mode.percentage}% (${mode.count})`;
+            }
+        });
+    }
+
+    updateNotificationBadges() {
+        const newAchievements = Object.values(this.achievements).filter(achievement => 
+            achievement.condition() && !this.unlockedAchievements.includes(achievement.id)
+        ).length;
+        
+        const badge = document.querySelector('.notification-badge');
+        if (newAchievements > 0) {
+            badge.style.display = 'flex';
+            badge.textContent = newAchievements;
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+
+    showCalendar() {
+        const modal = document.getElementById('calendarModal');
+        
+        // Generate calendar
+        this.renderCalendar();
+        
+        modal.style.display = 'flex';
+    }
+
+    // Zorluk seviyesi yönetimi
+    setDifficulty(level) {
+        this.difficulty = level;
+        localStorage.setItem('difficulty', level);
+        
+        // UI güncelle
+        document.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.getElementById(level + 'Btn').classList.add('active');
+        
+        console.log(`Zorluk seviyesi ${level} olarak ayarlandı`);
+    }
+
+    getDifficultyWords(wordData, difficulty) {
+        let selectedWords = [];
+
+        switch(difficulty) {
+            case 'easy':
+                // Zorluk seviyesi 3-7: Kolay kelimeler
+                selectedWords = wordData.filter(word => 
+                    word.difficulty >= 3 && word.difficulty <= 7
+                );
+                break;
+                
+            case 'medium':
+                // Zorluk seviyesi 8-12: Orta kelimeler  
+                selectedWords = wordData.filter(word => 
+                    word.difficulty >= 8 && word.difficulty <= 12
+                );
+                break;
+                
+            case 'hard':
+                // Zorluk seviyesi 13-21: Zor kelimeler
+                selectedWords = wordData.filter(word => 
+                    word.difficulty >= 13 && word.difficulty <= 21
+                );
+                break;
+                
+            default:
+                selectedWords = wordData;
+        }
+
+        console.log(`${difficulty} seviyesi için ${selectedWords.length} kelime bulundu`);
+        return selectedWords;
+    }
 }
 
 // Global game instance
@@ -1168,8 +1440,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Global functions for HTML onclick events
 function startGame(mode = 'translation') {
-    if (game) {
+    if (game && game.wordData && game.wordData.length > 0) {
+        console.log(`🎮 ${mode} oyunu başlatılıyor...`);
         game.startGame(mode);
+    } else {
+        console.log('⏳ Oyun henüz hazır değil, lütfen bekleyin...');
+        alert('Oyun henüz yükleniyor, lütfen bekleyiniz...');
     }
 }
 
@@ -1191,6 +1467,12 @@ function checkAnswer() {
     }
 }
 
+function setDifficulty(level) {
+    if (game) {
+        game.setDifficulty(level);
+    }
+}
+
 // Modal close functions
 function closeAchievementsModal() {
     document.getElementById('achievementsModal').style.display = 'none';
@@ -1204,169 +1486,6 @@ function closeAchievementUnlockModal() {
     document.getElementById('achievementUnlockModal').style.display = 'none';
 }
 
-// Achievement functions for ArabicLearningGame class
-ArabicLearningGame.prototype.showAchievements = function() {
-    const modal = document.getElementById('achievementsModal');
-    const grid = document.querySelector('.achievements-grid');
-    
-    grid.innerHTML = '';
-    
-    Object.values(this.achievements).forEach(achievement => {
-        const isUnlocked = this.unlockedAchievements.includes(achievement.id);
-        const progress = this.getAchievementProgress(achievement);
-        
-        const item = document.createElement('div');
-        item.className = `achievement-item ${isUnlocked ? 'unlocked' : 'locked'}`;
-        
-        item.innerHTML = `
-            <i class="${achievement.icon} achievement-icon"></i>
-            <div class="achievement-title">${achievement.title}</div>
-            <div class="achievement-desc">${achievement.description}</div>
-            ${!isUnlocked && progress ? `<div class="achievement-progress">${progress}</div>` : ''}
-        `;
-        
-        grid.appendChild(item);
-    });
-    
-    modal.style.display = 'flex';
-};
-
-ArabicLearningGame.prototype.getAchievementProgress = function(achievement) {
-    const id = achievement.id;
-    
-    if (id === 'firstGame') {
-        return `${this.stats.gamesPlayed}/1`;
-    } else if (id === 'streak3') {
-        return `${this.stats.currentStreak}/3`;
-    } else if (id === 'streak7') {
-        return `${this.stats.currentStreak}/7`;
-    } else if (id === 'hasene100') {
-        return `${this.stats.totalHasene}/100`;
-    } else if (id === 'hasene500') {
-        return `${this.stats.totalHasene}/500`;
-    } else if (id === 'perfect10') {
-        return `${this.stats.perfectGames}/1`;
-    } else if (id === 'wordMaster') {
-        return `${this.stats.wordsLearned}/50`;
-    } else if (id === 'speedster') {
-        const avg = Math.round(this.stats.averageTime / 1000);
-        return avg > 3 ? `${avg}s/3s` : 'Tamamlandı!';
-    }
-    
-    return null;
-};
-
-ArabicLearningGame.prototype.checkNewAchievements = function() {
-    Object.values(this.achievements).forEach(achievement => {
-        if (!this.unlockedAchievements.includes(achievement.id) && achievement.condition()) {
-            this.unlockAchievement(achievement);
-        }
-    });
-};
-
-ArabicLearningGame.prototype.unlockAchievement = function(achievement) {
-    this.unlockedAchievements.push(achievement.id);
-    localStorage.setItem('unlockedAchievements', JSON.stringify(this.unlockedAchievements));
-    
-    // Show unlock animation
-    this.showAchievementUnlock(achievement);
-    
-    // Update notification badge
-    this.updateNotificationBadges();
-};
-
-ArabicLearningGame.prototype.showAchievementUnlock = function(achievement) {
-    const modal = document.getElementById('achievementUnlockModal');
-    
-    document.getElementById('unlockedAchievementIcon').className = achievement.icon;
-    document.getElementById('unlockedAchievementTitle').textContent = achievement.title;
-    document.getElementById('unlockedAchievementDesc').textContent = achievement.description;
-    
-    modal.style.display = 'flex';
-    
-    // Auto close after 3 seconds
-    setTimeout(() => {
-        modal.style.display = 'none';
-    }, 3000);
-};
-
-ArabicLearningGame.prototype.showStats = function() {
-    const modal = document.getElementById('statsModal');
-    
-    // Update stat numbers - HTML ID'lere göre düzeltildi
-    document.getElementById('statTotalGames').textContent = this.stats.gamesPlayed;
-    document.getElementById('statTotalHasene').textContent = this.stats.totalHasene;
-    document.getElementById('statMaxStreak').textContent = this.stats.currentStreak;
-    
-    // Update charts
-    this.updateWeeklyChart();
-    this.updateGameModeStats();
-    
-    modal.style.display = 'flex';
-};
-
-ArabicLearningGame.prototype.updateWeeklyChart = function() {
-    const weeklyData = this.getWeeklyData();
-    const chartBars = document.querySelectorAll('.chart-bar');
-    
-    const maxValue = Math.max(...weeklyData, 1);
-    
-    chartBars.forEach((bar, index) => {
-        const value = weeklyData[index];
-        const height = (value / maxValue) * 100;
-        
-        bar.style.height = `${Math.max(height, 10)}px`;
-        bar.querySelector('.chart-value').textContent = value;
-    });
-};
-
-ArabicLearningGame.prototype.getWeeklyData = function() {
-    // Son 7 gün için veri (şimdilik rastgele, gerçek veriler eklenebilir)
-    const weeklyGames = JSON.parse(localStorage.getItem('weeklyGames')) || [0,0,0,0,0,0,0];
-    return weeklyGames;
-};
-
-ArabicLearningGame.prototype.updateGameModeStats = function() {
-    // Oyun modları istatistikleri (örnek veriler)
-    const modes = [
-        { name: 'Çeviri', class: 'translation', percentage: 75 },
-        { name: 'Dinleme', class: 'listening', percentage: 45 },
-        { name: 'Yazma', class: 'writing', percentage: 30 }
-    ];
-    
-    modes.forEach((mode, index) => {
-        const progressBar = document.querySelectorAll('.mode-bar')[index];
-        const percentageSpan = document.querySelectorAll('.mode-percentage')[index];
-        
-        if (progressBar && percentageSpan) {
-            progressBar.style.width = `${mode.percentage}%`;
-            percentageSpan.textContent = `${mode.percentage}%`;
-        }
-    });
-};
-
-ArabicLearningGame.prototype.updateNotificationBadges = function() {
-    const newAchievements = Object.values(this.achievements).filter(achievement => 
-        achievement.condition() && !this.unlockedAchievements.includes(achievement.id)
-    ).length;
-    
-    const badge = document.querySelector('.notification-badge');
-    if (newAchievements > 0) {
-        badge.style.display = 'flex';
-        badge.textContent = newAchievements;
-    } else {
-        badge.style.display = 'none';
-    }
-};
-
-ArabicLearningGame.prototype.showCalendar = function() {
-    const modal = document.getElementById('calendarModal');
-    
-    // Generate calendar
-    this.renderCalendar();
-    
-    modal.style.display = 'flex';
-};
 
 // Global functions for HTML onclick events
 function toggleCalendar() {
