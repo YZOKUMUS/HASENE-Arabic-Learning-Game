@@ -175,9 +175,10 @@ class ArabicLearningGame {
         unlimitedHeartsActive = localStorage.getItem('unlimitedHearts') === 'true';
         this.totalHasene = parseInt(localStorage.getItem('totalHasene')) || 0;
         this.streak = parseInt(localStorage.getItem('streak')) || 0;
-        this.level = Math.floor(this.totalHasene / 500) + 1; // Daha hızlı seviye atlaması
+        // Progressive level system - Her seviye daha zor
+        this.level = this.calculateLevel(this.totalHasene);
         this.xp = this.totalHasene;
-        this.xpToNextLevel = (this.level * 500) - this.totalHasene;
+        this.xpToNextLevel = this.getXPRequiredForLevel(this.level + 1) - this.totalHasene;
         this.dailyHasene = parseInt(localStorage.getItem('dailyHasene')) || 0;
         this.lastPlayDate = localStorage.getItem('lastPlayDate') || '';
         this.wordsLearned = 0; // Dinamik olarak hesaplanacak
@@ -498,12 +499,16 @@ class ArabicLearningGame {
         const dailyProgress = Math.min((this.dailyHasene / 1000) * 100, 100);
         document.getElementById('dailyProgress').style.width = `${dailyProgress}%`;
         
-        // Update XP Progress
-        const xpInCurrentLevel = this.totalHasene % 500;
-        const xpProgress = (xpInCurrentLevel / 500) * 100;
-        document.getElementById('xpProgress').style.width = `${xpProgress}%`;
+        // Update XP Progress - Progressive System
+        const currentLevelXP = this.getXPRequiredForLevel(this.level);
+        const nextLevelXP = this.getXPRequiredForLevel(this.level + 1);
+        const xpInCurrentLevel = this.totalHasene - currentLevelXP;
+        const xpNeededForNext = nextLevelXP - currentLevelXP;
+        const xpProgress = (xpInCurrentLevel / xpNeededForNext) * 100;
+        
+        document.getElementById('xpProgress').style.width = `${Math.max(0, xpProgress)}%`;
         document.getElementById('currentXP').textContent = xpInCurrentLevel;
-        document.getElementById('nextLevelXP').textContent = 500;
+        document.getElementById('nextLevelXP').textContent = xpNeededForNext;
         document.getElementById('currentLevel').textContent = this.level;
         document.getElementById('nextLevel').textContent = this.level + 1;
         
@@ -812,12 +817,16 @@ class ArabicLearningGame {
     }
     
     showMultipleChoiceQuestion(question) {
-        // Show question text
+        // Show question text with Arabic styling
+        const questionTextElement = document.getElementById('questionText');
+        
         if (this.gameMode === 'translation' || this.gameMode === 'speed') {
-            document.getElementById('questionText').textContent = question.word.kelime;
+            // Arabic text with Amiri font and game mode colors
+            questionTextElement.innerHTML = `<span class="arabic-word ${this.gameMode}-mode">${question.word.kelime}</span>`;
+            console.log(`🎨 Arabic styling applied: ${this.gameMode}-mode`);
             document.getElementById('audioBtn').style.display = 'inline-block';
         } else if (this.gameMode === 'listening') {
-            document.getElementById('questionText').textContent = '🎧 Sesi dinleyin';
+            questionTextElement.textContent = '🎧 Sesi dinleyin';
             document.getElementById('audioBtn').style.display = 'inline-block';
             // Auto-play audio for listening mode
             setTimeout(() => this.playAudio(), 500);
@@ -1057,14 +1066,15 @@ class ArabicLearningGame {
             text.className = 'feedback-text incorrect';
         }
         
-        // Soru formatına göre meaning ayarla
+        // Soru formatına göre meaning ayarla - Arapça renkli
         if (question.word) {
-            // Normal format
-            meaning.textContent = `${question.word.kelime} = ${question.word.anlam}`;
+            // Normal format with Arabic styling
+            meaning.innerHTML = `<span class="arabic-word ${this.gameMode}-mode">${question.word.kelime}</span> = ${question.word.anlam}`;
+            console.log(`🎨 Feedback Arabic styling: ${this.gameMode}-mode`);
             this.currentAudio = question.word.ses_dosyasi;
         } else if (question.arabic && question.correct) {
-            // Sonsuz mod format
-            meaning.textContent = `${question.arabic} = ${question.correct}`;
+            // Sonsuz mod format with Arabic styling
+            meaning.innerHTML = `<span class="arabic-word ${this.gameMode}-mode">${question.arabic}</span> = ${question.correct}`;
             this.currentAudio = null; // Sonsuz modda ses yok şimdilik
         } else {
             // Fallback
@@ -1125,6 +1135,17 @@ class ArabicLearningGame {
     }
     
     skipQuestion() {
+        // Sonsuz modda soru tükendiyse yeni sorular ekle
+        if (this.currentQuestion >= this.questions.length) {
+            if (this.isEndlessMode && this.hearts > 0) {
+                this.addMoreEndlessQuestions();
+            } else {
+                console.warn('Soru tükendi ve sonsuz mod değil');
+                this.completeGame();
+                return;
+            }
+        }
+        
         // Mark as incorrect but don't lose heart
         const question = this.questions[this.currentQuestion];
         
@@ -1149,7 +1170,15 @@ class ArabicLearningGame {
     addMoreEndlessQuestions() {
         // Sonsuz modda yeni sorular ekle
         const moreQuestions = [];
-        const usedWords = this.questions.map(q => q.word ? q.word.id : q.arabic);
+        const usedWords = this.questions.map(q => q.word ? q.word.id : q.word?.kelime);
+        
+        // Zorluk seviyesine uygun kelimeler al
+        const difficultyWords = this.getDifficultyWords(this.wordData, this.difficulty);
+        
+        if (!difficultyWords || difficultyWords.length === 0) {
+            console.warn('Zorluk seviyesi için kelime bulunamadı, tüm kelimeleri kullanıyoruz');
+            difficultyWords = this.wordData;
+        }
         
         // 5 yeni soru ekle (daha manageable)
         for (let i = 0; i < 5; i++) {
@@ -1158,10 +1187,10 @@ class ArabicLearningGame {
             
             // Daha önce kullanılmayan kelime bul
             do {
-                randomWord = this.words[Math.floor(Math.random() * this.words.length)];
+                randomWord = difficultyWords[Math.floor(Math.random() * difficultyWords.length)];
                 attempts++;
                 if (attempts > 100) break; // Sonsuz döngüyü önle
-            } while (usedWords.includes(randomWord.id || randomWord.arabic) && attempts < 100);
+            } while (usedWords.includes(randomWord.id || randomWord.kelime) && attempts < 100);
             
             if (randomWord) {
                 // Game mode'a göre soru tipini belirle
@@ -1172,30 +1201,20 @@ class ArabicLearningGame {
                     });
                 } else {
                     // Multiple choice için yanlış seçenekler oluştur
-                    const wrongOptions = [];
-                    while (wrongOptions.length < 3) {
-                        const randomOption = this.words[Math.floor(Math.random() * this.words.length)];
-                        if (randomOption.id !== randomWord.id && 
-                            !wrongOptions.includes(randomOption.kelime)) {
-                            wrongOptions.push(randomOption.kelime);
-                        }
-                    }
-                    
-                    // Seçenekleri karıştır
-                    const options = [randomWord.kelime, ...wrongOptions];
-                    for (let j = options.length - 1; j > 0; j--) {
-                        const k = Math.floor(Math.random() * (j + 1));
-                        [options[j], options[k]] = [options[k], options[j]];
-                    }
+                    const wrongAnswers = this.getWrongAnswers(randomWord.anlam, 3);
+                    const allOptions = [randomWord.anlam, ...wrongAnswers];
+                    const shuffledOptions = allOptions.sort(() => Math.random() - 0.5);
                     
                     moreQuestions.push({
                         word: randomWord,
-                        options: options,
-                        type: 'multiple-choice'
+                        correctAnswer: randomWord.anlam,
+                        options: shuffledOptions,
+                        correctIndex: shuffledOptions.indexOf(randomWord.anlam),
+                        type: this.gameMode
                     });
                 }
                 
-                usedWords.push(randomWord.id || randomWord.arabic);
+                usedWords.push(randomWord.id || randomWord.kelime);
             }
         }
         
@@ -1272,9 +1291,9 @@ class ArabicLearningGame {
         const currentCount = parseInt(localStorage.getItem(modeKey)) || 0;
         localStorage.setItem(modeKey, (currentCount + 1).toString());
         
-        // Check for level up
+        // Check for level up - Progressive system
         const oldLevel = this.level;
-        this.level = Math.floor(this.totalHasene / 1000) + 1;
+        this.level = this.calculateLevel(this.totalHasene);
         
         // Update streak if daily goal is met (1000 hasene)
         if (this.dailyHasene >= 1000 && this.streak === 0) {
@@ -1429,6 +1448,42 @@ class ArabicLearningGame {
                 console.log(`🔥 Streak Milestone! ${passedMilestone} gün streak fanfarı çaldı!`);
             }, 500);
         }
+    }
+
+    // 📈 Progressive Level System - Her seviye exponentially daha zor
+    calculateLevel(totalXP) {
+        if (totalXP < 1000) return 1;     // Seviye 1: 0-999 XP
+        if (totalXP < 2500) return 2;     // Seviye 2: 1000-2499 XP (1500 XP gerek)
+        if (totalXP < 5000) return 3;     // Seviye 3: 2500-4999 XP (2500 XP gerek)
+        if (totalXP < 8000) return 4;     // Seviye 4: 5000-7999 XP (3000 XP gerek)
+        if (totalXP < 12000) return 5;    // Seviye 5: 8000-11999 XP (4000 XP gerek)
+        if (totalXP < 17000) return 6;    // Seviye 6: 12000-16999 XP (5000 XP gerek)
+        if (totalXP < 23000) return 7;    // Seviye 7: 17000-22999 XP (6000 XP gerek)
+        if (totalXP < 30000) return 8;    // Seviye 8: 23000-29999 XP (7000 XP gerek)
+        if (totalXP < 38000) return 9;    // Seviye 9: 30000-37999 XP (8000 XP gerek)
+        if (totalXP < 47000) return 10;   // Seviye 10: 38000-46999 XP (9000 XP gerek)
+        
+        // Seviye 10'dan sonra her seviye 10000 XP daha gerektirir
+        const extraLevels = Math.floor((totalXP - 47000) / 10000);
+        return 10 + extraLevels;
+    }
+
+    // 🎯 Belirli seviye için gerekli XP
+    getXPRequiredForLevel(level) {
+        if (level <= 1) return 0;
+        if (level <= 2) return 1000;
+        if (level <= 3) return 2500;
+        if (level <= 4) return 5000;
+        if (level <= 5) return 8000;
+        if (level <= 6) return 12000;
+        if (level <= 7) return 17000;
+        if (level <= 8) return 23000;
+        if (level <= 9) return 30000;
+        if (level <= 10) return 38000;
+        if (level <= 11) return 47000;
+        
+        // Seviye 11'dan sonra her seviye 10000 XP daha
+        return 47000 + ((level - 11) * 10000);
     }
     
     updateGameStats() {
@@ -1964,6 +2019,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function startGame(mode = 'translation') {
     if (game && game.wordData && game.wordData.length > 0) {
         console.log(`🎮 ${mode} oyunu başlatılıyor...`);
+        console.log(`🎨 Mode value being passed: "${mode}"`); // Debug log
         game.startGame(mode);
     } else {
         console.log('⏳ Oyun henüz hazır değil, lütfen bekleyin...');
@@ -2465,4 +2521,6 @@ function updateSoundUI() {
         }
     }
 }
+
+
 
