@@ -422,31 +422,32 @@ body {
 /* Progress Section */
 .progress-section {
     background: white;
-    padding: 20px;
+    padding: 15px;
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-light);
-    margin-bottom: 30px;
+    margin-bottom: 20px;
 }
 
 .daily-goal h3 {
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     color: var(--text-dark);
     font-weight: 700;
+    font-size: 16px;
 }
 
 .progress-bar {
     width: 100%;
-    height: 12px;
+    height: 8px;
     background: #e5e5e5;
-    border-radius: 6px;
+    border-radius: 4px;
     overflow: hidden;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .progress-fill {
     height: 100%;
     background: linear-gradient(90deg, var(--primary-green), var(--primary-blue));
-    border-radius: 6px;
+    border-radius: 4px;
     transition: width 0.5s ease-in-out;
 }
 
@@ -514,35 +515,35 @@ body {
 /* Difficulty Section */
 .difficulty-section {
     background: white;
-    padding: 25px;
+    padding: 18px;
     border-radius: var(--border-radius-large);
     box-shadow: var(--shadow-light);
-    margin-bottom: 25px;
+    margin-bottom: 18px;
     text-align: center;
 }
 
 .difficulty-section h3 {
-    font-size: 1.4rem;
+    font-size: 1.2rem;
     font-weight: 700;
     color: var(--text-dark);
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 8px;
 }
 
 .difficulty-buttons {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px;
 }
 
 .difficulty-btn {
     background: white;
-    border: 3px solid var(--border-color);
+    border: 2px solid var(--border-color);
     border-radius: var(--border-radius);
-    padding: 20px 15px;
+    padding: 12px 10px;
     cursor: pointer;
     transition: all 0.3s ease;
     text-align: center;
@@ -595,20 +596,20 @@ body {
 }
 
 .difficulty-btn i {
-    font-size: 2rem;
-    margin-bottom: 10px;
+    font-size: 1.5rem;
+    margin-bottom: 6px;
     display: block;
 }
 
 .difficulty-btn span {
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     font-weight: 700;
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 3px;
 }
 
 .difficulty-btn small {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     opacity: 0.8;
     display: block;
 }
@@ -1333,14 +1334,30 @@ body {
         font-size: 2.5rem;
     }
     
+    .game-modes {
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+    
     .game-mode-btn {
         flex-direction: column;
         text-align: center;
-        gap: 15px;
+        gap: 10px;
+        padding: 15px;
     }
     
     .game-mode-btn i {
-        font-size: 3rem;
+        font-size: 2.2rem;
+        width: auto;
+    }
+    
+    .game-mode-btn h3 {
+        font-size: 1.1rem;
+        margin-bottom: 3px;
+    }
+    
+    .game-mode-btn p {
+        font-size: 0.8rem;
     }
     
     .stats-section {
@@ -1366,6 +1383,95 @@ body {
     
     .streak-info, .hasene-info, .level-info {
         font-size: 0.8rem;
+    }
+    
+    /* Difficulty Section Mobile */
+    .difficulty-section {
+        padding: 12px;
+        margin-bottom: 15px;
+    }
+    
+    .difficulty-section h3 {
+        font-size: 1rem;
+        margin-bottom: 10px;
+    }
+    
+    .difficulty-buttons {
+        display: flex;
+        gap: 6px;
+        justify-content: space-between;
+    }
+    
+    .difficulty-btn {
+        padding: 8px 6px;
+        min-width: 0;
+        flex: 1;
+        font-size: 0.75rem;
+    }
+    
+    .difficulty-btn i {
+        font-size: 1rem;
+        margin-bottom: 3px;
+    }
+    
+    .difficulty-btn span {
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+    
+    .difficulty-btn small {
+        font-size: 0.6rem;
+        margin-top: 2px;
+        opacity: 0.8;
+    }
+    
+    /* Progress Section Mobile */
+    .progress-section {
+        padding: 12px;
+        margin-bottom: 15px;
+    }
+    
+    .daily-goal {
+        padding: 12px;
+        margin-bottom: 8px;
+    }
+    
+    .daily-goal h3 {
+        font-size: 15px;
+        margin-bottom: 8px;
+    }
+    
+    .xp-section {
+        margin-top: 8px;
+        padding: 10px;
+    }
+    
+    .xp-section h3 {
+        font-size: 0.85rem;
+        margin-bottom: 6px;
+    }
+    
+    .level-progress {
+        gap: 8px;
+        margin: 8px 0;
+    }
+    
+    .current-level, .next-level {
+        font-size: 0.75rem;
+    }
+    
+    .xp-info {
+        font-size: 0.8rem;
+        margin-top: 6px;
+    }
+    
+    .streak-multiplier {
+        margin-top: 8px;
+    }
+    
+    .multiplier-badge {
+        font-size: 0.8rem;
+        padding: 6px 10px;
     }
     
     /* Calendar mobil uyum */
@@ -1542,26 +1648,27 @@ input:focus {
 /* Quick Actions */
 .quick-actions {
     display: flex;
-    gap: 15px;
-    margin-bottom: 30px;
+    gap: 10px;
+    margin-bottom: 20px;
     justify-content: center;
 }
 
 .action-btn {
     background: white;
     border: none;
-    padding: 15px 20px;
+    padding: 10px 15px;
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-light);
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     font-weight: 600;
+    font-size: 14px;
     color: var(--text-dark);
     position: relative;
-    min-width: 120px;
+    min-width: 100px;
     justify-content: center;
 }
 
@@ -2305,14 +2412,15 @@ input:focus {
     transform: translateX(-50%);
     background: var(--text-dark);
     color: white;
-    padding: 8px 12px;
+    padding: 4px 8px;
     border-radius: var(--border-radius-small);
-    font-size: 0.75rem;
+    font-size: 0.6rem;
     white-space: nowrap;
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.2s ease;
     z-index: 1000;
+    max-width: 120px;
 }
 
 .calendar-tooltip::after {
@@ -2320,8 +2428,8 @@ input:focus {
     position: absolute;
     top: 100%;
     left: 50%;
-    margin-left: -5px;
-    border-width: 5px;
+    margin-left: -3px;
+    border-width: 3px;
     border-style: solid;
     border-color: var(--text-dark) transparent transparent transparent;
 }
@@ -2338,6 +2446,17 @@ input:focus {
     
     .calendar-day {
         font-size: 0.8rem;
+    }
+    
+    .calendar-tooltip {
+        font-size: 0.55rem;
+        padding: 3px 6px;
+        max-width: 100px;
+    }
+    
+    .calendar-tooltip::after {
+        border-width: 2px;
+        margin-left: -2px;
     }
     
     .calendar-legend {
@@ -2369,13 +2488,132 @@ input:focus {
     background: var(--primary-blue-hover);
 }
 
+/* XP Progress Styles */
+.xp-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 12px;
+    border-radius: 10px;
+    color: white;
+    text-align: center;
+}
+
+.level-progress {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 10px 0;
+    gap: 10px;
+}
+
+.xp-bar {
+    flex: 1;
+    height: 8px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.xp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #FFD700, #FFA500);
+    transition: width 0.5s ease;
+    box-shadow: 0 0 10px rgba(255,215,0,0.5);
+}
+
+.current-level, .next-level {
+    font-weight: bold;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.xp-info {
+    margin: 8px 0 0 0;
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+
+.streak-multiplier {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    padding: 8px 12px;
+    border-radius: 20px;
+    display: inline-block;
+}
+
+.multiplier-badge {
+    color: white;
+    font-weight: bold;
+    font-size: 0.9rem;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+/* Challenge Game Mode Buttons */
+.game-mode-btn.challenge {
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    position: relative;
+    overflow: hidden;
+}
+
+.game-mode-btn.challenge h3 {
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+}
+
+.game-mode-btn.challenge p {
+    color: rgba(255,255,255,0.9);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+.game-mode-btn.challenge i {
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.game-mode-btn.challenge::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.game-mode-btn.challenge:hover::before {
+    left: 100%;
+}
+
+.game-mode-btn.challenge:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+/* Pulse animation for notification badges */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Glow effect for XP bar */
+@keyframes xpGlow {
+    0% { box-shadow: 0 0 5px rgba(255,215,0,0.3); }
+    50% { box-shadow: 0 0 20px rgba(255,215,0,0.6); }
+    100% { box-shadow: 0 0 5px rgba(255,215,0,0.3); }
+}
+
+.xp-fill {
+    animation: xpGlow 2s ease-in-out infinite;
+}
+
 /* Achievements and Stats Mobile Responsive */
 @media (max-width: 768px) {
     .quick-actions {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-        margin-bottom: 20px;
+        gap: 8px;
+        margin-bottom: 15px;
     }
     
     .action-btn.calendar {
@@ -2385,7 +2623,8 @@ input:focus {
     .action-btn {
         width: 100%;
         min-width: unset;
-        padding: 12px 15px;
+        padding: 8px 12px;
+        font-size: 13px;
     }
     
     .achievements-modal, .stats-modal, .calendar-modal {
@@ -2815,4 +3054,134 @@ input:focus {
         box-sizing: border-box !important;
         vertical-align: middle !important;
     }
+}
+
+/* Hearts Depleted Screen */
+.hearts-depleted-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    text-align: center;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.broken-heart-animation {
+    font-size: 80px;
+    color: var(--primary-red);
+    margin-bottom: 30px;
+    animation: heartBreak 2s ease-in-out infinite;
+}
+
+@keyframes heartBreak {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1) rotate(-5deg); }
+}
+
+.hearts-depleted-content h2 {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin-bottom: 15px;
+}
+
+.hearts-depleted-content p {
+    font-size: 16px;
+    color: var(--text-light);
+    margin-bottom: 30px;
+    line-height: 1.5;
+}
+
+.heart-refill-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    margin-bottom: 30px;
+}
+
+.refill-option {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    background: white;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+    gap: 15px;
+    min-height: 80px;
+}
+
+.refill-option:hover {
+    border-color: var(--primary-green);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+.refill-option i {
+    font-size: 24px;
+    min-width: 30px;
+}
+
+.refill-option.watch-ad i {
+    color: var(--primary-blue);
+}
+
+.refill-option.wait-time i {
+    color: var(--primary-orange);
+}
+
+.refill-option.unlimited i {
+    color: var(--primary-purple);
+}
+
+.option-content {
+    flex: 1;
+}
+
+.option-content h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 5px;
+}
+
+.option-content p {
+    font-size: 14px;
+    color: var(--text-light);
+    margin-bottom: 8px;
+}
+
+.reward, .timer, .price {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.reward {
+    background: rgba(88, 204, 2, 0.1);
+    color: var(--primary-green);
+}
+
+.timer {
+    background: rgba(255, 150, 0, 0.1);
+    color: var(--primary-orange);
+}
+
+.price {
+    background: rgba(206, 130, 255, 0.1);
+    color: var(--primary-purple);
+}
+
+.hearts-depleted-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
 }

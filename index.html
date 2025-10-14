@@ -68,11 +68,24 @@
         <div class="main-content">
             <div class="progress-section">
                 <div class="daily-goal">
-                    <h3>Günlük Hedef</h3>
+                    <h3>🎯 Günlük Hedef</h3>
                     <div class="progress-bar">
                         <div class="progress-fill" id="dailyProgress" style="width: 0%"></div>
                     </div>
                     <p><span id="dailyHasene">0</span>/1000 Hasene</p>
+                </div>
+                
+                <!-- XP Progress -->
+                <div class="xp-section" style="margin-top: 15px;">
+                    <h3>⚡ Seviye İlerlemen</h3>
+                    <div class="level-progress">
+                        <span class="current-level">Seviye <span id="currentLevel">1</span></span>
+                        <div class="xp-bar">
+                            <div class="xp-fill" id="xpProgress" style="width: 0%"></div>
+                        </div>
+                        <span class="next-level">Seviye <span id="nextLevel">2</span></span>
+                    </div>
+                    <p class="xp-info"><span id="currentXP">0</span>/<span id="nextLevelXP">500</span> XP</p>
                 </div>
             </div>
 
@@ -131,6 +144,18 @@
                     <i class="fas fa-pen"></i>
                     <h3>Yazma Oyunu</h3>
                     <p>Türkçe anlamı verilen kelimeyi yaz</p>
+                </button>
+                
+                <button class="game-mode-btn challenge" onclick="startGame('speed')" style="background: linear-gradient(135deg, #ff6b6b, #ee5a24);">
+                    <i class="fas fa-bolt"></i>
+                    <h3>Hız Modu ⚡</h3>
+                    <p>15 saniyede cevapla! Hızlı puan kazan!</p>
+                </button>
+                
+                <button class="game-mode-btn challenge" onclick="startGame('endless')" style="background: linear-gradient(135deg, #a55eea, #8b5cf6);">
+                    <i class="fas fa-infinity"></i>
+                    <h3>Sonsuz Mod 🎯</h3>
+                    <p>Kalp bitene kadar devam et!</p>
                 </button>
             </div>
 
@@ -267,6 +292,54 @@
                 <div class="feedback-actions">
                     <button class="continue-btn" id="continueBtn" onclick="nextQuestion()" style="display: none;">Devam Et</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hearts Depleted Screen -->
+    <div id="heartsDepleted" class="screen" style="display: none;">
+        <div class="hearts-depleted-content">
+            <div class="broken-heart-animation">
+                <i class="fas fa-heart-broken"></i>
+            </div>
+            
+            <h2>Kalplerin Bitti!</h2>
+            <p>Endişelenme, kalp yenilemenin birkaç yolu var:</p>
+            
+            <div class="heart-refill-options">
+                <button class="refill-option watch-ad" onclick="watchAdForHearts()">
+                    <i class="fas fa-play-circle"></i>
+                    <div class="option-content">
+                        <h3>Reklam İzle</h3>
+                        <p>30 saniyelik reklam izle, 1 kalp kazan!</p>
+                        <span class="reward">+1 ❤️</span>
+                    </div>
+                </button>
+                
+                <button class="refill-option wait-time" onclick="showWaitTimer()">
+                    <i class="fas fa-clock"></i>
+                    <div class="option-content">
+                        <h3>Bekle</h3>
+                        <p>Her 30 dakikada 1 kalp yenilenir</p>
+                        <span class="timer" id="heartTimer">29:45</span>
+                    </div>
+                </button>
+                
+                <button class="refill-option unlimited" onclick="buyUnlimitedHearts()">
+                    <i class="fas fa-infinity"></i>
+                    <div class="option-content">
+                        <h3>Sınırsız Kalp</h3>
+                        <p>Hiç kalp kaybetme! (Simülasyon)</p>
+                        <span class="price">100 Hasene</span>
+                    </div>
+                </button>
+            </div>
+            
+            <div class="hearts-depleted-actions">
+                <button class="menu-btn" onclick="returnToMenu()">
+                    <i class="fas fa-home"></i>
+                    Ana Menü
+                </button>
             </div>
         </div>
     </div>
@@ -513,6 +586,7 @@
     <audio id="correctSound" src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+D2u2ccBSuBzvLZjTgHEWe57+OZUQ4IVKTk97VaFws+ltryxXksBS6Hz/LdjTgIG2q+7eSXSAoOVKLm9L1mFgkugM3110g+CV+16iKcWAcLflG1cfkGrrcY0U4YwyZs3+LB9M8H4VLQ+K36oLoi4WEYyCNU4dLDzOAfAAAA"></audio>
     <audio id="incorrectSound" src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+D2u2ccBSuBzvLZjTgHEWe57+OZUQ4IVKTk97VaFws+ltryxXksBS6Hz/LdjTgIG2q+7eSXSAoOVKLm9L1mFgkugM3110g+CV+16iKcWAcLflG1cfkGrrcY0U4YwyZs3+LB9M8H4VLQ+K36oLoi4WEYyCNU4dLDzOAfAAAA"></audio>
 
+    <script src="party-effects.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

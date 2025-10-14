@@ -4,11 +4,16 @@ class ArabicLearningGame {
         this.wordData = [];
         this.currentQuestion = 0;
         this.score = 0;
-        this.hearts = 3;
+        this.hearts = 5; // Duolingo gibi 5 kalp
         this.gameXP = 0;
+        
+        // Sınırsız kalp kontrolü
+        unlimitedHeartsActive = localStorage.getItem('unlimitedHearts') === 'true';
         this.totalHasene = parseInt(localStorage.getItem('totalHasene')) || 0;
         this.streak = parseInt(localStorage.getItem('streak')) || 0;
-        this.level = Math.floor(this.totalHasene / 1000) + 1;
+        this.level = Math.floor(this.totalHasene / 500) + 1; // Daha hızlı seviye atlaması
+        this.xp = this.totalHasene;
+        this.xpToNextLevel = (this.level * 500) - this.totalHasene;
         this.dailyHasene = parseInt(localStorage.getItem('dailyHasene')) || 0;
         this.lastPlayDate = localStorage.getItem('lastPlayDate') || '';
         this.wordsLearned = 0; // Dinamik olarak hesaplanacak
@@ -86,6 +91,55 @@ class ArabicLearningGame {
                 description: '50 kelime! İlim tahsil etmeye devam!',
                 icon: 'fas fa-book',
                 condition: () => this.stats.wordsLearned >= 50
+            },
+            hasene1000: {
+                id: 'hasene1000',
+                title: '🕌 Hasene Emiri',
+                description: '1000 hasene! Masha Allah!',
+                icon: 'fas fa-fire',
+                condition: () => this.stats.totalHasene >= 1000
+            },
+            streak30: {
+                id: 'streak30',
+                title: '📿 Aylık Mücahit',
+                description: '30 gün streak! İnanılmaz kararlılık!',
+                icon: 'fas fa-calendar-check',
+                condition: () => this.stats.currentStreak >= 30
+            },
+            wordGuru: {
+                id: 'wordGuru',
+                title: '🕌 Kelime Üstadı',
+                description: '100 kelime öğrendin! Ustasın!',
+                icon: 'fas fa-graduation-cap',
+                condition: () => this.stats.wordsLearned >= 100
+            },
+            fastLearner: {
+                id: 'fastLearner',
+                title: '📿 Hızlı Öğrenci',
+                description: 'Ortalama 2 saniye! Çok hızlısın!',
+                icon: 'fas fa-rocket',
+                condition: () => this.stats.averageTime <= 2000
+            },
+            perfectStreak: {
+                id: 'perfectStreak',
+                title: '🕌 Mükemmel Seri',
+                description: '5 mükemmel oyun üst üste!',
+                icon: 'fas fa-diamond',
+                condition: () => this.stats.perfectStreak >= 5
+            },
+            gameAddict: {
+                id: 'gameAddict',
+                title: '📿 Oyun Bağımlısı',
+                description: '100 oyun tamamladın!',
+                icon: 'fas fa-gamepad',
+                condition: () => this.stats.gamesPlayed >= 100
+            },
+            quranLover: {
+                id: 'quranLover',
+                title: '🕌 Kuran Sevdalısı',
+                description: 'Her sure türünden kelime öğrendin!',
+                icon: 'fas fa-quran',
+                condition: () => this.getUniqueSuras() >= 10
             }
         };
 
@@ -130,6 +184,22 @@ class ArabicLearningGame {
                 }
             });
         });
+    }
+    
+    getUniqueSuras() {
+        if (!this.words || this.words.length === 0) {
+            return 0;
+        }
+        
+        // Benzersiz sure sayısını hesapla
+        const uniqueSuras = new Set();
+        this.words.forEach(word => {
+            if (word.sure) {
+                uniqueSuras.add(word.sure);
+            }
+        });
+        
+        return uniqueSuras.size;
     }
     
     async init() {
@@ -246,6 +316,17 @@ class ArabicLearningGame {
         // Update daily progress (günlük hedef 1000 hasene)
         const dailyProgress = Math.min((this.dailyHasene / 1000) * 100, 100);
         document.getElementById('dailyProgress').style.width = `${dailyProgress}%`;
+        
+        // Update XP Progress
+        const xpInCurrentLevel = this.totalHasene % 500;
+        const xpProgress = (xpInCurrentLevel / 500) * 100;
+        document.getElementById('xpProgress').style.width = `${xpProgress}%`;
+        document.getElementById('currentXP').textContent = xpInCurrentLevel;
+        document.getElementById('nextLevelXP').textContent = 500;
+        document.getElementById('currentLevel').textContent = this.level;
+        document.getElementById('nextLevel').textContent = this.level + 1;
+        
+
     }
     
     startGame(mode = 'translation') {
@@ -264,6 +345,15 @@ class ArabicLearningGame {
         this.hearts = 5;
         this.gameHasene = 0;
         
+        // Hız modu için timer ayarları
+        this.isSpeedMode = (mode === 'speed');
+        this.questionTimer = null;
+        this.timeLeft = 0;
+        
+        // Sonsuz modu için ayarlar
+        this.isEndlessMode = (mode === 'endless');
+        this.endlessQuestionCount = 0;
+        
         // Generate questions
         this.generateQuestions();
         
@@ -278,7 +368,8 @@ class ArabicLearningGame {
     }
     
     generateQuestions() {
-        const questionCount = 10;
+        // Sonsuz modda başlangıçta sadece 5 soru, sonra dinamik ekleme
+        const questionCount = this.isEndlessMode ? 5 : 10;
         this.questions = [];
         
         console.log(`Sorular üretiliyor... Toplam kelime sayısı: ${this.wordData.length}`);
@@ -299,7 +390,7 @@ class ArabicLearningGame {
             };
             
             // Generate wrong options for multiple choice
-            if (this.gameMode === 'translation' || this.gameMode === 'listening') {
+            if (this.gameMode === 'translation' || this.gameMode === 'listening' || this.gameMode === 'speed') {
                 const wrongAnswers = this.getWrongAnswers(word.anlam, 3);
                 const allOptions = [word.anlam, ...wrongAnswers];
                 question.options = allOptions.sort(() => Math.random() - 0.5);
@@ -488,26 +579,42 @@ class ArabicLearningGame {
         const questionTypeTexts = {
             'translation': 'Arapça kelimeyi çevir',
             'listening': 'Sesi dinle ve anlamını bul',
-            'writing': 'Türkçe anlamı verilen kelimeyi yaz'
+            'writing': 'Türkçe anlamı verilen kelimeyi yaz',
+            'speed': 'Arapça kelimeyi çevir'
         };
         document.getElementById('questionType').textContent = questionTypeTexts[this.gameMode];
     }
     
     showQuestion() {
         if (this.currentQuestion >= this.questions.length) {
-            this.completeGame();
-            return;
+            // Sonsuz modda yeni sorular ekle
+            if (this.isEndlessMode && this.hearts > 0) {
+                this.addMoreEndlessQuestions();
+                // Yeni sorular eklendikten sonra devam et
+            } else {
+                this.completeGame();
+                return;
+            }
         }
         
         const question = this.questions[this.currentQuestion];
         
         // Update progress
-        document.getElementById('currentQuestion').textContent = this.currentQuestion + 1;
-        const progress = ((this.currentQuestion) / this.questions.length) * 100;
-        document.getElementById('gameProgress').style.width = `${progress}%`;
+        if (this.isEndlessMode) {
+            // Sonsuz modda soru sayısı ve kalp göster
+            document.getElementById('currentQuestion').textContent = this.currentQuestion + 1;
+            document.getElementById('totalQuestions').textContent = '∞';
+            // Progress bar kalp bazlı olsun
+            const heartProgress = (this.hearts / 5) * 100;
+            document.getElementById('gameProgress').style.width = `${heartProgress}%`;
+        } else {
+            document.getElementById('currentQuestion').textContent = this.currentQuestion + 1;
+            const progress = ((this.currentQuestion) / this.questions.length) * 100;
+            document.getElementById('gameProgress').style.width = `${progress}%`;
+        }
         
         // Show question based on mode
-        if (this.gameMode === 'translation' || this.gameMode === 'listening') {
+        if (this.gameMode === 'translation' || this.gameMode === 'listening' || this.gameMode === 'speed') {
             this.showMultipleChoiceQuestion(question);
         } else if (this.gameMode === 'writing') {
             this.showWritingQuestion(question);
@@ -516,11 +623,16 @@ class ArabicLearningGame {
         // Hide feedback and continue button
         this.hideFeedback();
         document.getElementById('continueBtn').style.display = 'none';
+        
+        // Hız modu için timer başlat
+        if (this.isSpeedMode) {
+            startQuestionTimer();
+        }
     }
     
     showMultipleChoiceQuestion(question) {
         // Show question text
-        if (this.gameMode === 'translation') {
+        if (this.gameMode === 'translation' || this.gameMode === 'speed') {
             document.getElementById('questionText').textContent = question.word.kelime;
             document.getElementById('audioBtn').style.display = 'inline-block';
         } else if (this.gameMode === 'listening') {
@@ -616,6 +728,11 @@ class ArabicLearningGame {
     }
     
     processAnswer(isCorrect, selectedButton = null) {
+        // Hız modunda timer'ı temizle
+        if (this.isSpeedMode) {
+            clearQuestionTimer();
+        }
+        
         const question = this.questions[this.currentQuestion];
         
         // Update word statistics for smart repetition
@@ -645,7 +762,10 @@ class ArabicLearningGame {
                 selectedButton.classList.add('correct');
             }
         } else {
-            this.hearts--;
+            // Sınırsız kalp aktifse kalp kaybetme
+            if (!unlimitedHeartsActive) {
+                this.hearts--;
+            }
             
             // Show incorrect feedback
             this.showFeedback(false, question);
@@ -654,7 +774,7 @@ class ArabicLearningGame {
             this.playSound('incorrect');
             
             // Update hearts display
-            if (this.hearts >= 0) {
+            if (!unlimitedHeartsActive && this.hearts >= 0) {
                 const heartIndex = 5 - this.hearts;
                 const heart = document.getElementById(`heart${heartIndex}`);
                 if (heart) {
@@ -662,14 +782,14 @@ class ArabicLearningGame {
                 }
             }
             
-            if (selectedButton) {
+            if (selectedButton && selectedButton.classList) {
                 selectedButton.classList.add('incorrect');
-                // Highlight correct answer
-                const correctIndex = question.correctIndex;
-                const options = document.querySelectorAll('.option-btn');
-                if (options[correctIndex]) {
-                    options[correctIndex].classList.add('correct');
-                }
+            }
+            // Highlight correct answer
+            const correctIndex = question.correctIndex;
+            const options = document.querySelectorAll('.option-btn');
+            if (options[correctIndex]) {
+                options[correctIndex].classList.add('correct');
             }
             
             // Check if game over (disable heart system for now)
@@ -693,10 +813,40 @@ class ArabicLearningGame {
             if (continueBtn) {
                 continueBtn.style.display = 'inline-block';
                 console.log('Continue button displayed');
+                
+                // Hız modunda otomatik devam et (2 saniye sonra)
+                if (this.isSpeedMode) {
+                    setTimeout(() => {
+                        if (continueBtn.style.display !== 'none') {
+                            console.log('🏃‍♂️ Hız modu: Otomatik devam...');
+                            
+                            // Son soru kontrolü
+                            if (this.currentQuestion + 1 >= this.questions.length) {
+                                if (this.isEndlessMode && this.hearts > 0) {
+                                    console.log('🔄 Sonsuz mod son soru: Yeni sorular eklenecek...');
+                                    this.nextQuestion();
+                                } else {
+                                    console.log('🏁 Hız modu son soru: Oyun bitiyor...');
+                                    this.nextQuestion(); // completeGame'i çağıracak
+                                }
+                            } else {
+                                this.nextQuestion();
+                            }
+                        }
+                    }, 2000);
+                }
             } else {
                 console.error('Continue button not found!');
             }
         }, 800);
+        
+        // Kalp kontrolü - feedback gösterildikten sonra kontrol et
+        if (!unlimitedHeartsActive && this.hearts <= 0) {
+            setTimeout(() => {
+                console.log('💔 Kalplar bitti, kalp yenileme ekranına yönlendiriliyor...');
+                showHeartsDepleted();
+            }, 3000); // Feedback ve otomatik devam için yeterli süre
+        }
     }
     
     showFeedback(isCorrect, question) {
@@ -718,7 +868,20 @@ class ArabicLearningGame {
             text.className = 'feedback-text incorrect';
         }
         
-        meaning.textContent = `${question.word.kelime} = ${question.word.anlam}`;
+        // Soru formatına göre meaning ayarla
+        if (question.word) {
+            // Normal format
+            meaning.textContent = `${question.word.kelime} = ${question.word.anlam}`;
+            this.currentAudio = question.word.ses_dosyasi;
+        } else if (question.arabic && question.correct) {
+            // Sonsuz mod format
+            meaning.textContent = `${question.arabic} = ${question.correct}`;
+            this.currentAudio = null; // Sonsuz modda ses yok şimdilik
+        } else {
+            // Fallback
+            meaning.textContent = 'Kelime bilgisi mevcut değil';
+            this.currentAudio = null;
+        }
         
         // Hide continue button initially
         const continueBtn = document.getElementById('continueBtn');
@@ -731,9 +894,6 @@ class ArabicLearningGame {
         setTimeout(() => {
             feedback.classList.add('show');
         }, 100);
-        
-        // Store audio for feedback
-        this.currentAudio = question.word.ses_dosyasi;
     }
     
     hideFeedback() {
@@ -753,6 +913,19 @@ class ArabicLearningGame {
         this.hideFeedback();
         this.currentQuestion++;
         
+        // Check if game is complete
+        if (this.currentQuestion >= this.questions.length) {
+            if (this.isEndlessMode && this.hearts > 0) {
+                console.log('🔄 Sonsuz mod: Yeni sorular ekleniyor...');
+                this.addMoreEndlessQuestions();
+                // Continue with the new questions
+            } else {
+                console.log('Game completed! Total questions:', this.questions.length);
+                this.completeGame();
+                return;
+            }
+        }
+        
         // Reset input if in writing mode
         const input = document.getElementById('answerInput');
         input.disabled = false;
@@ -765,6 +938,12 @@ class ArabicLearningGame {
     skipQuestion() {
         // Mark as incorrect but don't lose heart
         const question = this.questions[this.currentQuestion];
+        
+        if (!question) {
+            console.error('Skip: Soru bulunamadı!', this.currentQuestion, this.questions.length);
+            return;
+        }
+        
         this.totalAnswers++;
         
         // Show correct answer
@@ -778,6 +957,66 @@ class ArabicLearningGame {
         localStorage.setItem('totalAnswers', this.totalAnswers.toString());
     }
     
+    addMoreEndlessQuestions() {
+        // Sonsuz modda yeni sorular ekle
+        const moreQuestions = [];
+        const usedWords = this.questions.map(q => q.word ? q.word.id : q.arabic);
+        
+        // 5 yeni soru ekle (daha manageable)
+        for (let i = 0; i < 5; i++) {
+            let randomWord;
+            let attempts = 0;
+            
+            // Daha önce kullanılmayan kelime bul
+            do {
+                randomWord = this.words[Math.floor(Math.random() * this.words.length)];
+                attempts++;
+                if (attempts > 100) break; // Sonsuz döngüyü önle
+            } while (usedWords.includes(randomWord.id || randomWord.arabic) && attempts < 100);
+            
+            if (randomWord) {
+                // Game mode'a göre soru tipini belirle
+                if (this.gameMode === 'writing') {
+                    moreQuestions.push({
+                        word: randomWord,
+                        type: 'writing'
+                    });
+                } else {
+                    // Multiple choice için yanlış seçenekler oluştur
+                    const wrongOptions = [];
+                    while (wrongOptions.length < 3) {
+                        const randomOption = this.words[Math.floor(Math.random() * this.words.length)];
+                        if (randomOption.id !== randomWord.id && 
+                            !wrongOptions.includes(randomOption.kelime)) {
+                            wrongOptions.push(randomOption.kelime);
+                        }
+                    }
+                    
+                    // Seçenekleri karıştır
+                    const options = [randomWord.kelime, ...wrongOptions];
+                    for (let j = options.length - 1; j > 0; j--) {
+                        const k = Math.floor(Math.random() * (j + 1));
+                        [options[j], options[k]] = [options[k], options[j]];
+                    }
+                    
+                    moreQuestions.push({
+                        word: randomWord,
+                        options: options,
+                        type: 'multiple-choice'
+                    });
+                }
+                
+                usedWords.push(randomWord.id || randomWord.arabic);
+            }
+        }
+        
+        // Yeni soruları ekle
+        this.questions.push(...moreQuestions);
+        this.endlessQuestionCount += moreQuestions.length;
+        
+        console.log(`🔄 Sonsuz mod: ${moreQuestions.length} yeni soru eklendi. Toplam: ${this.questions.length}`);
+    }
+
     playAudio() {
         if (this.currentAudio) {
             const audio = document.getElementById('audioPlayer');
@@ -786,6 +1025,24 @@ class ArabicLearningGame {
                 console.error('Audio playback failed:', error);
             });
         }
+    }
+    
+    updateHeartsDisplay() {
+        // Kalp görünümünü güncelle
+        for (let i = 1; i <= 5; i++) {
+            const heart = document.getElementById(`heart${i}`);
+            if (heart) {
+                if (i <= this.hearts) {
+                    heart.classList.remove('lost');
+                    heart.style.color = '#ff6b6b'; // Kırmızı kalp
+                } else {
+                    heart.classList.add('lost');
+                    heart.style.color = '#ccc'; // Gri kalp
+                }
+            }
+        }
+        
+        console.log(`💖 Kalpler güncellendi: ${this.hearts}/5`);
     }
     
     playFeedbackAudio() {
@@ -803,6 +1060,12 @@ class ArabicLearningGame {
     }
     
     completeGame() {
+        // Kalp kontrolü - eğer kalp bitmişse kalp yenileme ekranına git
+        if (this.hearts <= 0 && !unlimitedHeartsActive) {
+            showHeartsDepleted();
+            return;
+        }
+        
         // Calculate results
         const totalQuestions = this.questions.length;
         const accuracy = Math.round((this.score / totalQuestions) * 100);
@@ -1614,8 +1877,220 @@ function initArabicKeyboard() {
     });
 }
 
+// Heart Refill System (Duolingo-style)
+let heartRefillTimer = null;
+let unlimitedHeartsActive = false;
+
+function showHeartsDepleted() {
+    console.log('❤️‍🩹 Kalplar bitti, kalp yenileme ekranı gösteriliyor...');
+    document.getElementById('gameScreen').style.display = 'none';
+    document.getElementById('heartsDepleted').style.display = 'flex';
+    
+    // Heart timer'ını başlat
+    startHeartRefillTimer();
+}
+
+function watchAdForHearts() {
+    console.log('📺 Reklam izleniyor...');
+    
+    // Fake ad loading
+    const button = event.target.closest('.refill-option');
+    const originalContent = button.innerHTML;
+    
+    button.innerHTML = `
+        <i class="fas fa-spinner fa-spin"></i>
+        <div class="option-content">
+            <h3>Reklam Yükleniyor...</h3>
+            <p>Lütfen bekleyin</p>
+        </div>
+    `;
+    button.style.pointerEvents = 'none';
+    
+    // 3 saniye fake reklam
+    setTimeout(() => {
+        // 1 kalp ver
+        game.hearts = Math.min(game.hearts + 1, 5);
+        game.updateHeartsDisplay();
+        
+        // Başarı mesajı
+        button.innerHTML = `
+            <i class="fas fa-check-circle" style="color: var(--primary-green);"></i>
+            <div class="option-content">
+                <h3>Tebrikler!</h3>
+                <p>1 kalp kazandın! ❤️</p>
+            </div>
+        `;
+        
+        // 2 saniye sonra oyuna dön
+        setTimeout(() => {
+            document.getElementById('heartsDepleted').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'flex';
+        }, 2000);
+    }, 3000);
+}
+
+function startHeartRefillTimer() {
+    let timeLeft = 30 * 60; // 30 dakika (saniye cinsinden)
+    
+    heartRefillTimer = setInterval(() => {
+        timeLeft--;
+        
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        const timerDisplay = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        
+        const timerElement = document.getElementById('heartTimer');
+        if (timerElement) {
+            timerElement.textContent = timerDisplay;
+        }
+        
+        if (timeLeft <= 0) {
+            clearInterval(heartRefillTimer);
+            
+            // 1 kalp ver
+            if (game && game.hearts < 5) {
+                game.hearts++;
+                game.updateHeartsDisplay();
+                
+                // Bildirim göster
+                showNotification('❤️ Yeni kalp kazandın!', 'success');
+            }
+            
+            // Timer'ı yeniden başlat
+            startHeartRefillTimer();
+        }
+    }, 1000);
+}
+
+function showWaitTimer() {
+    showNotification('⏰ Kalp yenilenmesi için beklemen gerekiyor!', 'info');
+}
+
+function buyUnlimitedHearts() {
+    const currentHasene = parseInt(localStorage.getItem('totalHasene') || '0');
+    
+    if (currentHasene >= 100) {
+        // Hasene düş
+        const newHasene = currentHasene - 100;
+        localStorage.setItem('totalHasene', newHasene.toString());
+        
+        // Sınırsız kalp aktifleştir
+        unlimitedHeartsActive = true;
+        localStorage.setItem('unlimitedHearts', 'true');
+        
+        // UI güncelle
+        if (game) {
+            game.hearts = 5;
+            game.updateHeartsDisplay();
+        }
+        
+        showNotification('♾️ Sınırsız kalp aktifleştirildi!', 'success');
+        
+        // Oyuna dön
+        setTimeout(() => {
+            document.getElementById('heartsDepleted').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'flex';
+        }, 2000);
+    } else {
+        showNotification('❌ Yeterli Hasene yok! (100 Hasene gerekli)', 'error');
+    }
+}
+
+function showNotification(message, type = 'info') {
+    // Basit notification sistemi
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'success' ? '#4caf50' : type === 'error' ? '#f44336' : '#2196f3'};
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        z-index: 10000;
+        font-weight: 600;
+        animation: slideIn 0.3s ease-out;
+    `;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Game class'ına kalp kontrolü ekle
+function checkHeartsDepleted() {
+    if (!unlimitedHeartsActive && game && game.hearts <= 0) {
+        showHeartsDepleted();
+        return true;
+    }
+    return false;
+}
+
 // Initialize keyboard when page loads
 document.addEventListener('DOMContentLoaded', function() {
     initArabicKeyboard();
 });
+
+// Hız Modu Timer Fonksiyonları (Game Class'ın dışında)
+function startQuestionTimer() {
+    if (game && game.isSpeedMode) {
+        game.timeLeft = 15; // 15 saniye
+        updateTimerDisplay();
+        
+        game.questionTimer = setInterval(() => {
+            game.timeLeft--;
+            updateTimerDisplay();
+            
+            if (game.timeLeft <= 0) {
+                timeUp();
+            }
+        }, 1000);
+    }
+}
+
+function updateTimerDisplay() {
+    if (game && game.isSpeedMode) {
+        const questionType = document.getElementById('questionType');
+        const baseText = 'Arapça kelimeyi çevir';
+        questionType.innerHTML = `${baseText} <span style="color: #ff6b6b; font-weight: bold;">⏱️ ${game.timeLeft}s</span>`;
+        
+        // Son 5 saniyede kırmızı yap
+        if (game.timeLeft <= 5) {
+            questionType.style.color = '#ff6b6b';
+        } else {
+            questionType.style.color = '#333';
+        }
+    }
+}
+
+function timeUp() {
+    if (game && game.questionTimer) {
+        clearInterval(game.questionTimer);
+        game.questionTimer = null;
+        
+        // Yanlış cevap olarak işle
+        console.log('⏰ Süre doldu! Hız modunda otomatik yanlış cevap...');
+        
+        // Tüm seçenekleri devre dışı bırak
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.classList.add('disabled');
+        });
+        
+        // Yanlış cevap işle
+        game.processAnswer(false, null);
+    }
+}
+
+function clearQuestionTimer() {
+    if (game && game.questionTimer) {
+        clearInterval(game.questionTimer);
+        game.questionTimer = null;
+        
+        // Question type'ı normale döndür
+        const questionType = document.getElementById('questionType');
+        questionType.style.color = '#333';
+    }
+}
 
