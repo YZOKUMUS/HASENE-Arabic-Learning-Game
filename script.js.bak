@@ -1,4 +1,4 @@
-﻿// Sound Manager Class
+// Sound Manager Class
 class SoundManager {
     constructor() {
         this.audioGenerator = null;
@@ -989,37 +989,22 @@ class ArabicLearningGame {
                 const yeniHasene = this.gameHasene;
                 
                 // totalHasene ve dailyHasene'yi de güncelle
-                console.log('🔍 totalHasene güncelleniyor...');
                 this.totalHasene = Math.max(0, this.totalHasene - haseneKaybi);
                 this.dailyHasene = Math.max(0, this.dailyHasene - haseneKaybi);
                 
-                console.log('🔍 localStorage kaydediliyor...');
                 // localStorage'ı hemen güncelle
-                try {
-                    this.saveGameData();
-                    console.log('✅ saveGameData başarılı');
-                } catch (error) {
-                    console.error('❌ saveGameData hatası:', error);
-                }
+                this.saveGameData();
                 
-                console.log('🔍 UI güncelleniyor...');
                 // UI'yi güncelle
-                try {
-                    this.updateUI();
-                    console.log('✅ updateUI başarılı');
-                } catch (error) {
-                    console.error('❌ updateUI hatası:', error);
-                }
+                this.updateUI();
+                
+                console.log(`��💔 HASENE AZALDI! ${eskiHasene} → ${yeniHasene} (-${haseneKaybi})`);
                 
                 console.log(`💔 HASENE AZALDI! ${eskiHasene} → ${yeniHasene} (-${haseneKaybi})`);
                 console.log(`📊 Total Hasene: ${this.totalHasene}, Daily Hasene: ${this.dailyHasene}`);
                 
                 // Hasene azalma uyarısı göster
-                try {
-                    this.showHaseneDecrease(haseneKaybi);
-                } catch (error) {
-                    console.error('showHaseneDecrease hatası:', error);
-                }
+                this.showHaseneDecrease(haseneKaybi);
             }
             
             // Play incorrect sound
@@ -1162,18 +1147,46 @@ class ArabicLearningGame {
 
     // 🚨 Hasene azalma uyarısı göster
     showHaseneDecrease(haseneKaybi) {
-        // Hasene display elementini bul ve kırmızı animasyon uygula
+        // Hasene display elementini bul ve kırmızı yap
         const haseneDisplay = document.getElementById('gameHasene');
         if (haseneDisplay) {
             haseneDisplay.style.color = '#ff4b4b';
             haseneDisplay.style.transform = 'scale(1.2)';
             haseneDisplay.style.transition = 'all 0.3s ease';
+            
+            // 2 saniye sonra normal renge dön
             setTimeout(() => {
                 haseneDisplay.style.color = '';
                 haseneDisplay.style.transform = '';
             }, 2000);
         }
-        // Artık popup yok, sadece animasyon var
+        
+        // Ekranda büyük uyarı göster
+        const warningDiv = document.createElement('div');
+        warningDiv.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #ff4b4b;
+            color: white;
+            padding: 20px 40px;
+            border-radius: 12px;
+            font-size: 24px;
+            font-weight: bold;
+            z-index: 10000;
+            box-shadow: 0 8px 32px rgba(255, 75, 75, 0.3);
+            animation: pulse 0.5s ease-in-out;
+        `;
+        warningDiv.innerHTML = `💔 -${haseneKaybi} HASENE!`;
+        
+        document.body.appendChild(warningDiv);
+        
+        // 2 saniye sonra kaldır
+        setTimeout(() => {
+            warningDiv.remove();
+        }, 2000);
+        
         console.log(`🚨 HASENE AZALMA UYARISI GÖSTER: -${haseneKaybi}`);
     }
     
