@@ -339,12 +339,30 @@ body {
     position: sticky;
     top: 0;
     z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
 }
 
 .user-info {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex: 1;
+}
+
+/* Sound control styling within action buttons */
+.action-btn.sound-control.disabled {
+    background: rgba(220, 220, 220, 0.9);
+    color: #999;
+}
+
+.action-btn.sound-control.disabled:hover {
+    background: rgba(220, 220, 220, 0.9);
+    color: #999;
+    transform: none;
+    box-shadow: var(--shadow-light);
 }
 
 .streak-info, .hasene-info, .level-info {
@@ -1454,6 +1472,12 @@ body {
     .level-progress {
         gap: 8px;
         margin: 8px 0;
+    }
+    
+    /* Header Mobile */
+    .header {
+        padding: 10px 15px;
+    }
     }
     
     .current-level, .next-level {

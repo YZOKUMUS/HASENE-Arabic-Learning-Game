@@ -59,8 +59,8 @@
                     <span id="haseneCount">0</span>
                 </div>
                 <div class="level-info">
-                    <i class="fas fa-trophy level-icon"></i>
                     <span>Seviye <span id="levelCount">1</span></span>
+                    <i class="fas fa-trophy level-icon"></i>
                 </div>
             </div>
         </div>
@@ -102,6 +102,14 @@
                 <button class="action-btn calendar" onclick="toggleCalendar()">
                     <i class="fas fa-calendar-alt"></i>
                     <span>Takvim</span>
+                </button>
+                <button class="action-btn sound-control" id="soundToggle" onclick="toggleSound()">
+                    <i class="fas fa-volume-up" id="soundIcon"></i>
+                    <span>Ses</span>
+                </button>
+                <button class="action-btn sound-control" id="musicToggle" onclick="toggleMusic()">
+                    <i class="fas fa-music" id="musicIcon"></i>
+                    <span>Müzik</span>
                 </button>
             </div>
 
@@ -586,6 +594,7 @@
     <audio id="correctSound" src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+D2u2ccBSuBzvLZjTgHEWe57+OZUQ4IVKTk97VaFws+ltryxXksBS6Hz/LdjTgIG2q+7eSXSAoOVKLm9L1mFgkugM3110g+CV+16iKcWAcLflG1cfkGrrcY0U4YwyZs3+LB9M8H4VLQ+K36oLoi4WEYyCNU4dLDzOAfAAAA"></audio>
     <audio id="incorrectSound" src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+D2u2ccBSuBzvLZjTgHEWe57+OZUQ4IVKTk97VaFws+ltryxXksBS6Hz/LdjTgIG2q+7eSXSAoOVKLm9L1mFgkugM3110g+CV+16iKcWAcLflG1cfkGrrcY0U4YwyZs3+LB9M8H4VLQ+K36oLoi4WEYyCNU4dLDzOAfAAAA"></audio>
 
+    <script src="sounds/audio-generator.js"></script>
     <script src="party-effects.js"></script>
     <script src="script.js"></script>
 </body>

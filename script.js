@@ -1,3 +1,167 @@
+// Sound Manager Class
+class SoundManager {
+    constructor() {
+        this.audioGenerator = null;
+        this.soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
+        this.musicEnabled = localStorage.getItem('musicEnabled') !== 'false';
+        this.musicLoop = null;
+        this.initSound();
+    }
+
+    initSound() {
+        // AudioGenerator'ı yükle
+        if (typeof AudioGenerator !== 'undefined') {
+            this.audioGenerator = new AudioGenerator();
+        } else {
+            console.warn('AudioGenerator yüklenemedi');
+        }
+    }
+
+    // Ses açma/kapama
+    toggleSound() {
+        this.soundEnabled = !this.soundEnabled;
+        localStorage.setItem('soundEnabled', this.soundEnabled);
+        return this.soundEnabled;
+    }
+
+    // Müzik açma/kapama  
+    toggleMusic() {
+        this.musicEnabled = !this.musicEnabled;
+        console.log('SoundManager toggleMusic, yeni durum:', this.musicEnabled);
+        localStorage.setItem('musicEnabled', this.musicEnabled);
+        
+        if (!this.musicEnabled && this.musicLoop) {
+            console.log('Müzik kapatıldı, loop temizleniyor');
+            clearInterval(this.musicLoop);
+            this.musicLoop = null;
+        }
+        
+        return this.musicEnabled;
+    }
+
+    // Doğru cevap sesi
+    playCorrect() {
+        if (this.soundEnabled && this.audioGenerator) {
+            this.audioGenerator.playCorrectSound();
+        }
+    }
+
+    // Yanlış cevap sesi
+    playIncorrect() {
+        if (this.soundEnabled && this.audioGenerator) {
+            this.audioGenerator.playIncorrectSound();
+        }
+    }
+
+    // Buton tıklama sesi
+    playClick() {
+        if (this.soundEnabled && this.audioGenerator) {
+            this.audioGenerator.playClickSound();
+        }
+    }
+
+    // Buton hover sesi
+    playHover() {
+        if (this.soundEnabled && this.audioGenerator) {
+            this.audioGenerator.playHoverSound();
+        }
+    }
+
+    // Level atlama sesi
+    playLevelUp() {
+        if (this.soundEnabled && this.audioGenerator) {
+            this.audioGenerator.playLevelUpSound();
+        }
+    }
+
+    // Rozet kazanma sesi
+    playAchievement() {
+        if (this.soundEnabled && this.audioGenerator) {
+            this.audioGenerator.playAchievementSound();
+        }
+    }
+
+    // Başarı fanfarı
+    playSuccess() {
+        if (this.soundEnabled && this.audioGenerator) {
+            this.audioGenerator.playSuccessFanfare();
+        }
+    }
+
+    // 🎉 Seviye tamamlama fanfarı
+    playVictory() {
+        if (this.soundEnabled && this.audioGenerator) {
+            this.audioGenerator.playVictoryFanfare();
+        }
+    }
+
+    // ⭐ Mükemmel skor fanfarı (tüm cevaplar doğru)
+    playPerfect() {
+        if (this.soundEnabled && this.audioGenerator) {
+            this.audioGenerator.playPerfectFanfare();
+        }
+    }
+
+    // 🏆 Başarım kazanma fanfarı
+    playAchievementUnlocked() {
+        if (this.soundEnabled && this.audioGenerator) {
+            this.audioGenerator.playAchievementFanfare();
+        }
+    }
+
+    // 🔥 Streak milestone fanfarı
+    playStreak() {
+        if (this.soundEnabled && this.audioGenerator) {
+            this.audioGenerator.playStreakFanfare();
+        }
+    }
+
+    // Kalp kaybı sesi
+    playHeartLost() {
+        if (this.soundEnabled && this.audioGenerator) {
+            this.audioGenerator.playHeartLostSound();
+        }
+    }
+
+    // Arka plan müziği başlat
+    startBackgroundMusic() {
+        if (this.musicEnabled && this.audioGenerator) {
+            // Önce var olan müziği durdur
+            this.stopBackgroundMusic();
+            
+            // Her 15 saniyede müzik tekrarla (daha uzun interval)
+            this.musicLoop = setInterval(() => {
+                if (this.musicEnabled) {
+                    this.audioGenerator.playBackgroundMusic();
+                }
+            }, 15000);
+            
+            // İlk çalma
+            this.audioGenerator.playBackgroundMusic();
+        }
+    }
+
+    // Arka plan müziği durdur
+    stopBackgroundMusic() {
+        console.log('stopBackgroundMusic çağrıldı, musicLoop:', this.musicLoop);
+        if (this.musicLoop) {
+            clearInterval(this.musicLoop);
+            this.musicLoop = null;
+            console.log('Müzik loop temizlendi');
+        } else {
+            console.log('Müzik loop zaten null');
+        }
+        
+        // Aktif çalan müziği de durdur
+        if (this.audioGenerator) {
+            this.audioGenerator.stopAllMusic();
+        }
+    }
+}
+
+// Global SoundManager instance
+window.soundManager = new SoundManager();
+
 // Duolingo-style Game Logic - Updated
 class ArabicLearningGame {
     constructor() {
@@ -267,6 +431,18 @@ class ArabicLearningGame {
             targetScreen.style.display = 'flex';
             targetScreen.scrollTop = 0;
         }
+        
+        // Music control based on screen
+        if (window.soundManager) {
+            if (screenId === 'mainMenu' && window.soundManager.musicEnabled) {
+                window.soundManager.startBackgroundMusic();
+            } else if (screenId !== 'mainMenu') {
+                window.soundManager.stopBackgroundMusic();
+            }
+        }
+        
+        // Store current screen for reference
+        this.currentScreen = screenId;
     }
     
     countArabicLetters(arabicText) {
@@ -285,7 +461,12 @@ class ArabicLearningGame {
         if (this.lastPlayDate !== today) {
             if (this.lastPlayDate === yesterday.toDateString()) {
                 // Played yesterday, continue streak
+                const oldStreak = this.streak;
                 this.streak++;
+                
+                // 🔥 Streak milestone fanfarı çal
+                this.checkStreakMilestone(oldStreak, this.streak);
+                
             } else if (this.lastPlayDate !== '') {
                 // Missed a day, reset streak
                 this.streak = 1;
@@ -752,11 +933,13 @@ class ArabicLearningGame {
             this.gameHasene += earnedHasene;
             console.log(`Word: ${arabicWord}, Letters: ${letterCount}, Hasene: ${earnedHasene}`);
             
+            // Play correct sound
+            if (window.soundManager) {
+                window.soundManager.playCorrect();
+            }
+            
             // Show correct feedback
             this.showFeedback(true, question);
-            
-            // Play correct sound
-            this.playSound('correct');
             
             if (selectedButton) {
                 selectedButton.classList.add('correct');
@@ -767,11 +950,13 @@ class ArabicLearningGame {
                 this.hearts--;
             }
             
+            // Play incorrect sound
+            if (window.soundManager) {
+                window.soundManager.playIncorrect();
+            }
+            
             // Show incorrect feedback
             this.showFeedback(false, question);
-            
-            // Play incorrect sound
-            this.playSound('incorrect');
             
             // Update hearts display
             if (!unlimitedHeartsActive && this.hearts >= 0) {
@@ -779,6 +964,10 @@ class ArabicLearningGame {
                 const heart = document.getElementById(`heart${heartIndex}`);
                 if (heart) {
                     heart.classList.add('lost');
+                    // Play heart lost sound
+                    if (window.soundManager) {
+                        window.soundManager.playHeartLost();
+                    }
                 }
             }
             
@@ -1114,6 +1303,11 @@ class ArabicLearningGame {
     }
     
     showGameComplete(totalQuestions, accuracy, oldLevel) {
+        // Play success fanfare
+        if (window.soundManager) {
+            window.soundManager.playSuccess();
+        }
+        
         // Update results display
         document.getElementById('earnedHasene').textContent = this.gameHasene;
         document.getElementById('correctAnswers').textContent = `${this.score}/${totalQuestions}`;
@@ -1151,6 +1345,11 @@ class ArabicLearningGame {
     }
     
     showLevelUp() {
+        // 🎉 Play level up victory fanfare
+        if (window.soundManager) {
+            window.soundManager.playVictory();
+        }
+        
         document.getElementById('newLevel').textContent = this.level;
         document.getElementById('newLevelText').textContent = this.level;
         document.getElementById('levelUpModal').style.display = 'flex';
@@ -1173,8 +1372,63 @@ class ArabicLearningGame {
         // Update statistics
         this.updateGameStats();
         
+        // 🎵 Başarı seviyesine göre fanfar çal
+        this.playEndGameFanfare();
+        
         alert('Oyun bitti! Tekrar deneyin.');
         this.returnToMenu();
+    }
+
+    // 🎉 Oyun sonu fanfar sistemi
+    playEndGameFanfare() {
+        const accuracy = this.totalAnswers > 0 ? (this.correctAnswers / this.totalAnswers) * 100 : 0;
+        const isHighScore = this.score >= 15;
+        const isPerfectScore = accuracy === 100 && this.totalAnswers >= 10;
+        
+        if (isPerfectScore) {
+            // ⭐ Mükemmel performans - tüm cevaplar doğru
+            setTimeout(() => {
+                if (window.soundManager) window.soundManager.playPerfect();
+            }, 300);
+            console.log('🎵 Perfect Score Fanfare played!');
+            
+        } else if (isHighScore) {
+            // 🎉 Yüksek skor - seviye başarısı
+            setTimeout(() => {
+                if (window.soundManager) window.soundManager.playVictory();
+            }, 300);
+            console.log('🎵 Victory Fanfare played!');
+            
+        } else if (accuracy >= 70) {
+            // 🎵 İyi performans - normal başarı sesi
+            setTimeout(() => {
+                if (window.soundManager) window.soundManager.playSuccess();
+            }, 300);
+            console.log('🎵 Success Fanfare played!');
+            
+        } else {
+            // 📈 Teşvik edici - gelişim için
+            console.log('🎵 No fanfare - keep practicing!');
+        }
+    }
+
+    // 🔥 Streak milestone kontrolü
+    checkStreakMilestone(oldStreak, newStreak) {
+        const milestones = [3, 7, 10, 15, 20, 30, 50, 100];
+        
+        // Yeni milestone geçildiyse fanfar çal
+        const passedMilestone = milestones.find(milestone => 
+            oldStreak < milestone && newStreak >= milestone
+        );
+        
+        if (passedMilestone) {
+            setTimeout(() => {
+                if (window.soundManager) {
+                    window.soundManager.playStreak();
+                }
+                console.log(`🔥 Streak Milestone! ${passedMilestone} gün streak fanfarı çaldı!`);
+            }, 500);
+        }
     }
     
     updateGameStats() {
@@ -1503,6 +1757,11 @@ class ArabicLearningGame {
     }
 
     showAchievementUnlock(achievement) {
+        // 🏆 Play achievement fanfare
+        if (window.soundManager) {
+            window.soundManager.playAchievementUnlocked();
+        }
+        
         const modal = document.getElementById('achievementUnlockModal');
         
         document.getElementById('unlockedAchievementIcon').className = achievement.icon;
@@ -2091,6 +2350,119 @@ function clearQuestionTimer() {
         // Question type'ı normale döndür
         const questionType = document.getElementById('questionType');
         questionType.style.color = '#333';
+    }
+}
+
+// Add sound effects to all buttons
+document.addEventListener('DOMContentLoaded', function() {
+    // Add click sound to all buttons
+    document.addEventListener('click', function(e) {
+        try {
+            const target = e.target;
+            if (!target || !target.classList) return;
+            
+            const isButton = target.tagName === 'BUTTON' || 
+                            target.classList.contains('btn') ||
+                            target.classList.contains('game-mode-btn') ||
+                            target.classList.contains('difficulty-btn') ||
+                            target.classList.contains('option-btn') ||
+                            target.classList.contains('action-btn') ||
+                            target.classList.contains('key-btn');
+            
+            if (isButton && window.soundManager) {
+                window.soundManager.playClick();
+            }
+        } catch (error) {
+            console.warn('Click sound error:', error);
+        }
+    });
+    
+    // Add hover sound to specific interactive elements
+    document.addEventListener('mouseenter', function(e) {
+        try {
+            const target = e.target;
+            if (!target || !target.classList) return;
+            
+            const isHoverable = target.classList.contains('game-mode-btn') ||
+                               target.classList.contains('difficulty-btn') ||
+                               target.classList.contains('action-btn');
+            
+            if (isHoverable && window.soundManager) {
+                window.soundManager.playHover();
+            }
+        } catch (error) {
+            console.warn('Hover sound error:', error);
+        }
+    }, true);
+    
+    // Initialize sound context on first user interaction
+    document.addEventListener('click', function initSound() {
+        if (window.soundManager && window.soundManager.audioGenerator) {
+            window.soundManager.audioGenerator.unlock();
+        }
+        document.removeEventListener('click', initSound);
+    }, { once: true });
+    
+    // Update sound control UI on load
+    updateSoundUI();
+});
+
+// Sound Control Functions
+function toggleSound() {
+    if (window.soundManager) {
+        const enabled = window.soundManager.toggleSound();
+        updateSoundUI();
+    }
+}
+
+function toggleMusic() {
+    if (window.soundManager) {
+        const enabled = window.soundManager.toggleMusic();
+        console.log('Müzik toggle edildi, durum:', enabled);
+        updateSoundUI();
+        
+        if (enabled) {
+            // Müzik açıldı - main menu'daysa başlat
+            if (game && game.currentScreen === 'mainMenu') {
+                console.log('Müzik başlatılıyor...');
+                window.soundManager.startBackgroundMusic();
+            }
+        } else {
+            // Müzik kapatıldı - her durumda durdur
+            console.log('Müzik durduruluyor...');
+            window.soundManager.stopBackgroundMusic();
+        }
+    }
+}
+
+function updateSoundUI() {
+    if (window.soundManager) {
+        const soundBtn = document.getElementById('soundToggle');
+        const musicBtn = document.getElementById('musicToggle');
+        const soundIcon = document.getElementById('soundIcon');
+        const musicIcon = document.getElementById('musicIcon');
+        
+        // Sound button
+        if (soundBtn && soundIcon) {
+            if (window.soundManager.soundEnabled) {
+                soundBtn.classList.remove('disabled');
+                soundIcon.className = 'fas fa-volume-up';
+            } else {
+                soundBtn.classList.add('disabled');
+                soundIcon.className = 'fas fa-volume-mute';
+            }
+        }
+        
+        // Music button
+        if (musicBtn && musicIcon) {
+            if (window.soundManager.musicEnabled) {
+                musicBtn.classList.remove('disabled');
+                musicIcon.className = 'fas fa-music';
+            } else {
+                musicBtn.classList.add('disabled');
+                musicIcon.className = 'fas fa-music';
+            }
+        }
     }
 }
 
