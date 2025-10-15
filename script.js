@@ -125,42 +125,145 @@ class SoundManager {
 
     // Arka plan müziği başlat
     startBackgroundMusic() {
-        if (this.musicEnabled && this.audioGenerator) {
-            // Önce var olan müziği durdur
-            this.stopBackgroundMusic();
-            
-            // Her 15 saniyede müzik tekrarla (daha uzun interval)
-            this.musicLoop = setInterval(() => {
-                if (this.musicEnabled) {
-                    this.audioGenerator.playBackgroundMusic();
-                }
-            }, 15000);
-            
-            // İlk çalma
-            this.audioGenerator.playBackgroundMusic();
-        }
+        // Müzik çalma devre dışı bırakıldı
+        return;
     }
 
     // Arka plan müziği durdur
     stopBackgroundMusic() {
-        console.log('stopBackgroundMusic çağrıldı, musicLoop:', this.musicLoop);
-        if (this.musicLoop) {
-            clearInterval(this.musicLoop);
-            this.musicLoop = null;
-            console.log('Müzik loop temizlendi');
-        } else {
-            console.log('Müzik loop zaten null');
-        }
-        
-        // Aktif çalan müziği de durdur
-        if (this.audioGenerator) {
-            this.audioGenerator.stopAllMusic();
-        }
+        // Müzik durdurma devre dışı bırakıldı
+        return;
     }
 }
 
 // Global SoundManager instance
 window.soundManager = new SoundManager();
+
+// Ayet Dinle ve Oku görevini tetikleyen fonksiyon
+async function showAyetTask() {
+    let response = await fetch('ayetoku.json');
+    let ayetler = await response.json();
+    let randomIndex = Math.floor(Math.random() * ayetler.length);
+    let ayet = ayetler[randomIndex];
+
+    let modal = document.createElement('div');
+    modal.id = 'ayetModal';
+    modal.style.position = 'fixed';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.width = '100vw';
+    modal.style.height = '100vh';
+    modal.style.background = 'rgba(0,0,0,0.7)';
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    modal.style.zIndex = '9999';
+    modal.innerHTML = `
+        <div style="background:#fff;padding:32px 24px;border-radius:16px;max-width:400px;text-align:center;box-shadow:0 2px 16px #0002;">
+            <h2 style="font-size:1.3em;margin-bottom:10px;">Ayet Dinle &amp; Oku</h2>
+            <div style="font-size:1.1em;color:#3f51b5;margin-bottom:6px;"><span style='color:#888;font-size:0.9em;'>(${ayet.ayet_kimligi})</span></div>
+            <div style="font-family:'Amiri',serif;font-size:1.5em;color:#009688;margin-bottom:10px;">${ayet["ayahs.text_uthmani_tajweed"] || ''}</div>
+            <div style="font-size:1em;margin-bottom:10px;">${ayet.meal}</div>
+            <audio id="ayetAudio" src="${ayet.ayet_ses_dosyasi}" controls style="width:100%;margin-bottom:10px;"></audio>
+            <br><button onclick="document.body.removeChild(document.getElementById('ayetModal'))" style="margin-top:10px;background:#eee;color:#333;padding:6px 18px;border:none;border-radius:8px;font-size:0.9em;cursor:pointer;">Kapat</button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    // Ayet dinlendiğinde hasene kazandır
+    const ayetAudio = document.getElementById('ayetAudio');
+    let haseneGiven = false;
+    function giveAyetHasene() {
+        if (!haseneGiven) {
+            let ayetHasene = parseInt(localStorage.getItem('ayetHasene')) || 0;
+            ayetHasene += 10;
+            localStorage.setItem('ayetHasene', ayetHasene.toString());
+            // Toplam ve günlük hasene'ye de ekle
+            let totalHasene = parseInt(localStorage.getItem('totalHasene')) || 0;
+            totalHasene += 10;
+            localStorage.setItem('totalHasene', totalHasene.toString());
+            let dailyHasene = parseInt(localStorage.getItem('dailyHasene')) || 0;
+            dailyHasene += 10;
+            localStorage.setItem('dailyHasene', dailyHasene.toString());
+            if (document.getElementById('haseneCount')) {
+                document.getElementById('haseneCount').textContent = totalHasene;
+            }
+            if (document.getElementById('dailyHasene')) {
+                document.getElementById('dailyHasene').textContent = dailyHasene;
+            }
+            haseneGiven = true;
+        }
+    }
+    if (ayetAudio) {
+        ayetAudio.addEventListener('ended', giveAyetHasene);
+    }
+    // Modal kapatılırken de hasene ver (dinlenmişse)
+    modal.querySelector('button[onclick]')?.addEventListener('click', giveAyetHasene);
+}
+
+// Dua dinleme görevini tetikleyen fonksiyon
+async function showDuaTask() {
+    // dualar.json dosyasını oku
+    let response = await fetch('dualar.json');
+    let dualar = await response.json();
+    // Rastgele dua seç
+    let randomIndex = Math.floor(Math.random() * dualar.length);
+    let dua = dualar[randomIndex];
+
+    // Modal oluştur
+    let modal = document.createElement('div');
+    modal.id = 'duaModal';
+    modal.style.position = 'fixed';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.width = '100vw';
+    modal.style.height = '100vh';
+    modal.style.background = 'rgba(0,0,0,0.7)';
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    modal.style.zIndex = '9999';
+    modal.innerHTML = `
+        <div style="background:#fff;padding:32px 24px;border-radius:16px;max-width:400px;text-align:center;box-shadow:0 2px 16px #0002;">
+            <h2 style="font-size:1.3em;margin-bottom:10px;">Dua Dinle</h2>
+            <div style="font-family:'Amiri',serif;font-size:1.5em;color:#009688;margin-bottom:10px;">${dua.dua}</div>
+            <div style="font-size:1em;margin-bottom:10px;">${dua.tercume}</div>
+            <audio id="duaAudio" src="${dua.ses_url}" controls style="width:100%;margin-bottom:10px;"></audio>
+            <br><button onclick="document.body.removeChild(document.getElementById('duaModal'))" style="margin-top:10px;background:#eee;color:#333;padding:6px 18px;border:none;border-radius:8px;font-size:0.9em;cursor:pointer;">Kapat</button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    // Dua dinlendiğinde otomatik hasene ekle
+    const duaAudio = document.getElementById('duaAudio');
+    let haseneGiven = false;
+    function giveDuaHasene() {
+        if (!haseneGiven) {
+            let listenedDuaCount = parseInt(localStorage.getItem('listenedDuaCount')) || 0;
+            listenedDuaCount++;
+            localStorage.setItem('listenedDuaCount', listenedDuaCount);
+            let haseneEarned = 10;
+            let totalHasene = parseInt(localStorage.getItem('totalHasene')) || 0;
+            totalHasene += haseneEarned;
+            localStorage.setItem('totalHasene', totalHasene);
+            let dailyHasene = parseInt(localStorage.getItem('dailyHasene')) || 0;
+            dailyHasene += haseneEarned;
+            localStorage.setItem('dailyHasene', dailyHasene);
+            if (document.getElementById('haseneCount')) {
+                document.getElementById('haseneCount').textContent = totalHasene;
+            }
+            if (document.getElementById('dailyHasene')) {
+                document.getElementById('dailyHasene').textContent = dailyHasene;
+            }
+            haseneGiven = true;
+        }
+    }
+    if (duaAudio) {
+        duaAudio.addEventListener('ended', giveDuaHasene);
+    }
+    // Modal kapatılırken de hasene ver (dinlenmişse)
+    modal.querySelector('button[onclick]')?.addEventListener('click', giveDuaHasene);
+}
 
 // Duolingo-style Game Logic - Updated
 class ArabicLearningGame {
@@ -200,7 +303,24 @@ class ArabicLearningGame {
     
     initializeAchievements() {
         // Başarımları tanımla - İslami Temalar 🕌📿
-        this.achievements = {
+    this.achievements = {
+            ayetListener: {
+                id: 'ayetListener',
+                title: '📖 Ayet Dinleyici',
+                description: '10 ayet dinledin!',
+                icon: 'fas fa-book-open',
+                condition: () => {
+                    let ayetHasene = parseInt(localStorage.getItem('ayetHasene')) || 0;
+                    return ayetHasene >= 100; // 10 ayet x 10 hasene
+                }
+            },
+            duaListener: {
+                id: 'duaListener',
+                title: '📿 Dua Dinleyici',
+                description: '10 farklı dua dinledin! Dualarla kalbin huzur buldu.',
+                icon: 'fas fa-pray',
+                condition: () => (parseInt(localStorage.getItem('listenedDuaCount')) || 0) >= 10
+            },
             firstGame: {
                 id: 'firstGame',
                 title: '🕌 İlk Namaz',
@@ -435,11 +555,7 @@ class ArabicLearningGame {
         
         // Music control based on screen
         if (window.soundManager) {
-            if (screenId === 'mainMenu' && window.soundManager.musicEnabled) {
-                window.soundManager.startBackgroundMusic();
-            } else if (screenId !== 'mainMenu') {
-                window.soundManager.stopBackgroundMusic();
-            }
+            // Müzik başlatma/durdurma devre dışı bırakıldı
         }
         
         // Store current screen for reference
@@ -765,7 +881,6 @@ class ArabicLearningGame {
         const questionTypeTexts = {
             'translation': 'Arapça kelimeyi çevir',
             'listening': 'Sesi dinle ve anlamını bul',
-            'writing': 'Türkçe anlamı verilen kelimeyi yaz',
             'speed': 'Arapça kelimeyi çevir'
         };
         document.getElementById('questionType').textContent = questionTypeTexts[this.gameMode];
@@ -773,37 +888,20 @@ class ArabicLearningGame {
     
     showQuestion() {
         if (this.currentQuestion >= this.questions.length) {
-            // Sonsuz modda yeni sorular ekle
-            if (this.isEndlessMode && this.hearts > 0) {
-                this.addMoreEndlessQuestions();
-                // Yeni sorular eklendikten sonra devam et
-            } else {
-                this.completeGame();
-                return;
-            }
+            this.completeGame();
+            return;
         }
         
         const question = this.questions[this.currentQuestion];
         
         // Update progress
-        if (this.isEndlessMode) {
-            // Sonsuz modda soru sayısı ve kalp göster
-            document.getElementById('currentQuestion').textContent = this.currentQuestion + 1;
-            document.getElementById('totalQuestions').textContent = '∞';
-            // Progress bar kalp bazlı olsun
-            const heartProgress = (this.hearts / 5) * 100;
-            document.getElementById('gameProgress').style.width = `${heartProgress}%`;
-        } else {
-            document.getElementById('currentQuestion').textContent = this.currentQuestion + 1;
-            const progress = ((this.currentQuestion) / this.questions.length) * 100;
-            document.getElementById('gameProgress').style.width = `${progress}%`;
-        }
+        document.getElementById('currentQuestion').textContent = this.currentQuestion + 1;
+        const progress = ((this.currentQuestion) / this.questions.length) * 100;
+        document.getElementById('gameProgress').style.width = `${progress}%`;
         
         // Show question based on mode
         if (this.gameMode === 'translation' || this.gameMode === 'listening' || this.gameMode === 'speed') {
             this.showMultipleChoiceQuestion(question);
-        } else if (this.gameMode === 'writing') {
-            this.showWritingQuestion(question);
         }
         
         // Hide feedback and continue button
@@ -2548,15 +2646,9 @@ function toggleMusic() {
         updateSoundUI();
         
         if (enabled) {
-            // Müzik açıldı - main menu'daysa başlat
-            if (game && game.currentScreen === 'mainMenu') {
-                console.log('Müzik başlatılıyor...');
-                window.soundManager.startBackgroundMusic();
-            }
+            // Müzik açıldı - devre dışı
         } else {
-            // Müzik kapatıldı - her durumda durdur
-            console.log('Müzik durduruluyor...');
-            window.soundManager.stopBackgroundMusic();
+            // Müzik kapatıldı - devre dışı
         }
     }
 }

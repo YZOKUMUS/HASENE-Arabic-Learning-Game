@@ -141,29 +141,25 @@
                     <h3>Çeviri Oyunu</h3>
                     <p>Arapça kelimeleri Türkçe'ye çevir</p>
                 </button>
-                
                 <button class="game-mode-btn secondary" onclick="startGame('listening')">
                     <i class="fas fa-headphones"></i>
                     <h3>Dinleme Oyunu</h3>
                     <p>Sesi dinle ve anlamını bul</p>
                 </button>
-                
-                <button class="game-mode-btn tertiary" onclick="startGame('writing')">
-                    <i class="fas fa-pen"></i>
-                    <h3>Yazma Oyunu</h3>
-                    <p>Türkçe anlamı verilen kelimeyi yaz</p>
-                </button>
-                
                 <button class="game-mode-btn challenge" onclick="startGame('speed')" style="background: linear-gradient(135deg, #ff6b6b, #ee5a24);">
                     <i class="fas fa-bolt"></i>
                     <h3>Hız Modu ⚡</h3>
                     <p>15 saniyede cevapla! Hızlı puan kazan!</p>
                 </button>
-                
-                <button class="game-mode-btn challenge" onclick="startGame('endless')" style="background: linear-gradient(135deg, #a55eea, #8b5cf6);">
-                    <i class="fas fa-infinity"></i>
-                    <h3>Sonsuz Mod 🎯</h3>
-                    <p>Kalp bitene kadar devam et!</p>
+                <button class="game-mode-btn ayet" onclick="showAyetTask()" style="background: linear-gradient(135deg, #3f51b5, #2196f3); color: #fff; text-shadow: 0 2px 8px #0008;">
+                    <i class="fas fa-book-open"></i>
+                    <h3 style="color:#fff;text-shadow:0 2px 8px #0008;">Ayet Dinle &amp; Oku</h3>
+                    <p style="color:#fff;text-shadow:0 2px 8px #0008;">Her gün bir ayet dinle ve oku!</p>
+                </button>
+                <button class="game-mode-btn dua" onclick="showDuaTask()" style="background: linear-gradient(135deg, #009688, #26a69a); color: #fff; text-shadow: 0 2px 8px #0008;">
+                    <i class="fas fa-pray"></i>
+                    <h3 style="color:#fff;text-shadow:0 2px 8px #0008;">Dua Dinleme Görevi</h3>
+                    <p style="color:#fff;text-shadow:0 2px 8px #0008;">Gün içinde dinlediğin dua kadar hasene kazan!</p>
                 </button>
             </div>
 
@@ -562,13 +558,6 @@
                                     <div class="mode-bar listening" id="listeningBar"></div>
                                 </div>
                                 <span class="mode-percentage" id="listeningPercent">0%</span>
-                            </div>
-                            <div class="mode-stat">
-                                <span class="mode-name">Yazma</span>
-                                <div class="mode-progress">
-                                    <div class="mode-bar writing" id="writingBar"></div>
-                                </div>
-                                <span class="mode-percentage" id="writingPercent">0%</span>
                             </div>
                         </div>
                     </div>
