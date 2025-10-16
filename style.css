@@ -1631,7 +1631,7 @@ body {
     .loading-percentage {
         font-size: 0.8rem;
     }
-}
+
 
 @media (max-width: 480px) {
     .welcome-section h1 {
