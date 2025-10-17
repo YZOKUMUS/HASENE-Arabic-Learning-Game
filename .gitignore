@@ -4,8 +4,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# APK files (too large for GitHub)
-*.apk
+# APK files (will be uploaded via GitHub Releases)
+# *.apk
 
 # Android build files
 android/app/build/
