@@ -194,6 +194,9 @@ async function showAyetTask() {
             if (document.getElementById('haseneCount')) {
                 document.getElementById('haseneCount').textContent = totalHasene;
             }
+            if (document.getElementById('haseneCountBottom')) {
+                document.getElementById('haseneCountBottom').textContent = totalHasene;
+            }
             if (document.getElementById('dailyHasene')) {
                 document.getElementById('dailyHasene').textContent = dailyHasene;
             }
@@ -263,6 +266,9 @@ async function showDuaTask() {
             localStorage.setItem('dailyHasene', dailyHasene);
             if (document.getElementById('haseneCount')) {
                 document.getElementById('haseneCount').textContent = totalHasene;
+            }
+            if (document.getElementById('haseneCountBottom')) {
+                document.getElementById('haseneCountBottom').textContent = totalHasene;
             }
             if (document.getElementById('dailyHasene')) {
                 document.getElementById('dailyHasene').textContent = dailyHasene;
@@ -653,6 +659,9 @@ class ArabicLearningGame {
         // Update main menu stats
         document.getElementById('streakCount').textContent = this.streak;
         document.getElementById('haseneCount').textContent = this.totalHasene;
+        if (document.getElementById('haseneCountBottom')) {
+            document.getElementById('haseneCountBottom').textContent = this.totalHasene;
+        }
         document.getElementById('levelCount').textContent = this.level;
         document.getElementById('dailyHasene').textContent = this.dailyHasene;
         

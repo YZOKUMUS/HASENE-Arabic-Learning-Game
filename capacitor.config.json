@@ -1,0 +1,8 @@
+{
+  "appId": "com.hasene.arabiclearning.v2",
+  "appName": "HASENE - Arapça Öğrenme v2",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}

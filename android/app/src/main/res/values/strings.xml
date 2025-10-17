@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">HASENE - Arapça Öğrenme v2</string>
+    <string name="title_activity_main">HASENE - Arapça Öğrenme v2</string>
+    <string name="package_name">com.hasene.arabiclearning.v2</string>
+    <string name="custom_url_scheme">com.hasene.arabiclearning.v2</string>
+</resources>

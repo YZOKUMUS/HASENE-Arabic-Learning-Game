@@ -1,7 +1,7 @@
 {
-  "name": "HASENE - Duolingo Tarzı Arapça Öğrenme",
+  "name": "HASENE - Arapça Öğrenme Oyunu",
   "short_name": "HASENE",
-  "description": "Duolingo tarzında eğlenceli Arapça kelime öğrenme oyunu. Hasene toplama, streak, seviye sistemi ile öğrenmeyi gamify edin!",
+  "description": "🕌 İslami temalı Arapça öğrenme oyunu! Kelime çevir, ayet dinle, dua oku. Hasene topla, seviye atla! 📿",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#667eea",

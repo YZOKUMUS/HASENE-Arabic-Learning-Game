@@ -1,14 +1,19 @@
 // HASENE Service Worker for offline functionality
 
-const CACHE_NAME = 'hasene-v1';
+const CACHE_NAME = 'hasene-v2.0';
 const urlsToCache = [
   './',
   './index.html',
   './style.css',
   './script.js',
   './data.json',
+  './ayetoku.json',
+  './dualar.json',
   './manifest.json',
+  './party-effects.js',
+  './sounds/audio-generator.js',
   'https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap',
+  'https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'
 ];
 
