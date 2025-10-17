@@ -2022,17 +2022,17 @@ class ArabicLearningGame {
     }
 
     updateWeeklyChart() {
-        const weeklyData = this.getWeeklyData();
+        const { weeklyData, dayLabels } = this.getWeeklyData();
         const chartContainer = document.getElementById('weeklyChart');
         
         // Haftalık chart barları oluştur
         chartContainer.innerHTML = '';
         
         const maxValue = Math.max(...weeklyData, 1);
-        const days = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
         
         weeklyData.forEach((value, index) => {
-            const height = Math.max((value / maxValue) * 100, 10);
+            // Bar yüksekliğini maksimum 60px ile sınırla (yazıyı kapatmasın)
+            const height = Math.max((value / maxValue) * 60, 8);
             
             const chartBar = document.createElement('div');
             chartBar.className = 'chart-bar';
@@ -2040,7 +2040,7 @@ class ArabicLearningGame {
             
             chartBar.innerHTML = `
                 <div class="chart-value">${value}</div>
-                <div class="chart-label">${days[index]}</div>
+                <div class="chart-label">${dayLabels[index]}</div>
             `;
             
             chartContainer.appendChild(chartBar);
@@ -2048,20 +2048,26 @@ class ArabicLearningGame {
     }
 
     getWeeklyData() {
-        // Son 7 gün için gerçek hasene verileri
+        // Son 7 gün için gerçek hasene verileri ve doğru gün etiketleri
         const weeklyData = [];
+        const dayLabels = [];
         const today = new Date();
+        const dayNames = ['Pz', 'Pt', 'Sl', 'Çr', 'Pr', 'Cu', 'Ct']; // Pazar=0, Pazartesi=1, ...
         
         for (let i = 6; i >= 0; i--) {
             const date = new Date(today);
             date.setDate(date.getDate() - i);
             const dateString = date.toDateString();
             
+            // Günün adını al (JavaScript'te Pazar=0, Pazartesi=1)
+            const dayOfWeek = date.getDay();
+            dayLabels.push(dayNames[dayOfWeek]);
+            
             const dailyHasene = this.getDailyHasene(dateString) || 0;
             weeklyData.push(dailyHasene);
         }
         
-        return weeklyData;
+        return { weeklyData, dayLabels };
     }
 
     updateGameModeStats() {
