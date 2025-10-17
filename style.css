@@ -1340,8 +1340,9 @@ body {
 
 .modal-content p {
     font-size: 1.1rem;
-    color: var(--text-light);
+    color: var(--text-dark);
     margin-bottom: 25px;
+    line-height: 1.5;
 }
 
 .modal-btn {
@@ -1354,10 +1355,14 @@ body {
     font-weight: 700;
     cursor: pointer;
     transition: all 0.3s ease;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 12px rgba(88, 204, 2, 0.3);
 }
 
 .modal-btn:hover {
     background: var(--primary-green-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(88, 204, 2, 0.4);
 }
 
 /* Responsive Design */
@@ -1823,9 +1828,10 @@ input:focus {
     align-items: center;
     padding: 20px 25px;
     border-bottom: 1px solid var(--border-color);
-    background: linear-gradient(135deg, var(--primary-blue), var(--primary-purple));
+    background: linear-gradient(135deg, #0d8bd8, #9c27b0);
     color: white;
     border-radius: var(--border-radius-large) var(--border-radius-large) 0 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
 .modal-header h2 {
@@ -1833,21 +1839,28 @@ input:focus {
     display: flex;
     align-items: center;
     gap: 10px;
+    font-weight: bold;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    color: white;
 }
 
 .close-modal-btn {
-    background: none;
-    border: none;
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,255,255,0.8);
     color: white;
     font-size: 1.2rem;
     cursor: pointer;
-    padding: 5px;
+    padding: 8px;
     border-radius: 50%;
     transition: all 0.2s ease;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
 .close-modal-btn:hover {
-    background: rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.3);
+    border-color: white;
+    transform: scale(1.1);
 }
 
 .achievements-grid {
@@ -2087,8 +2100,20 @@ input:focus {
     background: var(--primary-blue);
 }
 
-.mode-bar.writing {
-    background: var(--primary-purple);
+.mode-bar.speed {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+}
+
+.mode-bar.fillblank {
+    background: linear-gradient(135deg, #9c27b0, #673ab7);
+}
+
+.mode-bar.ayet {
+    background: linear-gradient(135deg, #3f51b5, #2196f3);
+}
+
+.mode-bar.dua {
+    background: linear-gradient(135deg, #009688, #26a69a);
 }
 
 .mode-percentage {
@@ -2674,6 +2699,49 @@ input:focus {
 .game-mode-btn.challenge:hover {
     transform: translateY(-3px) scale(1.02);
     box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+/* Fillblank Game Mode Buttons */
+.game-mode-btn.fillblank {
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    position: relative;
+    overflow: hidden;
+}
+
+.game-mode-btn.fillblank h3 {
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+}
+
+.game-mode-btn.fillblank p {
+    color: white !important;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+.game-mode-btn.fillblank i {
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.game-mode-btn.fillblank::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.game-mode-btn.fillblank:hover::before {
+    left: 100%;
+}
+
+.game-mode-btn.fillblank:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(156, 39, 176, 0.4);
 }
 
 /* Pulse animation for notification badges */
@@ -3281,4 +3349,81 @@ input:focus {
     display: flex;
     gap: 15px;
     justify-content: center;
+}
+
+/* 📝 Boşluk Doldurma Modu Stilleri */
+.fillblank-arabic {
+    font-family: 'Amiri', 'Times New Roman', serif;
+    font-size: 32px;
+    line-height: 1.8;
+    text-align: center;
+    color: var(--text-dark);
+    margin-bottom: 20px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    direction: rtl;
+    unicode-bidi: bidi-override;
+}
+
+.fillblank-turkish {
+    font-size: 14px;
+    color: var(--text-light);
+    text-align: center;
+    margin-bottom: 20px;
+    line-height: 1.5;
+    font-weight: 300;
+}
+
+.fillblank-option {
+    font-family: 'Amiri', 'Times New Roman', serif !important;
+    font-size: 20px !important;
+    direction: rtl;
+    unicode-bidi: bidi-override;
+}
+
+.fillblank-arabic strong {
+    color: var(--primary-blue);
+    background: rgba(28, 176, 246, 0.1);
+    padding: 4px 8px;
+    border-radius: var(--border-radius-small);
+}
+
+/* 📝 Boşluk Doldurma Feedback Stilleri */
+.feedback-fillblank {
+    text-align: center;
+}
+
+.feedback-arabic {
+    font-family: 'Amiri', 'Times New Roman', serif;
+    font-size: 24px;
+    line-height: 1.6;
+    color: var(--text-dark);
+    margin-bottom: 15px;
+    direction: rtl;
+    unicode-bidi: bidi-override;
+}
+
+.feedback-turkish {
+    font-size: 13px;
+    color: var(--text-light);
+    margin-bottom: 15px;
+    line-height: 1.4;
+    font-weight: 300;
+}
+
+.feedback-word {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--primary-green);
+}
+
+.arabic-word.fillblank-mode {
+    font-family: 'Amiri', 'Times New Roman', serif;
+    font-size: 22px;
+    color: var(--primary-blue);
+    font-weight: bold;
+    direction: rtl;
+    unicode-bidi: bidi-override;
 }

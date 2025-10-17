@@ -151,6 +151,11 @@
                     <h3>Hız Modu ⚡</h3>
                     <p>15 saniyede cevapla! Hızlı puan kazan!</p>
                 </button>
+                <button class="game-mode-btn fillblank" onclick="startGame('fillblank')" style="background: linear-gradient(135deg, #9c27b0, #673ab7);">
+                    <i class="fas fa-puzzle-piece"></i>
+                    <h3>Boşluk Doldur 📝</h3>
+                    <p>Ayet'teki eksik kelimeleri bul!</p>
+                </button>
                 <button class="game-mode-btn ayet" onclick="showAyetTask()" style="background: linear-gradient(135deg, #3f51b5, #2196f3); color: #fff; text-shadow: 0 2px 8px #0008;">
                     <i class="fas fa-book-open"></i>
                     <h3 style="color:#fff;text-shadow:0 2px 8px #0008;">Ayet Dinle &amp; Oku</h3>
@@ -558,6 +563,34 @@
                                     <div class="mode-bar listening" id="listeningBar"></div>
                                 </div>
                                 <span class="mode-percentage" id="listeningPercent">0%</span>
+                            </div>
+                            <div class="mode-stat">
+                                <span class="mode-name">Hız</span>
+                                <div class="mode-progress">
+                                    <div class="mode-bar speed" id="speedBar"></div>
+                                </div>
+                                <span class="mode-percentage" id="speedPercent">0%</span>
+                            </div>
+                            <div class="mode-stat">
+                                <span class="mode-name">Boşluk Doldur</span>
+                                <div class="mode-progress">
+                                    <div class="mode-bar fillblank" id="fillblankBar"></div>
+                                </div>
+                                <span class="mode-percentage" id="fillblankPercent">0%</span>
+                            </div>
+                            <div class="mode-stat">
+                                <span class="mode-name">Ayet Dinleme</span>
+                                <div class="mode-progress">
+                                    <div class="mode-bar ayet" id="ayetBar"></div>
+                                </div>
+                                <span class="mode-percentage" id="ayetPercent">0%</span>
+                            </div>
+                            <div class="mode-stat">
+                                <span class="mode-name">Dua Dinleme</span>
+                                <div class="mode-progress">
+                                    <div class="mode-bar dua" id="duaBar"></div>
+                                </div>
+                                <span class="mode-percentage" id="duaPercent">0%</span>
                             </div>
                         </div>
                     </div>

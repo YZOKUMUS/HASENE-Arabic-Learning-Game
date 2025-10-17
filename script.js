@@ -178,6 +178,12 @@ async function showAyetTask() {
             let ayetHasene = parseInt(localStorage.getItem('ayetHasene')) || 0;
             ayetHasene += 10;
             localStorage.setItem('ayetHasene', ayetHasene.toString());
+            
+            // Ayet dinleme sayısını artır (istatistik için)
+            let ayetListens = parseInt(localStorage.getItem('ayetListens')) || 0;
+            ayetListens += 1;
+            localStorage.setItem('ayetListens', ayetListens.toString());
+            
             // Toplam ve günlük hasene'ye de ekle
             let totalHasene = parseInt(localStorage.getItem('totalHasene')) || 0;
             totalHasene += 10;
@@ -242,6 +248,12 @@ async function showDuaTask() {
             let listenedDuaCount = parseInt(localStorage.getItem('listenedDuaCount')) || 0;
             listenedDuaCount++;
             localStorage.setItem('listenedDuaCount', listenedDuaCount);
+            
+            // Dua dinleme sayısını artır (istatistik için)
+            let duaListens = parseInt(localStorage.getItem('duaListens')) || 0;
+            duaListens += 1;
+            localStorage.setItem('duaListens', duaListens.toString());
+            
             let haseneEarned = 10;
             let totalHasene = parseInt(localStorage.getItem('totalHasene')) || 0;
             totalHasene += haseneEarned;
@@ -425,6 +437,31 @@ class ArabicLearningGame {
                 description: 'Her sure türünden kelime öğrendin!',
                 icon: 'fas fa-quran',
                 condition: () => this.getUniqueSuras() >= 10
+            },
+            fillBlankMaster: {
+                id: 'fillBlankMaster',
+                title: '🧩 Boşluk Doldurma Üstadı',
+                description: '10 boşluk doldurma oyunu tamamladın! Ayetleri iyi biliyorsun!',
+                icon: 'fas fa-puzzle-piece',
+                condition: () => (parseInt(localStorage.getItem('fillblankGames')) || 0) >= 10
+            },
+            fillBlankPerfect: {
+                id: 'fillBlankPerfect',
+                title: '📝 Ayet Hafızı',
+                description: 'Boşluk doldurma oyununda mükemmel skor! Ayetleri ezberlemişsin!',
+                icon: 'fas fa-book-reader',
+                condition: () => {
+                    // Son fillblank oyununda %100 başarı gösterdi mi?
+                    const lastFillBlankScore = localStorage.getItem('lastFillBlankPerfect');
+                    return lastFillBlankScore === 'true';
+                }
+            },
+            ayahExplorer: {
+                id: 'ayahExplorer',
+                title: '🔍 Ayet Araştırmacısı',
+                description: '50 farklı ayetten kelime öğrendin! Kur\'an keşfin devam ediyor!',
+                icon: 'fas fa-search',
+                condition: () => (parseInt(localStorage.getItem('fillblankGames')) || 0) >= 50
             }
         };
 
@@ -518,15 +555,26 @@ class ArabicLearningGame {
     async loadWordData() {
         try {
             console.log('Data yükleniyor...');
-            const response = await fetch('data.json');
-            if (!response.ok) {
-                throw new Error(`HTTP Error: ${response.status}`);
+            
+            // Kelime verileri yükle
+            const wordResponse = await fetch('data.json');
+            if (!wordResponse.ok) {
+                throw new Error(`HTTP Error: ${wordResponse.status}`);
             }
-            this.wordData = await response.json();
+            this.wordData = await wordResponse.json();
             console.log(`✅ ${this.wordData.length} kelime başarıyla yüklendi!`);
+            
+            // Ayet verileri yükle (boşluk doldurma modu için)
+            const ayetResponse = await fetch('ayetoku.json');
+            if (!ayetResponse.ok) {
+                throw new Error(`HTTP Error: ${ayetResponse.status}`);
+            }
+            this.ayetData = await ayetResponse.json();
+            console.log(`✅ ${this.ayetData.length} ayet başarıyla yüklendi!`);
             
             // Test: İlk 5 kelimeyi göster
             console.log('İlk 5 kelime:', this.wordData.slice(0, 5));
+            console.log('İlk 5 ayet:', this.ayetData.slice(0, 5));
             
         } catch (error) {
             console.error('❌ Kelime verisi yükleme hatası:', error);
@@ -639,7 +687,7 @@ class ArabicLearningGame {
             return;
         }
         
-        console.log(`${mode} oyunu başlatılıyor... Toplam kelime: ${this.wordData.length}`);
+        console.log(`${mode} oyunu başlatılıyor... Toplam kelime: ${this.wordData.length}, Zorluk seviyesi: ${this.difficulty}`);
         
         this.gameMode = mode;
         this.currentQuestion = 0;
@@ -674,33 +722,57 @@ class ArabicLearningGame {
         const questionCount = this.isEndlessMode ? 5 : 10;
         this.questions = [];
         
-        console.log(`Sorular üretiliyor... Toplam kelime sayısı: ${this.wordData.length}`);
-        
-        // Load learning statistics
-        const wordStats = JSON.parse(localStorage.getItem('wordStats')) || {};
-        
-        // Smart word selection algorithm
-        const selectedWords = this.selectSmartWords(questionCount, wordStats);
-        
-        console.log(`Seçilen kelime sayısı: ${selectedWords.length}`);
-        
-        selectedWords.forEach(word => {
-            let question = {
-                word: word,
-                correctAnswer: word.anlam,
-                type: this.gameMode
-            };
+        if (this.gameMode === 'fillblank') {
+            // Boşluk doldurma modu için ayet soruları oluştur
+            console.log(`Boşluk doldurma soruları üretiliyor... Toplam ayet sayısı: ${this.ayetData ? this.ayetData.length : 0}`);
             
-            // Generate wrong options for multiple choice
-            if (this.gameMode === 'translation' || this.gameMode === 'listening' || this.gameMode === 'speed') {
-                const wrongAnswers = this.getWrongAnswers(word.anlam, 3);
-                const allOptions = [word.anlam, ...wrongAnswers];
-                question.options = allOptions.sort(() => Math.random() - 0.5);
-                question.correctIndex = question.options.indexOf(word.anlam);
+            if (!this.ayetData || this.ayetData.length === 0) {
+                console.error('Ayet verileri yok!');
+                return;
             }
             
-            this.questions.push(question);
-        });
+            // Zorluk seviyesine göre ayetleri filtrele
+            const difficultyAyets = this.getDifficultyAyets(this.ayetData, this.difficulty);
+            console.log(`Zorluk seviyesi: ${this.difficulty}, Filtrelenmiş ayet sayısı: ${difficultyAyets.length}`);
+            
+            // Rastgele ayetler seç
+            for (let i = 0; i < questionCount; i++) {
+                const randomAyet = difficultyAyets[Math.floor(Math.random() * difficultyAyets.length)];
+                const fillBlankQuestion = this.createFillBlankQuestion(randomAyet);
+                if (fillBlankQuestion) {
+                    this.questions.push(fillBlankQuestion);
+                }
+            }
+        } else {
+            // Normal kelime modları için
+            console.log(`Sorular üretiliyor... Toplam kelime sayısı: ${this.wordData.length}`);
+            
+            // Load learning statistics
+            const wordStats = JSON.parse(localStorage.getItem('wordStats')) || {};
+            
+            // Smart word selection algorithm
+            const selectedWords = this.selectSmartWords(questionCount, wordStats);
+            
+            console.log(`Seçilen kelime sayısı: ${selectedWords.length}`);
+            
+            selectedWords.forEach(word => {
+                let question = {
+                    word: word,
+                    correctAnswer: word.anlam,
+                    type: this.gameMode
+                };
+                
+                // Generate wrong options for multiple choice
+                if (this.gameMode === 'translation' || this.gameMode === 'listening' || this.gameMode === 'speed') {
+                    const wrongAnswers = this.getWrongAnswers(word.anlam, 3);
+                    const allOptions = [word.anlam, ...wrongAnswers];
+                    question.options = allOptions.sort(() => Math.random() - 0.5);
+                    question.correctIndex = question.options.indexOf(word.anlam);
+                }
+                
+                this.questions.push(question);
+            });
+        }
         
         console.log(`Generated ${this.questions.length} questions for ${this.gameMode} mode`);
     }
@@ -881,7 +953,8 @@ class ArabicLearningGame {
         const questionTypeTexts = {
             'translation': 'Arapça kelimeyi çevir',
             'listening': 'Sesi dinle ve anlamını bul',
-            'speed': 'Arapça kelimeyi çevir'
+            'speed': 'Arapça kelimeyi çevir',
+            'fillblank': 'Boş yerleri doldur'
         };
         document.getElementById('questionType').textContent = questionTypeTexts[this.gameMode];
     }
@@ -902,6 +975,8 @@ class ArabicLearningGame {
         // Show question based on mode
         if (this.gameMode === 'translation' || this.gameMode === 'listening' || this.gameMode === 'speed') {
             this.showMultipleChoiceQuestion(question);
+        } else if (this.gameMode === 'fillblank') {
+            this.showFillBlankQuestion(question);
         }
         
         // Hide feedback and continue button
@@ -975,6 +1050,103 @@ class ArabicLearningGame {
         // Store current audio URL
         this.currentAudio = question.word.ses_dosyasi;
     }
+
+    createFillBlankQuestion(ayet) {
+        if (!ayet || !ayet['ayahs.text_uthmani_tajweed'] || !ayet.meal) {
+            return null;
+        }
+        
+        const arabicText = ayet['ayahs.text_uthmani_tajweed'];
+        const turkishText = ayet.meal;
+        
+        // Arapça metindeki kelimeleri ayır
+        const words = arabicText.split(/\s+/).filter(word => word.length > 2); // En az 3 harfli kelimeler
+        
+        if (words.length < 3) return null; // Çok kısa ayetleri atla
+        
+        // Rastgele bir kelimeyi boşluk yap
+        const randomIndex = Math.floor(Math.random() * words.length);
+        const hiddenWord = words[randomIndex];
+        
+        // Boşluklu metni oluştur
+        const wordsWithBlank = [...words];
+        wordsWithBlank[randomIndex] = '_____';
+        const textWithBlank = wordsWithBlank.join(' ');
+        
+        // Yanlış seçenekler oluştur (diğer ayetlerden rastgele kelimeler)
+        const wrongOptions = this.getRandomArabicWords(hiddenWord, 3);
+        const allOptions = [hiddenWord, ...wrongOptions];
+        const shuffledOptions = allOptions.sort(() => Math.random() - 0.5);
+        
+        return {
+            type: 'fillblank',
+            ayet: ayet,
+            arabicTextWithBlank: textWithBlank,
+            turkishText: turkishText,
+            correctWord: hiddenWord,
+            options: shuffledOptions,
+            correctIndex: shuffledOptions.indexOf(hiddenWord),
+            audioUrl: ayet.ayet_ses_dosyasi
+        };
+    }
+
+    getRandomArabicWords(excludeWord, count) {
+        const wrongWords = [];
+        const attempts = 0;
+        const maxAttempts = 100;
+        
+        while (wrongWords.length < count && attempts < maxAttempts) {
+            // Rastgele bir ayet seç
+            const randomAyet = this.ayetData[Math.floor(Math.random() * this.ayetData.length)];
+            if (!randomAyet || !randomAyet['ayahs.text_uthmani_tajweed']) continue;
+            
+            // Bu ayetteki kelimelerden rastgele birini seç
+            const words = randomAyet['ayahs.text_uthmani_tajweed'].split(/\s+/).filter(word => 
+                word.length > 2 && word !== excludeWord && !wrongWords.includes(word)
+            );
+            
+            if (words.length > 0) {
+                const randomWord = words[Math.floor(Math.random() * words.length)];
+                if (!wrongWords.includes(randomWord)) {
+                    wrongWords.push(randomWord);
+                }
+            }
+        }
+        
+        return wrongWords;
+    }
+
+    showFillBlankQuestion(question) {
+        // Boşluklu Arapça metni göster
+        const questionTextElement = document.getElementById('questionText');
+        questionTextElement.innerHTML = `<div class="fillblank-arabic">${question.arabicTextWithBlank}</div>
+                                       <div class="fillblank-turkish">${question.turkishText}</div>`;
+        
+        // Ses butonunu göster
+        document.getElementById('audioBtn').style.display = 'inline-block';
+        
+        // Word ID yerine ayet kimliği göster
+        document.getElementById('wordId').textContent = `Ayet: ${question.ayet.ayet_kimligi}`;
+        
+        // Seçenekleri göster, klavyeyi gizle
+        document.getElementById('optionsContainer').style.display = 'grid';
+        document.getElementById('inputContainer').style.display = 'none';
+        document.getElementById('arabicKeyboard').style.display = 'none';
+        
+        const optionsContainer = document.getElementById('optionsContainer');
+        optionsContainer.innerHTML = '';
+        
+        question.options.forEach((option, index) => {
+            const button = document.createElement('button');
+            button.className = 'option-btn fillblank-option';
+            button.textContent = option;
+            button.onclick = () => this.selectOption(button, index);
+            optionsContainer.appendChild(button);
+        });
+        
+        // Ses dosyasını ayarla
+        this.currentAudio = question.audioUrl;
+    }
     
     selectOption(button, index) {
         const question = this.questions[this.currentQuestion];
@@ -1023,8 +1195,10 @@ class ArabicLearningGame {
         
         const question = this.questions[this.currentQuestion];
         
-        // Update word statistics for smart repetition
-        this.updateWordStats(question.word, isCorrect);
+        // Update word statistics for smart repetition (sadece kelime modları için)
+        if (question.word) {
+            this.updateWordStats(question.word, isCorrect);
+        }
         
         // Update statistics
         this.totalAnswers++;
@@ -1033,12 +1207,24 @@ class ArabicLearningGame {
         if (isCorrect) {
             this.score++;
             this.correctAnswers++;
-            // Calculate hasene based on Arabic word length
-            const arabicWord = question.word.kelime;
-            const letterCount = this.countArabicLetters(arabicWord);
-            const earnedHasene = letterCount * 10;
+            
+            // Calculate hasene based on game mode
+            let earnedHasene = 0;
+            if (this.gameMode === 'fillblank') {
+                // Boşluk doldurma modunda doğru kelimenin harf sayısına göre
+                const correctWord = question.correctWord;
+                const letterCount = this.countArabicLetters(correctWord);
+                earnedHasene = letterCount * 15; // Boşluk doldurma daha zor, daha fazla hasene
+                console.log(`Fill-blank: ${correctWord}, Letters: ${letterCount}, Hasene: ${earnedHasene}`);
+            } else {
+                // Normal kelime modlarında
+                const arabicWord = question.word.kelime;
+                const letterCount = this.countArabicLetters(arabicWord);
+                earnedHasene = letterCount * 10;
+                console.log(`Word: ${arabicWord}, Letters: ${letterCount}, Hasene: ${earnedHasene}`);
+            }
+            
             this.gameHasene += earnedHasene;
-            console.log(`Word: ${arabicWord}, Letters: ${letterCount}, Hasene: ${earnedHasene}`);
             
             // Play correct sound
             if (window.soundManager) {
@@ -1222,7 +1408,16 @@ class ArabicLearningGame {
         }
         
         // Soru formatına göre meaning ayarla - Arapça renkli
-        if (question.word) {
+        if (this.gameMode === 'fillblank') {
+            // Boşluk doldurma modu için özel gösterim
+            const fullText = question.ayet['ayahs.text_uthmani_tajweed'];
+            meaning.innerHTML = `<div class="feedback-fillblank">
+                                  <div class="feedback-arabic">${fullText}</div>
+                                  <div class="feedback-turkish">${question.turkishText}</div>
+                                  <div class="feedback-word">Doğru kelime: <span class="arabic-word fillblank-mode">${question.correctWord}</span></div>
+                                </div>`;
+            this.currentAudio = question.audioUrl;
+        } else if (question.word) {
             // Normal format with Arabic styling
             meaning.innerHTML = `<span class="arabic-word ${this.gameMode}-mode">${question.word.kelime}</span> = ${question.word.anlam}`;
             console.log(`🎨 Feedback Arabic styling: ${this.gameMode}-mode`);
@@ -1455,9 +1650,17 @@ class ArabicLearningGame {
         this.wordsLearned = this.calculateMasteredWords();
         
         // Oyun modu sayacını güncelle
-        const modeKey = this.gameMode + 'Games'; // translationGames, listeningGames, writingGames
+        const modeKey = this.gameMode + 'Games'; // translationGames, listeningGames, speedGames, fillblankGames
         const currentCount = parseInt(localStorage.getItem(modeKey)) || 0;
         localStorage.setItem(modeKey, (currentCount + 1).toString());
+        
+        // Boşluk doldurma modunda mükemmel performansı kaydet
+        if (this.gameMode === 'fillblank' && accuracy === 100) {
+            localStorage.setItem('lastFillBlankPerfect', 'true');
+            console.log('🏆 Boşluk doldurma mükemmel performans kaydedildi!');
+        } else if (this.gameMode === 'fillblank') {
+            localStorage.setItem('lastFillBlankPerfect', 'false');
+        }
         
         // Check for level up - Progressive system
         const oldLevel = this.level;
@@ -1947,6 +2150,15 @@ class ArabicLearningGame {
         } else if (id === 'speedster') {
             const avg = Math.round(this.stats.averageTime / 1000);
             return avg > 3 ? `${avg}s/3s` : 'Tamamlandı!';
+        } else if (id === 'fillBlankMaster') {
+            const fillBlankGames = parseInt(localStorage.getItem('fillblankGames')) || 0;
+            return `${fillBlankGames}/10`;
+        } else if (id === 'fillBlankPerfect') {
+            const isPerfect = localStorage.getItem('lastFillBlankPerfect') === 'true';
+            return isPerfect ? 'Tamamlandı!' : 'Mükemmel skor gerekli';
+        } else if (id === 'ayahExplorer') {
+            const fillBlankGames = parseInt(localStorage.getItem('fillblankGames')) || 0;
+            return `${fillBlankGames}/50`;
         }
         
         return null;
@@ -2074,9 +2286,12 @@ class ArabicLearningGame {
         // Gerçek oyun modları istatistikleri
         const translationGames = parseInt(localStorage.getItem('translationGames')) || 0;
         const listeningGames = parseInt(localStorage.getItem('listeningGames')) || 0;
-        const writingGames = parseInt(localStorage.getItem('writingGames')) || 0;
+        const speedGames = parseInt(localStorage.getItem('speedGames')) || 0;
+        const fillblankGames = parseInt(localStorage.getItem('fillblankGames')) || 0;
+        const ayetListens = parseInt(localStorage.getItem('ayetListens')) || 0;
+        const duaListens = parseInt(localStorage.getItem('duaListens')) || 0;
         
-        const totalGames = translationGames + listeningGames + writingGames || 1; // 0'a bölme hatası önleme
+        const totalGames = translationGames + listeningGames + speedGames + fillblankGames + ayetListens + duaListens || 1; // 0'a bölme hatası önleme
         
         const modes = [
             { 
@@ -2092,10 +2307,28 @@ class ArabicLearningGame {
                 count: listeningGames
             },
             { 
-                name: 'Yazma', 
-                class: 'writing', 
-                percentage: Math.round((writingGames / totalGames) * 100),
-                count: writingGames
+                name: 'Hız', 
+                class: 'speed', 
+                percentage: Math.round((speedGames / totalGames) * 100),
+                count: speedGames
+            },
+            { 
+                name: 'Boşluk Doldur', 
+                class: 'fillblank', 
+                percentage: Math.round((fillblankGames / totalGames) * 100),
+                count: fillblankGames
+            },
+            { 
+                name: 'Ayet Dinleme', 
+                class: 'ayet', 
+                percentage: Math.round((ayetListens / totalGames) * 100),
+                count: ayetListens
+            },
+            { 
+                name: 'Dua Dinleme', 
+                class: 'dua', 
+                percentage: Math.round((duaListens / totalGames) * 100),
+                count: duaListens
             }
         ];
         
@@ -2179,6 +2412,51 @@ class ArabicLearningGame {
         console.log(`${difficulty} seviyesi için ${selectedWords.length} kelime bulundu`);
         return selectedWords;
     }
+
+    getDifficultyAyets(ayetData, difficulty) {
+        let selectedAyets = [];
+
+        if (!ayetData || ayetData.length === 0) {
+            return [];
+        }
+
+        ayetData.forEach(ayet => {
+            if (!ayet || !ayet['ayahs.text_uthmani_tajweed']) return;
+            
+            const arabicText = ayet['ayahs.text_uthmani_tajweed'];
+            const wordCount = arabicText.split(/\s+/).filter(word => word.length > 2).length;
+            
+            // Kelime sayısına göre zorluk belirleme
+            switch(difficulty) {
+                case 'easy':
+                    // 3-8 kelime: Kolay ayetler
+                    if (wordCount >= 3 && wordCount <= 8) {
+                        selectedAyets.push(ayet);
+                    }
+                    break;
+                    
+                case 'medium':
+                    // 9-15 kelime: Orta ayetler  
+                    if (wordCount >= 9 && wordCount <= 15) {
+                        selectedAyets.push(ayet);
+                    }
+                    break;
+                    
+                case 'hard':
+                    // 16+ kelime: Zor ayetler
+                    if (wordCount >= 16) {
+                        selectedAyets.push(ayet);
+                    }
+                    break;
+                    
+                default:
+                    selectedAyets.push(ayet);
+            }
+        });
+
+        console.log(`${difficulty} seviyesi için ${selectedAyets.length} ayet bulundu`);
+        return selectedAyets.length > 0 ? selectedAyets : ayetData; // Eğer hiç ayet bulunamazsa tümünü döndür
+    }
 }
 
 // Global game instance
@@ -2188,6 +2466,44 @@ let game;
 document.addEventListener('DOMContentLoaded', () => {
     game = new ArabicLearningGame();
 });
+
+// Test function for validating difficulty levels
+function testAllGameModes() {
+    console.log('=== ZORLUK SEVİYESİ DOĞRULAMA TESTİ ===');
+    
+    const modes = ['translation', 'listening', 'speed', 'fillblank'];
+    const difficulties = ['easy', 'medium', 'hard'];
+    
+    modes.forEach(mode => {
+        console.log(`\n--- ${mode.toUpperCase()} MODU TESTİ ---`);
+        
+        difficulties.forEach(difficulty => {
+            console.log(`\n${difficulty} zorluk seviyesi:`);
+            
+            // Zorluk seviyesini ayarla
+            game.setDifficulty(difficulty);
+            
+            // Oyunu başlat (gerçekte başlatmadan sadece soru üretimi test)
+            if (mode === 'fillblank') {
+                if (game.ayetData && game.ayetData.length > 0) {
+                    const difficultyAyets = game.getDifficultyAyets(game.ayetData, difficulty);
+                    console.log(`${difficulty} - Toplam ayet: ${game.ayetData.length}, Filtrelenmiş: ${difficultyAyets.length}`);
+                } else {
+                    console.log(`${difficulty} - Ayet verileri yok!`);
+                }
+            } else {
+                if (game.wordData && game.wordData.length > 0) {
+                    const difficultyWords = game.getDifficultyWords(game.wordData, difficulty);
+                    console.log(`${difficulty} - Toplam kelime: ${game.wordData.length}, Filtrelenmiş: ${difficultyWords.length}`);
+                } else {
+                    console.log(`${difficulty} - Kelime verileri yok!`);
+                }
+            }
+        });
+    });
+    
+    console.log('\n=== TEST TAMAMLANDI ===');
+}
 
 // Global functions for HTML onclick events
 function startGame(mode = 'translation') {
