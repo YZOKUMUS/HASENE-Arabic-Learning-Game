@@ -263,16 +263,33 @@ async function showAyetTask() {
     modal.style.justifyContent = 'center';
     modal.style.zIndex = '9999';
     modal.innerHTML = `
-        <div style="background:#fff;padding:32px 24px;border-radius:16px;max-width:400px;text-align:center;box-shadow:0 2px 16px #0002;">
-            <h2 style="font-size:1.3em;margin-bottom:10px;">Ayet Dinle &amp; Oku</h2>
-            <div style="font-size:1.1em;color:#3f51b5;margin-bottom:6px;"><span style='color:#888;font-size:0.9em;'>(${ayet.ayet_kimligi})</span></div>
-            <div style="font-family:'Amiri',serif;font-size:1.0em;color:#009688;margin-bottom:10px;">${ayet["ayahs.text_uthmani_tajweed"] || ''}</div>
-            <div style="font-size:0.9em;margin-bottom:10px;">${ayet.meal}</div>
-            <audio id="ayetAudio" src="${ayet.ayet_ses_dosyasi}" controls style="width:100%;margin-bottom:10px;"></audio>
-            <br><button onclick="document.body.removeChild(document.getElementById('ayetModal'))" style="margin-top:10px;background:#eee;color:#333;padding:6px 18px;border:none;border-radius:8px;font-size:0.9em;cursor:pointer;">Kapat</button>
+        <div style="background:#fff;padding:16px;border-radius:16px;max-width:90vw;max-height:85vh;overflow-y:auto;text-align:center;box-shadow:0 2px 16px #0002;position:relative;">
+            <!-- X Butonu (Sağ üst köşe) -->
+            <button onclick="document.body.removeChild(document.getElementById('ayetModal'))" style="position:absolute;top:8px;right:8px;width:32px;height:32px;border:none;background:rgba(0,0,0,0.1);border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#666;">×</button>
+            
+            <h2 style="font-size:1.2em;margin-bottom:8px;margin-top:24px;">Ayet Dinle &amp; Oku</h2>
+            <div style="font-size:1.0em;color:#3f51b5;margin-bottom:6px;"><span style='color:#888;font-size:0.85em;'>(${ayet.ayet_kimligi})</span></div>
+            
+            <!-- Scrollable Ayet Text -->
+            <div style="font-family:'Amiri',serif;font-size:0.95em;color:#009688;margin-bottom:12px;line-height:1.6;max-height:30vh;overflow-y:auto;padding:8px;border:1px solid #e0e0e0;border-radius:8px;background:#f9f9f9;">${ayet["ayahs.text_uthmani_tajweed"] || ''}</div>
+            
+            <!-- Scrollable Meal -->
+            <div style="font-size:0.85em;margin-bottom:12px;line-height:1.4;max-height:20vh;overflow-y:auto;padding:8px;text-align:left;border:1px solid #e0e0e0;border-radius:8px;background:#f5f5f5;">${ayet.meal}</div>
+            
+            <audio id="ayetAudio" src="${ayet.ayet_ses_dosyasi}" controls style="width:100%;margin-bottom:12px;"></audio>
+            
+            <!-- Alt Kapat Butonu (Her zaman görünür) -->
+            <button onclick="document.body.removeChild(document.getElementById('ayetModal'))" style="width:100%;padding:12px;background:#4CAF50;color:white;border:none;border-radius:8px;font-size:1.0em;cursor:pointer;font-weight:bold;">Kapat</button>
         </div>
     `;
     document.body.appendChild(modal);
+
+    // Modal dışına tıklayınca kapat
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            document.body.removeChild(modal);
+        }
+    });
 
     // Ayet dinlendiğinde hasene kazandır
     const ayetAudio = document.getElementById('ayetAudio');
