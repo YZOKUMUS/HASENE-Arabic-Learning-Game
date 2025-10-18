@@ -448,6 +448,9 @@ class ArabicLearningGame {
         
         this.initializeAchievements();
         this.init();
+        
+        // 🔄 Initialization sonrası UI'ı güncelle
+        this.updateUI();
     }
     
     // Türkçe difficulty değerlerini İngilizce'ye migrate et
