@@ -1078,8 +1078,8 @@ class ArabicLearningGame {
         this.xp = newHasene;
         
         // �🛡️ Koruma ekle
-        const currentCount = parseInt(localStorage.getItem(type + 's')) || 0;
-        localStorage.setItem(type + 's', currentCount + 1);
+        const currentCount = parseInt(localStorage.getItem(type === 'weekendPass' ? 'weekendPasses' : type + 's')) || 0;
+        localStorage.setItem(type === 'weekendPass' ? 'weekendPasses' : type + 's', currentCount + 1);
         
         console.log(`✅ ${type} satın alındı! ${price} hasene harcandı. Kalan: ${newHasene} | ${type}s: ${currentCount + 1}`);
         
