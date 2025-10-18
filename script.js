@@ -1,8 +1,9 @@
 ﻿// Sound Manager Class
-class SoundManager {
-    constructor() {
-        this.audioGenerator = null;
-        this.soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
+if (typeof SoundManager === 'undefined') {
+    class SoundManager {
+        constructor() {
+            this.audioGenerator = null;
+            this.soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
         this.musicEnabled = localStorage.getItem('musicEnabled') !== 'false';
         this.musicLoop = null;
         this.initSound();
@@ -26,14 +27,55 @@ class SoundManager {
 
     // Müzik açma/kapama  
     toggleMusic() {
-        this.musicEnabled = !this.musicEnabled;
-        console.log('SoundManager toggleMusic, yeni durum:', this.musicEnabled);
-        localStorage.setItem('musicEnabled', this.musicEnabled);
+        console.log('🎵 SoundManager toggleMusic başlatıldı');
         
-        if (!this.musicEnabled && this.musicLoop) {
-            console.log('Müzik kapatıldı, loop temizleniyor');
-            clearInterval(this.musicLoop);
-            this.musicLoop = null;
+        // Yeni background müzik sistemini çağır
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        const musicIcon = document.getElementById('musicIcon');
+        const musicBtn = document.getElementById('musicToggle');
+        
+        if (!backgroundMusic) {
+            console.error('❌ Background music element bulunamadı!');
+            alert('Müzik elementi bulunamadı!');
+            return false;
+        }
+
+        console.log('🎵 Audio element bulundu:', backgroundMusic);
+        console.log('🔗 Audio sources:', Array.from(backgroundMusic.children).map(s => s.src));
+        console.log('📊 Audio readyState:', backgroundMusic.readyState);
+        console.log('⏸️ Audio paused:', backgroundMusic.paused);
+
+        if (backgroundMusic.paused) {
+            // Müziği başlat
+            backgroundMusic.volume = 0.5; // Ses seviyesi %50
+            console.log('▶️ Müzik başlatılıyor...');
+            
+            backgroundMusic.play().then(() => {
+                console.log('✅ Background müzik başlatıldı!');
+                console.log('🎶 Şu anda çalan source:', backgroundMusic.currentSrc);
+                alert('🎵 Müzik başlatıldı! Hangi sesi duyuyorsun?\n1. Melodi (Do-Re-Mi)\n2. Bip sesi (440Hz)\n3. Sessizlik');
+                
+                musicIcon.className = 'fas fa-music';
+                musicBtn.classList.remove('disabled');
+                musicBtn.style.opacity = '1';
+                localStorage.setItem('backgroundMusicEnabled', 'true');
+                this.musicEnabled = true;
+            }).catch(error => {
+                console.error('❌ Müzik çalınamadı:', error);
+                console.log('🔄 Fallback dosyalarını kontrol ediyorum...');
+                alert('❌ Müzik hatası: ' + error.message + '\nConsole\'u kontrol edin!');
+                this.musicEnabled = false;
+            });
+        } else {
+            // Müziği durdur
+            backgroundMusic.pause();
+            console.log('⏹️ Background müzik durduruldu');
+            alert('⏹️ Müzik durduruldu');
+            musicIcon.className = 'fas fa-music-slash';
+            musicBtn.classList.add('disabled');
+            musicBtn.style.opacity = '0.5';
+            localStorage.setItem('backgroundMusicEnabled', 'false');
+            this.musicEnabled = false;
         }
         
         return this.musicEnabled;
@@ -135,9 +177,12 @@ class SoundManager {
         return;
     }
 }
+}
 
 // Global SoundManager instance
-window.soundManager = new SoundManager();
+if (typeof window.soundManager === 'undefined') {
+    window.soundManager = new SoundManager();
+}
 
 // Ayet Dinle ve Oku görevini tetikleyen fonksiyon
 async function showAyetTask() {
@@ -162,8 +207,8 @@ async function showAyetTask() {
         <div style="background:#fff;padding:32px 24px;border-radius:16px;max-width:400px;text-align:center;box-shadow:0 2px 16px #0002;">
             <h2 style="font-size:1.3em;margin-bottom:10px;">Ayet Dinle &amp; Oku</h2>
             <div style="font-size:1.1em;color:#3f51b5;margin-bottom:6px;"><span style='color:#888;font-size:0.9em;'>(${ayet.ayet_kimligi})</span></div>
-            <div style="font-family:'Amiri',serif;font-size:1.5em;color:#009688;margin-bottom:10px;">${ayet["ayahs.text_uthmani_tajweed"] || ''}</div>
-            <div style="font-size:1em;margin-bottom:10px;">${ayet.meal}</div>
+            <div style="font-family:'Amiri',serif;font-size:1.0em;color:#009688;margin-bottom:10px;">${ayet["ayahs.text_uthmani_tajweed"] || ''}</div>
+            <div style="font-size:0.9em;margin-bottom:10px;">${ayet.meal}</div>
             <audio id="ayetAudio" src="${ayet.ayet_ses_dosyasi}" controls style="width:100%;margin-bottom:10px;"></audio>
             <br><button onclick="document.body.removeChild(document.getElementById('ayetModal'))" style="margin-top:10px;background:#eee;color:#333;padding:6px 18px;border:none;border-radius:8px;font-size:0.9em;cursor:pointer;">Kapat</button>
         </div>
@@ -235,8 +280,8 @@ async function showDuaTask() {
     modal.innerHTML = `
         <div style="background:#fff;padding:32px 24px;border-radius:16px;max-width:400px;text-align:center;box-shadow:0 2px 16px #0002;">
             <h2 style="font-size:1.3em;margin-bottom:10px;">Dua Dinle</h2>
-            <div style="font-family:'Amiri',serif;font-size:1.5em;color:#009688;margin-bottom:10px;">${dua.dua}</div>
-            <div style="font-size:1em;margin-bottom:10px;">${dua.tercume}</div>
+            <div style="font-family:'Amiri',serif;font-size:1.0em;color:#009688;margin-bottom:10px;">${dua.dua}</div>
+            <div style="font-size:0.9em;margin-bottom:10px;">${dua.tercume}</div>
             <audio id="duaAudio" src="${dua.ses_url}" controls style="width:100%;margin-bottom:10px;"></audio>
             <br><button onclick="document.body.removeChild(document.getElementById('duaModal'))" style="margin-top:10px;background:#eee;color:#333;padding:6px 18px;border:none;border-radius:8px;font-size:0.9em;cursor:pointer;">Kapat</button>
         </div>
@@ -287,10 +332,10 @@ async function showDuaTask() {
 class ArabicLearningGame {
     constructor() {
         this.wordData = [];
-        this.currentQuestion = 0;
-        this.score = 0;
-        this.hearts = 5; // Duolingo gibi 5 kalp
-        this.gameXP = 0;
+            this.currentQuestion = 0;
+            this.score = 0;
+            this.hearts = 5; // Duolingo gibi 5 kalp
+            this.gameXP = 0;
         
         // Sınırsız kalp kontrolü - şimdilik devre dışı
         unlimitedHeartsActive = false; // localStorage.getItem('unlimitedHearts') === 'true';
@@ -306,9 +351,16 @@ class ArabicLearningGame {
         this.totalAnswers = parseInt(localStorage.getItem('totalAnswers')) || 0;
         this.correctAnswers = parseInt(localStorage.getItem('correctAnswers')) || 0;
         this.gameMode = 'translation';
-        this.difficulty = localStorage.getItem('difficulty') || 'orta';
+        // 🔧 Güvenli difficulty initialization
+        const rawDifficulty = localStorage.getItem('difficulty') || 'medium';
+        this.difficulty = this.normalizeDifficulty(rawDifficulty);
+        // Storage'ı da normalize et
+        localStorage.setItem('difficulty', this.difficulty);
         this.questions = [];
         this.currentAudio = null;
+        
+        // Legacy difficulty migration (artık normalizeDifficulty ile otomatik)
+        this.migrateDifficultyValues();
         
         // Calendar variables
         const now = new Date();
@@ -317,6 +369,72 @@ class ArabicLearningGame {
         
         this.initializeAchievements();
         this.init();
+    }
+    
+    // Türkçe difficulty değerlerini İngilizce'ye migrate et
+    migrateDifficultyValues() {
+        const currentDifficulty = localStorage.getItem('difficulty');
+        let migratedValue = null;
+        
+        // Türkçe -> İngilizce mapping
+        const migrationMap = {
+            'kolay': 'easy',
+            'orta': 'medium', 
+            'zor': 'hard'
+        };
+        
+        if (currentDifficulty && migrationMap[currentDifficulty]) {
+            migratedValue = migrationMap[currentDifficulty];
+            localStorage.setItem('difficulty', migratedValue);
+            this.difficulty = migratedValue;
+            console.log(`🔄 Difficulty migrated: ${currentDifficulty} -> ${migratedValue}`);
+        }
+    }
+
+    // 🔧 ZORLUK DEĞERİ NORMALİZASYON SİSTEMİ
+    normalizeDifficulty(difficulty) {
+        // Canonical değerler: 'easy', 'medium', 'hard'
+        const canonicalMap = {
+            // Türkçe mappings
+            'kolay': 'easy',
+            'orta': 'medium', 
+            'zor': 'hard',
+            // İngilizce (zaten canonical)
+            'easy': 'easy',
+            'medium': 'medium',
+            'hard': 'hard',
+            // Fallback mappings
+            'e': 'easy',
+            'm': 'medium', 
+            'h': 'hard',
+            '1': 'easy',
+            '2': 'medium',
+            '3': 'hard'
+        };
+        
+        // Normalize et
+        const normalized = canonicalMap[difficulty?.toLowerCase()] || 'medium';
+        
+        // Debug
+        if (difficulty !== normalized) {
+            console.log(`🔄 Difficulty normalized: "${difficulty}" -> "${normalized}"`);
+        }
+        
+        return normalized;
+    }
+
+    // 🔧 DİFFICULTY GÜVENLİ GETTER
+    getDifficulty() {
+        return this.normalizeDifficulty(this.difficulty);
+    }
+
+    // 🔧 DİFFICULTY GÜVENLİ SETTER  
+    setDifficulty(newDifficulty) {
+        const normalized = this.normalizeDifficulty(newDifficulty);
+        this.difficulty = normalized;
+        localStorage.setItem('difficulty', normalized);
+        console.log(`✅ Difficulty set to: "${normalized}"`);
+        return normalized;
     }
     
     initializeAchievements() {
@@ -656,21 +774,34 @@ class ArabicLearningGame {
     }
     
     updateUI() {
+        // Safety checks for DOM elements
+        const safeUpdateElement = (id, value) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = value;
+            }
+        };
+        
+        const safeUpdateStyle = (id, property, value) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.style[property] = value;
+            }
+        };
+        
         // Update main menu stats
-        document.getElementById('streakCount').textContent = this.streak;
-        document.getElementById('haseneCount').textContent = this.totalHasene;
-        if (document.getElementById('haseneCountBottom')) {
-            document.getElementById('haseneCountBottom').textContent = this.totalHasene;
-        }
-        document.getElementById('levelCount').textContent = this.level;
-        document.getElementById('dailyHasene').textContent = this.dailyHasene;
+        safeUpdateElement('streakCount', this.streak);
+        safeUpdateElement('haseneCount', this.totalHasene);
+        safeUpdateElement('haseneCountBottom', this.totalHasene);
+        safeUpdateElement('levelCount', this.level);
+        safeUpdateElement('dailyHasene', this.dailyHasene);
         
         // Gerçek öğrenilen kelimeleri hesapla ve güncelle
         this.wordsLearned = this.calculateMasteredWords();
         
         // Update daily progress (günlük hedef 1000 hasene)
         const dailyProgress = Math.min((this.dailyHasene / 1000) * 100, 100);
-        document.getElementById('dailyProgress').style.width = `${dailyProgress}%`;
+        safeUpdateStyle('dailyProgress', 'width', `${dailyProgress}%`);
         
         // Update XP Progress - Progressive System
         const currentLevelXP = this.getXPRequiredForLevel(this.level);
@@ -679,11 +810,11 @@ class ArabicLearningGame {
         const xpNeededForNext = nextLevelXP - currentLevelXP;
         const xpProgress = (xpInCurrentLevel / xpNeededForNext) * 100;
         
-        document.getElementById('xpProgress').style.width = `${Math.max(0, xpProgress)}%`;
-        document.getElementById('currentXP').textContent = xpInCurrentLevel;
-        document.getElementById('nextLevelXP').textContent = xpNeededForNext;
-        document.getElementById('currentLevel').textContent = this.level;
-        document.getElementById('nextLevel').textContent = this.level + 1;
+        safeUpdateStyle('xpProgress', 'width', `${Math.max(0, xpProgress)}%`);
+        safeUpdateElement('currentXP', xpInCurrentLevel);
+        safeUpdateElement('nextLevelXP', xpNeededForNext);
+        safeUpdateElement('currentLevel', this.level);
+        safeUpdateElement('nextLevel', this.level + 1);
         
 
     }
@@ -696,7 +827,9 @@ class ArabicLearningGame {
             return;
         }
         
-        console.log(`${mode} oyunu başlatılıyor... Toplam kelime: ${this.wordData.length}, Zorluk seviyesi: ${this.difficulty}`);
+        // 🔧 Güvenli difficulty kullanımı
+        const safeDifficulty = this.getDifficulty();
+        console.log(`${mode} oyunu başlatılıyor... Toplam kelime: ${this.wordData.length}, Zorluk seviyesi: ${safeDifficulty}`);
         
         this.gameMode = mode;
         this.currentQuestion = 0;
@@ -740,9 +873,11 @@ class ArabicLearningGame {
                 return;
             }
             
+            // 🔧 Güvenli difficulty kullanımı
+            const safeDifficulty = this.getDifficulty();
             // Zorluk seviyesine göre ayetleri filtrele
-            const difficultyAyets = this.getDifficultyAyets(this.ayetData, this.difficulty);
-            console.log(`Zorluk seviyesi: ${this.difficulty}, Filtrelenmiş ayet sayısı: ${difficultyAyets.length}`);
+            const difficultyAyets = this.getDifficultyAyets(this.ayetData, safeDifficulty);
+            console.log(`Zorluk seviyesi: ${safeDifficulty}, Filtrelenmiş ayet sayısı: ${difficultyAyets.length}`);
             
             // Rastgele ayetler seç
             for (let i = 0; i < questionCount; i++) {
@@ -787,10 +922,13 @@ class ArabicLearningGame {
     }
     
     selectSmartWords(count, wordStats) {
-        // Zorluk seviyesine göre kelime havuzunu filtrele
-        const difficultyWords = this.getDifficultyWords(this.wordData, this.difficulty);
+        // 🔧 Güvenli difficulty kullanımı
+        const safeDifficulty = this.getDifficulty();
         
-        console.log(`Zorluk seviyesi: ${this.difficulty}`);
+        // Zorluk seviyesine göre kelime havuzunu filtrele
+        const difficultyWords = this.getDifficultyWords(this.wordData, safeDifficulty);
+        
+        console.log(`Zorluk seviyesi: ${safeDifficulty}`);
         console.log(`Toplam kelime: ${this.wordData.length}, Filtrelenmiş: ${difficultyWords.length}`);
         
         const weightedWords = [];
@@ -1101,12 +1239,23 @@ class ArabicLearningGame {
 
     getRandomArabicWords(excludeWord, count) {
         const wrongWords = [];
-        const attempts = 0;
+        let attempts = 0; // let olarak değiştirdik
         const maxAttempts = 100;
         
+        // 🔧 KRİTİK FİX: Zorluk seviyesine uygun ayetler kullan!
+        const safeDifficulty = this.getDifficulty();
+        const difficultyAyets = this.getDifficultyAyets(this.ayetData, safeDifficulty);
+        
+        // Eğer filtrelenmiş ayet yoksa, tüm ayetleri kullan
+        const sourceAyets = difficultyAyets.length > 0 ? difficultyAyets : this.ayetData;
+        
+        console.log(`🎯 getRandomArabicWords: ${safeDifficulty} seviyesi için ${sourceAyets.length} ayetten seçim yapılıyor`);
+        
         while (wrongWords.length < count && attempts < maxAttempts) {
-            // Rastgele bir ayet seç
-            const randomAyet = this.ayetData[Math.floor(Math.random() * this.ayetData.length)];
+            attempts++; // Her döngüde artır - KRİTİK FİX!
+            
+            // 🔧 Zorluk seviyesine uygun ayetlerden seç
+            const randomAyet = sourceAyets[Math.floor(Math.random() * sourceAyets.length)];
             if (!randomAyet || !randomAyet['ayahs.text_uthmani_tajweed']) continue;
             
             // Bu ayetteki kelimelerden rastgele birini seç
@@ -1120,6 +1269,11 @@ class ArabicLearningGame {
                     wrongWords.push(randomWord);
                 }
             }
+        }
+        
+        // Güvenlik kontrolü - yeteri kadar kelime bulunamadıysa uyar
+        if (wrongWords.length < count) {
+            console.warn(`⚠️ Sadece ${wrongWords.length}/${count} yanlış seçenek bulunabildi. ${attempts} deneme yapıldı.`);
         }
         
         return wrongWords;
@@ -1261,18 +1415,20 @@ class ArabicLearningGame {
                 this.hearts--;
                 console.log(`💛 Kalp koruması! Hasene azalmadı. Kalan kalp: ${this.hearts}`);
             } else {
-                // Kalp yoksa hasene azalt
-                console.log(`🔍 DEBUG: Zorluk seviyesi: "${this.difficulty}"`);
+                // 🔧 Kalp yoksa hasene azalt - GÜVENLİ ZORLUK SİSTEMİ
+                const safeDifficulty = this.getDifficulty();
+                console.log(`🔍 DEBUG: Normalized zorluk seviyesi: "${safeDifficulty}"`);
                 
                 let haseneKaybi = 0;
-                // Türkçe zorluk seviyeleri
-                if (this.difficulty === 'kolay' || this.difficulty === 'easy') haseneKaybi = 5;
-                else if (this.difficulty === 'orta' || this.difficulty === 'medium') haseneKaybi = 10;
-                else if (this.difficulty === 'zor' || this.difficulty === 'hard') haseneKaybi = 25;
-                else {
-                    // Default değer - zorluk tanımsızsa orta seviye
-                    haseneKaybi = 10;
-                    console.log(`⚠️ Zorluk seviyesi tanımsız (${this.difficulty})! Default 10 hasene azaltılacak.`);
+                // 🎯 SADECE NORMALİZE EDİLMİŞ DEĞERLER (easy/medium/hard)
+                switch (safeDifficulty) {
+                    case 'easy': haseneKaybi = 5; break;
+                    case 'medium': haseneKaybi = 10; break;
+                    case 'hard': haseneKaybi = 25; break;
+                    default:
+                        // Bu durum olmamalı çünkü getDifficulty() her zaman valid değer döndürür
+                        haseneKaybi = 10;
+                        console.error(`🚨 BEKLENMEYEN ZORLUK DEĞERI: "${safeDifficulty}"! Bu bir hata!`);
                 }
                 
                 console.log(`🔍 DEBUG: Hesaplanan hasene kaybı: ${haseneKaybi}`);
@@ -1548,8 +1704,10 @@ class ArabicLearningGame {
         const moreQuestions = [];
         const usedWords = this.questions.map(q => q.word ? q.word.id : q.word?.kelime);
         
+        // 🔧 Güvenli difficulty kullanımı
+        const safeDifficulty = this.getDifficulty();
         // Zorluk seviyesine uygun kelimeler al
-        const difficultyWords = this.getDifficultyWords(this.wordData, this.difficulty);
+        const difficultyWords = this.getDifficultyWords(this.wordData, safeDifficulty);
         
         if (!difficultyWords || difficultyWords.length === 0) {
             console.warn('Zorluk seviyesi için kelime bulunamadı, tüm kelimeleri kullanıyoruz');
@@ -1918,6 +2076,15 @@ class ArabicLearningGame {
     }
     
     renderCalendar() {
+        // Safety check for DOM elements
+        const currentMonthEl = document.getElementById('currentMonth');
+        const grid = document.getElementById('calendarGrid');
+        
+        if (!currentMonthEl || !grid) {
+            console.log('Calendar DOM elements not found, skipping calendar rendering');
+            return;
+        }
+        
         const monthNames = [
             'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
             'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
@@ -1926,10 +2093,9 @@ class ArabicLearningGame {
         const dayNames = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
         
         // Update month header
-        document.getElementById('currentMonth').textContent = 
+        currentMonthEl.textContent = 
             `${monthNames[this.currentCalendarMonth]} ${this.currentCalendarYear}`;
         
-        const grid = document.getElementById('calendarGrid');
         grid.innerHTML = '';
         
         // Add day headers
@@ -2036,6 +2202,12 @@ class ArabicLearningGame {
         const loadingText = document.getElementById('loadingText');
         const loadingPercentage = document.getElementById('loadingPercentage');
         
+        // DOM safety check
+        if (!progressBar || !loadingText || !loadingPercentage) {
+            console.warn('Loading animation elements not found, skipping animation');
+            return;
+        }
+        
         const loadingSteps = [
             { text: "Arapça kelimeler yükleniyor...", duration: 2500 },
             { text: "Ses dosyaları hazırlanıyor...", duration: 2200 },
@@ -2051,7 +2223,9 @@ class ArabicLearningGame {
         const animateStep = () => {
             if (currentStep < loadingSteps.length) {
                 const step = loadingSteps[currentStep];
-                loadingText.textContent = step.text;
+                if (loadingText) {
+                    loadingText.textContent = step.text;
+                }
                 
                 const targetProgress = ((currentStep + 1) / loadingSteps.length) * 100;
                 
@@ -2067,8 +2241,12 @@ class ArabicLearningGame {
                         }, 300);
                     }
                     
-                    progressBar.style.width = progress + '%';
-                    loadingPercentage.textContent = Math.round(progress) + '%';
+                    if (progressBar) {
+                        progressBar.style.width = progress + '%';
+                    }
+                    if (loadingPercentage) {
+                        loadingPercentage.textContent = Math.round(progress) + '%';
+                    }
                 }, 30);
             }
         };
@@ -2097,9 +2275,11 @@ class ArabicLearningGame {
     }
 
     initializeDifficultyUI() {
-        // Kayıtlı zorluk seviyesini yükle
-        const savedDifficulty = localStorage.getItem('difficulty') || 'medium';
-        this.difficulty = savedDifficulty;
+        // 🔧 Güvenli zorluk yüklemesi
+        const rawDifficulty = localStorage.getItem('difficulty') || 'medium';
+        this.difficulty = this.normalizeDifficulty(rawDifficulty);
+        // Storage'ı da normalize et
+        localStorage.setItem('difficulty', this.difficulty);
         
         // UI'da doğru butonu aktif yap
         document.querySelectorAll('.difficulty-btn').forEach(btn => {
@@ -2375,10 +2555,12 @@ class ArabicLearningGame {
         modal.style.display = 'flex';
     }
 
-    // Zorluk seviyesi yönetimi
+    // 🔧 LEGACY setDifficulty - şimdi normalize ediyor
     setDifficulty(level) {
-        this.difficulty = level;
-        localStorage.setItem('difficulty', level);
+        const normalized = this.normalizeDifficulty(level);
+        this.difficulty = normalized;
+        localStorage.setItem('difficulty', normalized);
+        console.log(`✅ Difficulty set to: "${normalized}"`);
         
         // UI güncelle
         document.querySelectorAll('.difficulty-btn').forEach(btn => {
@@ -2391,6 +2573,17 @@ class ArabicLearningGame {
 
     getDifficultyWords(wordData, difficulty) {
         let selectedWords = [];
+
+        // 🔧 Güvenlik kontrolleri
+        if (!wordData || wordData.length === 0) {
+            console.warn(`⚠️ getDifficultyWords: wordData boş veya yok!`);
+            return [];
+        }
+
+        const validDifficulties = ['easy', 'medium', 'hard'];
+        if (!validDifficulties.includes(difficulty)) {
+            console.warn(`⚠️ getDifficultyWords: Beklenmeyen difficulty değeri: "${difficulty}", tüm kelimeler döndürülecek`);
+        }
 
         switch(difficulty) {
             case 'easy':
@@ -2426,7 +2619,14 @@ class ArabicLearningGame {
         let selectedAyets = [];
 
         if (!ayetData || ayetData.length === 0) {
+            console.warn(`⚠️ getDifficultyAyets: ayetData boş veya yok!`);
             return [];
+        }
+
+        // 🔧 Güvenlik: Beklenmeyen difficulty değerlerini logla
+        const validDifficulties = ['easy', 'medium', 'hard'];
+        if (!validDifficulties.includes(difficulty)) {
+            console.warn(`⚠️ getDifficultyAyets: Beklenmeyen difficulty değeri: "${difficulty}", tüm ayetler döndürülecek`);
         }
 
         ayetData.forEach(ayet => {
@@ -2438,22 +2638,22 @@ class ArabicLearningGame {
             // Kelime sayısına göre zorluk belirleme
             switch(difficulty) {
                 case 'easy':
-                    // 3-8 kelime: Kolay ayetler
-                    if (wordCount >= 3 && wordCount <= 8) {
+                    // 3-6 kelime: Kolay ayetler (kısa)
+                    if (wordCount >= 3 && wordCount <= 6) {
                         selectedAyets.push(ayet);
                     }
                     break;
                     
                 case 'medium':
-                    // 9-15 kelime: Orta ayetler  
-                    if (wordCount >= 9 && wordCount <= 15) {
+                    // 7-12 kelime: Orta ayetler  
+                    if (wordCount >= 7 && wordCount <= 12) {
                         selectedAyets.push(ayet);
                     }
                     break;
                     
                 case 'hard':
-                    // 16+ kelime: Zor ayetler
-                    if (wordCount >= 16) {
+                    // 13+ kelime: Zor ayetler (uzun ve karmaşık)
+                    if (wordCount >= 13) {
                         selectedAyets.push(ayet);
                     }
                     break;
@@ -2468,13 +2668,124 @@ class ArabicLearningGame {
     }
 }
 
+// ⚡ CRITICAL FIX: Manually add missing methods to prototype
+ArabicLearningGame.prototype.normalizeDifficulty = function(difficulty) {
+    // Canonical değerler: 'easy', 'medium', 'hard'
+    const canonicalMap = {
+        // Türkçe mappings
+        'kolay': 'easy',
+        'orta': 'medium', 
+        'zor': 'hard',
+        // İngilizce (zaten canonical)
+        'easy': 'easy',
+        'medium': 'medium',
+        'hard': 'hard',
+        // Fallback mappings
+        'e': 'easy',
+        'm': 'medium', 
+        'h': 'hard',
+        '1': 'easy',
+        '2': 'medium',
+        '3': 'hard'
+    };
+    
+    // Normalize et
+    const normalized = canonicalMap[difficulty?.toLowerCase()] || 'medium';
+    
+    // Debug
+    if (difficulty !== normalized) {
+        console.log(`🔄 Difficulty normalized: "${difficulty}" -> "${normalized}"`);
+    }
+    
+    return normalized;
+};
+
+ArabicLearningGame.prototype.getDifficulty = function() {
+    return this.normalizeDifficulty(this.difficulty);
+};
+
+ArabicLearningGame.prototype.generateFillBlankQuestion = function() {
+    const words = this.getRandomArabicWords(1);
+    if (words.length === 0) return null;
+    
+    const word = words[0];
+    const blanks = Math.min(Math.floor(word.arabic.length / 3), 3);
+    
+    return {
+        type: 'fillblank',
+        word: word,
+        blanks: blanks,
+        difficulty: this.getDifficulty()
+    };
+};
+
+ArabicLearningGame.prototype.saveGameData = function() {
+    const gameData = {
+        totalHasene: this.totalHasene,
+        streak: this.streak,
+        level: this.level,
+        difficulty: this.difficulty,
+        dailyHasene: this.dailyHasene
+    };
+    localStorage.setItem('gameData', JSON.stringify(gameData));
+    return gameData;
+};
+
+ArabicLearningGame.prototype.loadGameData = function() {
+    const saved = localStorage.getItem('gameData');
+    if (saved) {
+        const data = JSON.parse(saved);
+        this.totalHasene = data.totalHasene || 0;
+        this.streak = data.streak || 0;
+        this.level = data.level || 1;
+        this.difficulty = data.difficulty || 'easy';
+        this.dailyHasene = data.dailyHasene || 0;
+        return data;
+    }
+    return null;
+};
+
 // Global game instance
-let game;
+if (typeof game === 'undefined') {
+    var game;
+}
 
 // Initialize game when page loads
 document.addEventListener('DOMContentLoaded', () => {
-    game = new ArabicLearningGame();
+    if (typeof game === 'undefined' || game === null) {
+        game = new ArabicLearningGame();
+    }
+    
+    // Background müzik ayarlarını yükle
+    initializeBackgroundMusic();
 });
+
+// Background müzik başlatma fonksiyonu
+function initializeBackgroundMusic() {
+    const backgroundMusic = document.getElementById('backgroundMusic');
+    const musicIcon = document.getElementById('musicIcon');
+    const musicBtn = document.getElementById('musicToggle');
+    
+    if (!backgroundMusic) {
+        console.warn('Background music element bulunamadı');
+        return;
+    }
+
+    // Kullanıcının müzik tercihini kontrol et
+    const musicEnabled = localStorage.getItem('backgroundMusicEnabled');
+    
+    if (musicEnabled === 'true') {
+        // Müzik açık olarak ayarlanmış
+        musicIcon.className = 'fas fa-music';
+        musicBtn.style.opacity = '1';
+    } else {
+        // Müzik kapalı (varsayılan)
+        musicIcon.className = 'fas fa-music-slash';
+        musicBtn.style.opacity = '0.5';
+    }
+    
+    console.log('Background müzik sistemi hazır: O Gece Sendin Gelen - Mehmet Emin Ay');
+}
 
 // Test function for validating difficulty levels
 function testAllGameModes() {
@@ -2692,8 +3003,12 @@ function initArabicKeyboard() {
 }
 
 // Heart Refill System (Duolingo-style)
-let heartRefillTimer = null;
-let unlimitedHeartsActive = false;
+if (typeof heartRefillTimer === 'undefined') {
+    var heartRefillTimer = null;
+}
+if (typeof unlimitedHeartsActive === 'undefined') {
+    var unlimitedHeartsActive = false;
+}
 
 function showHeartsDepleted() {
     console.log('❤️‍🩹 Kalplar bitti, kalp yenileme ekranı gösteriliyor...');
@@ -2970,20 +3285,6 @@ function toggleSound() {
     }
 }
 
-function toggleMusic() {
-    if (window.soundManager) {
-        const enabled = window.soundManager.toggleMusic();
-        console.log('Müzik toggle edildi, durum:', enabled);
-        updateSoundUI();
-        
-        if (enabled) {
-            // Müzik açıldı - devre dışı
-        } else {
-            // Müzik kapatıldı - devre dışı
-        }
-    }
-}
-
 function updateSoundUI() {
     if (window.soundManager) {
         const soundBtn = document.getElementById('soundToggle');
@@ -3039,6 +3340,117 @@ function testHaseneDecrease() {
     } else {
         console.log(`❌ TEST BAŞARISIZ! Hasene azalmadı.`);
     }
+}
+
+// MÜZİK MENÜSÜ FONKSİYONLARI
+function showMusicMenu(event) {
+    event.preventDefault(); // Sağ tık menüsünü engelle
+    
+    const musicMenu = document.getElementById('musicMenu');
+    const isVisible = musicMenu.style.display === 'block';
+    
+    if (isVisible) {
+        musicMenu.style.display = 'none';
+    } else {
+        musicMenu.style.display = 'block';
+    }
+    
+    // Dışarı tıklanınca menüyü kapat
+    setTimeout(() => {
+        document.addEventListener('click', closeMusicMenuOnClickOutside);
+    }, 100);
+}
+
+function closeMusicMenuOnClickOutside(event) {
+    const musicMenu = document.getElementById('musicMenu');
+    const musicContainer = document.querySelector('.music-container');
+    
+    if (!musicContainer.contains(event.target)) {
+        musicMenu.style.display = 'none';
+        document.removeEventListener('click', closeMusicMenuOnClickOutside);
+    }
+}
+
+function openEsmaulHusna() {
+    document.getElementById('musicMenu').style.display = 'none';
+    
+    // Yeni sekmede Esmaül Hüsna sayfasını aç
+    window.open('esmaul-husna.html', '_blank', 'width=900,height=700,scrollbars=yes');
+    
+    // Bilgi mesajı göster
+    showNotification('🕌 Esmaül Hüsna tesbihat sayfası açıldı!', 'success');
+}
+
+function playGameMusic() {
+    document.getElementById('musicMenu').style.display = 'none';
+    
+    // Normal oyun müziğini çal
+    if (window.soundManager) {
+        window.soundManager.toggleMusic();
+    }
+    
+    showNotification('🎵 Oyun müziği başlatıldı!', 'success');
+}
+
+function openPlaylistSystem() {
+    document.getElementById('musicMenu').style.display = 'none';
+    
+    // Playlist sistem sayfasını aç
+    window.open('playlist-system.html', '_blank', 'width=900,height=700,scrollbars=yes');
+    
+    showNotification('📜 Playlist sistemi açıldı!', 'success');
+}
+
+function showNotification(message, type = 'info') {
+    // Bildirim göster
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = message;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'success' ? '#58cc02' : '#1cb0f6'};
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 10000;
+        font-weight: 600;
+        animation: slideInRight 0.3s ease;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // 3 saniye sonra kaldır
+    setTimeout(() => {
+        notification.style.animation = 'slideOutRight 0.3s ease';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// Animasyon CSS'ini ekle
+if (!document.getElementById('musicMenuStyles')) {
+    const style = document.createElement('style');
+    style.id = 'musicMenuStyles';
+    style.textContent = `
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+        .notification {
+            font-family: var(--font-family);
+        }
+    `;
+    document.head.appendChild(style);
 }
 
 
