@@ -184,10 +184,71 @@ if (typeof window.soundManager === 'undefined') {
 
 // Ayet Dinle ve Oku görevini tetikleyen fonksiyon
 async function showAyetTask() {
-    let response = await fetch('ayetoku.json');
-    let ayetler = await response.json();
+    console.log('🎯 showAyetTask başlatıldı');
+    
+    // Zorluk sistemine entegre et - önce localStorage'dan oku
+    let difficulty = localStorage.getItem('difficulty') || 'medium';
+    
+    // Normalize et (Türkçe değerler varsa İngilizce'ye çevir)
+    const migrationMap = {
+        'kolay': 'easy',
+        'orta': 'medium', 
+        'zor': 'hard'
+    };
+    if (migrationMap[difficulty]) {
+        difficulty = migrationMap[difficulty];
+    }
+    
+    // Geçerli değer kontrolü
+    if (!['easy', 'medium', 'hard'].includes(difficulty)) {
+        difficulty = 'medium';
+    }
+    
+    console.log(`🎯 Seçili zorluk: ${difficulty}`);
+    
+    const game = window.arabicLearningGame;
+    let ayetler = [];
+    
+    if (game && game.ayetData && game.ayetData.length > 0) {
+        ayetler = game.getDifficultyAyets(game.ayetData, difficulty);
+        console.log(`🎯 ${difficulty} seviyesi için ${ayetler.length} ayet bulundu`);
+    } else {
+        console.warn('⚠️ Game instance bulunamadı, manuel filtreleme yapılacak');
+    }
+    
+    // Fallback: Eğer zorluk sistemi çalışmazsa normal yükleme
+    if (ayetler.length === 0) {
+        console.log('⚠️ Fallback moduna geçiliyor...');
+        let response = await fetch('ayetoku.json');
+        let allAyetler = await response.json();
+        
+        // Manuel filtreleme yap
+        ayetler = allAyetler.filter(ayet => {
+            if (!ayet || !ayet['ayahs.text_uthmani_tajweed']) return false;
+            const arabicText = ayet['ayahs.text_uthmani_tajweed'];
+            const wordCount = arabicText.split(/\s+/).filter(word => word.length > 2).length;
+            
+            switch(difficulty) {
+                case 'easy': return wordCount >= 3 && wordCount <= 6;
+                case 'medium': return wordCount >= 7 && wordCount <= 12;
+                case 'hard': return wordCount >= 13;
+                default: return true;
+            }
+        });
+        
+        console.log(`🔧 Manuel filtreleme: ${difficulty} için ${ayetler.length} ayet bulundu`);
+        
+        // Eğer hâlâ boşsa tümünü al
+        if (ayetler.length === 0) {
+            ayetler = allAyetler;
+            console.log(`⚠️ Hiç ayet bulunamadı, tüm ayetler kullanılacak: ${ayetler.length}`);
+        }
+    }
+    
     let randomIndex = Math.floor(Math.random() * ayetler.length);
     let ayet = ayetler[randomIndex];
+    
+    console.log(`✅ Seçilen ayet kelime sayısı: ${ayet['ayahs.text_uthmani_tajweed'] ? ayet['ayahs.text_uthmani_tajweed'].split(/\s+/).filter(w => w.length > 2).length : 'bilinmiyor'}`);
 
     let modal = document.createElement('div');
     modal.id = 'ayetModal';
