@@ -1098,6 +1098,9 @@ class ArabicLearningGame {
             const element = document.getElementById(id);
             if (element) {
                 element.textContent = value;
+                console.log(`🔄 DOM Updated: ${id} = ${value}`);
+            } else {
+                console.warn(`⚠️ Element not found: ${id}`);
             }
         };
         
