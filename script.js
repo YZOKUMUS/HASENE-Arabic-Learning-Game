@@ -512,7 +512,12 @@ class ArabicLearningGame {
         const normalized = this.normalizeDifficulty(newDifficulty);
         this.difficulty = normalized;
         localStorage.setItem('difficulty', normalized);
-        console.log(`✅ Difficulty set to: "${normalized}"`);
+        
+        // 🧹 Cache'i temizle ki değişiklik hemen etkili olsun
+        this.cachedDifficultyWords = null;
+        this.cachedDifficultyAyets = null;
+        
+        console.log(`✅ Difficulty set to: "${normalized}" | Cache cleared ✨`);
         return normalized;
     }
     
@@ -3218,8 +3223,29 @@ function checkAnswer() {
 }
 
 function setDifficulty(level) {
-    if (game) {
-        game.setDifficulty(level);
+    // 🎮 Game objesi kontrolü - tüm referansları dene
+    const gameObj = window.game || window.arabicLearningGame || game;
+    
+    if (gameObj && typeof gameObj.setDifficulty === 'function') {
+        console.log(`🎯 Difficulty ayarlanıyor: ${level}`);
+        gameObj.setDifficulty(level);
+        
+        // 🔄 Cache'i temizle ki yeni difficulty hemen etkili olsun
+        if (gameObj.cachedDifficultyWords) {
+            gameObj.cachedDifficultyWords = null;
+            console.log('🧹 Difficulty cache temizlendi');
+        }
+        
+        // 🎨 UI güncellemesi
+        document.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.getElementById(level + 'Btn').classList.add('active');
+        
+        console.log(`✅ Difficulty başarıyla ${level} olarak ayarlandı!`);
+    } else {
+        console.error('❌ Game objesi bulunamadı - setDifficulty çalışmadı!');
+        console.error('🔍 Debug:', { windowGame: window.game, globalGame: game });
     }
 }
 
