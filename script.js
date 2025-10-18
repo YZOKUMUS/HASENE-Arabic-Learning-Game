@@ -1129,6 +1129,9 @@ class ArabicLearningGame {
         const xpNeededForNext = nextLevelXP - currentLevelXP;
         const xpProgress = (xpInCurrentLevel / xpNeededForNext) * 100;
         
+        // 🔧 Debug log for XP progress
+        console.log(`🔄 XP Progress: ${xpInCurrentLevel}/${xpNeededForNext} = ${xpProgress.toFixed(1)}%`);
+        
         safeUpdateStyle('xpProgress', 'width', `${Math.max(0, xpProgress)}%`);
         safeUpdateElement('currentXP', xpInCurrentLevel);
         safeUpdateElement('nextLevelXP', xpNeededForNext);
