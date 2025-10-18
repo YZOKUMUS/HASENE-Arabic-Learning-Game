@@ -770,7 +770,7 @@ class ArabicLearningGame {
             console.log('Data yükleniyor...');
             
             // Kelime verileri yükle
-            const wordResponse = await fetch('data.json');
+            const wordResponse = await fetch('./data.json');
             if (!wordResponse.ok) {
                 throw new Error(`HTTP Error: ${wordResponse.status}`);
             }
@@ -778,26 +778,71 @@ class ArabicLearningGame {
             console.log(`✅ ${this.wordData.length} kelime başarıyla yüklendi!`);
             
             // Ayet verileri yükle (boşluk doldurma modu için)
-            const ayetResponse = await fetch('ayetoku.json');
+            const ayetResponse = await fetch('./ayetoku.json');
             if (!ayetResponse.ok) {
                 throw new Error(`HTTP Error: ${ayetResponse.status}`);
             }
             this.ayetData = await ayetResponse.json();
             console.log(`✅ ${this.ayetData.length} ayet başarıyla yüklendi!`);
             
-            // Test: İlk 5 kelimeyi göster
-            console.log('İlk 5 kelime:', this.wordData.slice(0, 5));
-            console.log('İlk 5 ayet:', this.ayetData.slice(0, 5));
-            
         } catch (error) {
-            console.error('❌ Kelime verisi yükleme hatası:', error);
+            console.warn('❌ Data loading failed, using fallback data');
             
-            // Show user-friendly error message
-            alert(`Oyun verileri yüklenemedi!\n\nLütfen:\n• İnternet bağlantınızı kontrol edin\n• Sayfayı yenileyin (F5)\n• Tarayıcı cache'ini temizleyin\n\nHata: ${error.message}`);
+            // Fallback data - minimal test data
+            this.wordData = [
+                {
+                    "id": 1,
+                    "kelime": "السَّلَامُ عَلَيْكُمْ",
+                    "okunusu": "es-selâmu aleykum",
+                    "anlami": "Size selam olsun",
+                    "sure": "Genel",
+                    "kategori": "Selamlaşma"
+                },
+                {
+                    "id": 2,
+                    "kelime": "بِسْمِ اللَّهِ",
+                    "okunusu": "bismillah",
+                    "anlami": "Allah'ın adıyla",
+                    "sure": "Fatiha",
+                    "kategori": "Başlangıç"
+                },
+                {
+                    "id": 3,
+                    "kelime": "الْحَمْدُ لِلَّهِ",
+                    "okunusu": "elhamdulillah",
+                    "anlami": "Hamd Allah'a mahsustur",
+                    "sure": "Fatiha",
+                    "kategori": "Şükür"
+                },
+                {
+                    "id": 4,
+                    "kelime": "رَبِّ الْعَالَمِينَ",
+                    "okunusu": "rabbil âlemîn",
+                    "anlami": "Alemlerin Rabbi",
+                    "sure": "Fatiha",
+                    "kategori": "Allah'ın Sıfatları"
+                },
+                {
+                    "id": 5,
+                    "kelime": "الرَّحْمَٰنِ الرَّحِيمِ",
+                    "okunusu": "er-rahmânir rahîm",
+                    "anlami": "Rahman ve Rahim olan",
+                    "sure": "Fatiha",
+                    "kategori": "Allah'ın Sıfatları"
+                }
+            ];
             
-            // Set empty data to prevent further errors
-            this.wordData = [];
-            return;
+            this.ayetData = [
+                {
+                    "id": 1,
+                    "arapca": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+                    "turkce": "Rahman ve Rahim olan Allah'ın adıyla",
+                    "sure": "Fatiha",
+                    "ayet": 1
+                }
+            ];
+            
+            console.log(`✅ Fallback: ${this.wordData.length} words, ${this.ayetData.length} verses ready`);
         }
     }
     
@@ -2544,16 +2589,34 @@ class ArabicLearningGame {
         Object.values(this.achievements).forEach(achievement => {
             const isUnlocked = this.unlockedAchievements.includes(achievement.id);
             const progress = this.getAchievementProgress(achievement);
+            const conditionMet = this.checkAchievementCondition(achievement);
             
             const item = document.createElement('div');
-            item.className = `achievement-item ${isUnlocked ? 'unlocked' : 'locked'}`;
+            item.className = `achievement-item ${isUnlocked ? 'unlocked' : (conditionMet ? 'ready' : 'locked')}`;
+            
+            // Special styling for completed but not yet unlocked
+            if (conditionMet && !isUnlocked) {
+                item.style.background = 'linear-gradient(135deg, #fff3cd, #ffeaa7)';
+                item.style.borderColor = '#ffc107';
+                item.style.animation = 'achievementReady 2s ease-in-out infinite';
+            }
             
             item.innerHTML = `
                 <i class="${achievement.icon} achievement-icon"></i>
                 <div class="achievement-title">${achievement.title}</div>
                 <div class="achievement-desc">${achievement.description}</div>
                 ${!isUnlocked && progress ? `<div class="achievement-progress">${progress}</div>` : ''}
+                ${conditionMet && !isUnlocked ? `<div class="achievement-ready">🎉 Hazır!</div>` : ''}
             `;
+            
+            // Add click handler for ready achievements
+            if (conditionMet && !isUnlocked) {
+                item.style.cursor = 'pointer';
+                item.onclick = () => {
+                    this.unlockAchievementWithEffects(achievement.id);
+                    this.showAchievements(); // Refresh the modal
+                };
+            }
             
             grid.appendChild(item);
         });
@@ -2590,9 +2653,43 @@ class ArabicLearningGame {
         } else if (id === 'ayahExplorer') {
             const fillBlankGames = parseInt(localStorage.getItem('fillblankGames')) || 0;
             return `${fillBlankGames}/50`;
+        } else if (id === 'hasene1000') {
+            return `${this.stats.totalHasene}/1000`;
+        } else if (id === 'streak30') {
+            return `${this.stats.currentStreak}/30`;
+        } else if (id === 'wordGuru') {
+            return `${this.stats.wordsLearned}/100`;
+        } else if (id === 'gameAddict') {
+            return `${this.stats.gamesPlayed}/100`;
+        } else if (id === 'perfectStreak') {
+            return `${this.stats.perfectStreak || 0}/5`;
+        } else if (id === 'fastLearner') {
+            const avg = Math.round(this.stats.averageTime / 1000);
+            return avg > 2 ? `${avg}s/2s` : 'Tamamlandı!';
+        } else if (id === 'smartLearner') {
+            return 'Yanlış kelimeyi doğru yap';
+        } else if (id === 'ayetListener') {
+            const ayetHasene = parseInt(localStorage.getItem('ayetHasene')) || 0;
+            return `${ayetHasene}/100 hasene`;
+        } else if (id === 'duaListener') {
+            const duaCount = parseInt(localStorage.getItem('listenedDuaCount')) || 0;
+            return `${duaCount}/10 dua`;
+        } else if (id === 'quranLover') {
+            const uniqueSuras = this.getUniqueSuras();
+            return `${uniqueSuras}/10 sure`;
         }
         
         return null;
+    }
+
+    // 🎯 Check if achievement condition is met (without unlocking)
+    checkAchievementCondition(achievement) {
+        try {
+            return achievement.condition();
+        } catch (error) {
+            console.warn(`Achievement ${achievement.id} condition check failed:`, error);
+            return false;
+        }
     }
 
     checkNewAchievements() {
@@ -3901,10 +3998,6 @@ ArabicLearningGame.prototype.showAchievementNotification = function(achievementI
     const achievement = this.achievements[achievementId];
     if (!achievement) return;
     
-    // Console log for debugging
-    console.log(`🎉 ACHIEVEMENT UNLOCKED: ${achievement.title}`);
-    console.log(`📝 ${achievement.description}`);
-    
     // 🎨 Show visual achievement notification
     this.showVisualAchievement(achievement);
 };
@@ -4070,53 +4163,6 @@ ArabicLearningGame.prototype.unlockAchievementWithEffects = function(achievement
     
     return true;
 };
-
-// 🎨 TEST FUNCTIONS for Development
-function testMajorAchievement() {
-    console.log('🧪 Testing Major Achievement...');
-    const majorAchievements = ['smartLearner', 'hasene1000', 'streak30', 'perfectStreak', 'wordGuru'];
-    const randomAchievement = majorAchievements[Math.floor(Math.random() * majorAchievements.length)];
-    
-    // Temporarily remove from unlocked list to test again
-    const index = game.unlockedAchievements.indexOf(randomAchievement);
-    if (index > -1) {
-        game.unlockedAchievements.splice(index, 1);
-    }
-    
-    game.unlockAchievementWithEffects(randomAchievement);
-}
-
-function testMiniAchievement() {
-    console.log('🧪 Testing Mini Achievement...');
-    const miniAchievements = ['firstGame', 'streak3', 'hasene100', 'perfect10', 'speedster'];
-    const randomAchievement = miniAchievements[Math.floor(Math.random() * miniAchievements.length)];
-    
-    // Temporarily remove from unlocked list to test again
-    const index = game.unlockedAchievements.indexOf(randomAchievement);
-    if (index > -1) {
-        game.unlockedAchievements.splice(index, 1);
-    }
-    
-    game.unlockAchievementWithEffects(randomAchievement);
-}
-
-function testAllAchievementEffects() {
-    console.log('🧪 Testing All Achievement Effects...');
-    const allAchievements = Object.keys(game.achievements);
-    
-    let delay = 0;
-    allAchievements.forEach(achievement => {
-        setTimeout(() => {
-            // Remove from unlocked temporarily
-            const index = game.unlockedAchievements.indexOf(achievement);
-            if (index > -1) {
-                game.unlockedAchievements.splice(index, 1);
-            }
-            game.unlockAchievementWithEffects(achievement);
-        }, delay);
-        delay += 6000; // 6 second intervals
-    });
-}
 
 // Shop UI güncelleme devre dışı - manuel kullanım için
 // document.addEventListener('DOMContentLoaded', () => {
