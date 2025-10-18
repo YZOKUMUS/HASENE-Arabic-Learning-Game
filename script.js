@@ -1070,7 +1070,11 @@ class ArabicLearningGame {
             this.stats.totalHasene = newHasene;
         }
         
-        // 🛡️ Koruma ekle
+        // � XP senkronizasyonu - XP = totalHasene olduğu için güncelle
+        this.totalHasene = newHasene;
+        this.xp = newHasene;
+        
+        // �🛡️ Koruma ekle
         const currentCount = parseInt(localStorage.getItem(type + 's')) || 0;
         localStorage.setItem(type + 's', currentCount + 1);
         
