@@ -1217,7 +1217,7 @@ class ArabicLearningGame {
             const wordStats = JSON.parse(localStorage.getItem('wordStats')) || {};
             
             // Smart word selection algorithm
-            const selectedWords = this.selectSmartWords(questionCount, wordStats);
+            const selectedWords = this.selectSmartWords(questionCount, this.getDifficulty());
             
             console.log(`Seçilen kelime sayısı: ${selectedWords.length}`);
             
