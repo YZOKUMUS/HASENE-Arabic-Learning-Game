@@ -1007,7 +1007,7 @@ class ArabicLearningGame {
         // 💸 Hasene düş (hem localStorage hem de game object)
         const newHasene = currentHasene - price;
         localStorage.setItem('hasene', newHasene);
-        this.totalHasene = newHasene;
+        this.stats.totalHasene = newHasene;
         
         // 🛡️ Koruma ekle
         const currentCount = parseInt(localStorage.getItem(type + 's')) || 0;
@@ -3113,12 +3113,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 🛍️ Shop UI'ını başlangıçta güncelle
     updateShopUI();
-    
-    // 🌙 Tema sistemini başlat
-    initializeTheme();
-    
-    // 🔊 Enhanced Sound System'i başlat
-    initializeEnhancedSounds();
     
     // Background müzik ayarlarını yükle
     initializeBackgroundMusic();
