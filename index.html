@@ -557,6 +557,30 @@
                     </div>
                 </div>
                 
+                <!-- Streak Shop Section -->
+                <div class="streak-protection-section">
+                    <div class="protection-header">
+                        <h3>🛡️ Streak Koruması</h3>
+                        <p>Streak'ini korumak için özel öğeler!</p>
+                    </div>
+                    <div class="protection-inventory">
+                        <div class="protection-item">
+                            <span class="protection-icon">🛡️</span>
+                            <span class="protection-name">Streak Freeze</span>
+                            <span class="protection-count" id="streakFreezeCount">0</span>
+                        </div>
+                        <div class="protection-item">
+                            <span class="protection-icon">🏖️</span>
+                            <span class="protection-name">Weekend Pass</span>
+                            <span class="protection-count" id="weekendPassCount">0</span>
+                        </div>
+                    </div>
+                    <button class="shop-access-btn" onclick="showStreakShop()">
+                        <i class="fas fa-shopping-cart"></i>
+                        Koruma Mağazası
+                    </button>
+                </div>
+                
                 <div class="stats-charts">
                     <div class="chart-section">
                         <h3>Haftalık Hasene Grafiği</h3>
@@ -618,7 +642,48 @@
     </div>
 
     <!-- Achievement Unlock Modal -->
-    <div id="achievementUnlockModal" class="modal" style="display: none;">
+    <!-- Streak Shop Modal -->
+    <div id="streakShopModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeStreakShop()">&times;</span>
+            <h2>🛡️ Streak Koruma Mağazası</h2>
+            <p>Streak'ini korumak için özel öğeler satın al!</p>
+            
+            <div class="shop-items-grid">
+                <div class="shop-item">
+                    <div class="item-icon">🛡️</div>
+                    <h3>Streak Freeze</h3>
+                    <p>1 gün koruma sağlar. Bir gün oynayamazsan streak'in kırılmaz.</p>
+                    <div class="item-price">💰 100 Hasene</div>
+                    <div class="item-owned">Sahip olduğun: <span id="ownedStreakFreezes">0</span></div>
+                    <button class="shop-buy-btn" onclick="buyItem('streakFreeze')">Satın Al</button>
+                </div>
+                
+                <div class="shop-item">
+                    <div class="item-icon">🏖️</div>
+                    <h3>Weekend Pass</h3>
+                    <p>2 gün koruma sağlar. Hafta sonu için mükemmel!</p>
+                    <div class="item-price">💰 180 Hasene</div>
+                    <div class="item-owned">Sahip olduğun: <span id="ownedWeekendPasses">0</span></div>
+                    <button class="shop-buy-btn" onclick="buyItem('weekendPass')">Satın Al</button>
+                </div>
+            </div>
+            
+            <div class="shop-info">
+                <h4>📖 Nasıl Çalışır?</h4>
+                <ul>
+                    <li>🛡️ Streak Freeze: 1 gün kaçırırsan otomatik devreye girer</li>
+                    <li>🏖️ Weekend Pass: 2 gün kaçırırsan otomatik devreye girer</li>
+                    <li>⚡ Koruma kullanıldığında streak'in kırılmaz</li>
+                    <li>📱 Korumaların stokunu üstteki butondan görebilirsin</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Achievement Unlock Modal DEVRE DIŞI -->
+    <!-- 
+    <div id="achievementUnlockModal" class="modal">
         <div class="modal-content achievement-unlock">
             <div class="achievement-unlock-animation">
                 <i class="fas fa-trophy" id="unlockedAchievementIcon"></i>
@@ -629,6 +694,7 @@
             <button class="modal-btn" onclick="closeAchievementUnlockModal()">Harika!</button>
         </div>
     </div>
+    -->
 
     <audio id="audioPlayer" preload="none"></audio>
     <audio id="backgroundMusic" preload="auto" loop>

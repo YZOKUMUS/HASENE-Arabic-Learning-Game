@@ -415,7 +415,10 @@ class ArabicLearningGame {
         
         // Sınırsız kalp kontrolü - şimdilik devre dışı
         unlimitedHeartsActive = false; // localStorage.getItem('unlimitedHearts') === 'true';
+        
+        // Production için hasene sistemi
         this.totalHasene = parseInt(localStorage.getItem('totalHasene')) || 0;
+        
         this.streak = parseInt(localStorage.getItem('streak')) || 0;
         // Progressive level system - Her seviye daha zor
         this.level = this.calculateLevel(this.totalHasene);
@@ -833,8 +836,19 @@ class ArabicLearningGame {
                 this.checkStreakMilestone(oldStreak, this.streak);
                 
             } else if (this.lastPlayDate !== '') {
-                // Missed a day, reset streak
-                this.streak = 1;
+                // Check if streak protection should be used
+                const daysMissed = this.calculateDaysMissed(this.lastPlayDate, today);
+                const streakProtectionUsed = this.useStreakProtection(daysMissed);
+                
+                if (streakProtectionUsed) {
+                    // Streak protected! Continue without breaking
+                    console.log(`🛡️ Streak koruması kullanıldı! ${daysMissed} gün korundu. Streak devam ediyor: ${this.streak}`);
+                    // Streak sayısı aynı kalır, sadece tarihi güncelle
+                } else {
+                    // No protection available or too many days missed, reset streak
+                    console.log(`💔 Streak kırıldı! ${daysMissed} gün kaçırıldı. Yeni streak başlıyor.`);
+                    this.streak = 1;
+                }
             } else {
                 // First time playing
                 this.streak = 0;
@@ -847,6 +861,106 @@ class ArabicLearningGame {
         
         localStorage.setItem('lastPlayDate', today);
         localStorage.setItem('streak', this.streak.toString());
+    }
+
+    // 🛡️ Streak Koruma Sistemi
+    calculateDaysMissed(lastPlayDate, today) {
+        const lastDate = new Date(lastPlayDate);
+        const currentDate = new Date(today);
+        const timeDiff = currentDate.getTime() - lastDate.getTime();
+        const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+        return daysDiff - 1; // -1 çünkü dün oynamış olması normal
+    }
+
+    useStreakProtection(daysMissed) {
+        // Streak koruma malzemelerini kontrol et
+        let streakFreezes = parseInt(localStorage.getItem('streakFreezes')) || 0;
+        let weekendPasses = parseInt(localStorage.getItem('weekendPasses')) || 0;
+        
+        console.log(`🛡️ Koruma durumu: ${streakFreezes} Streak Freeze, ${weekendPasses} Weekend Pass`);
+        
+        if (daysMissed === 1 && streakFreezes > 0) {
+            // 1 gün kaçırdı, Streak Freeze kullan
+            streakFreezes--;
+            localStorage.setItem('streakFreezes', streakFreezes);
+            
+            // Kullanım kaydı
+            this.logStreakProtectionUsage('Streak Freeze', 1);
+            return true;
+            
+        } else if (daysMissed === 2 && weekendPasses > 0) {
+            // 2 gün kaçırdı, Weekend Pass kullan
+            weekendPasses--;
+            localStorage.setItem('weekendPasses', weekendPasses);
+            
+            // Kullanım kaydı
+            this.logStreakProtectionUsage('Weekend Pass', 2);
+            return true;
+            
+        } else if (daysMissed <= 2 && streakFreezes >= daysMissed) {
+            // Birden fazla Streak Freeze kullan
+            streakFreezes -= daysMissed;
+            localStorage.setItem('streakFreezes', streakFreezes);
+            
+            // Kullanım kaydı
+            this.logStreakProtectionUsage(`${daysMissed}x Streak Freeze`, daysMissed);
+            return true;
+        }
+        
+        return false; // Koruma kullanılamadı
+    }
+
+    logStreakProtectionUsage(protectionType, daysSaved) {
+        const usageLog = JSON.parse(localStorage.getItem('streakProtectionLog')) || [];
+        usageLog.push({
+            date: new Date().toISOString(),
+            type: protectionType,
+            daysSaved: daysSaved,
+            streakAtTime: this.streak
+        });
+        
+        // Son 10 kullanımı sakla
+        if (usageLog.length > 10) {
+            usageLog.splice(0, usageLog.length - 10);
+        }
+        
+        localStorage.setItem('streakProtectionLog', JSON.stringify(usageLog));
+        console.log(`✅ ${protectionType} kullanıldı! ${daysSaved} gün korundu.`);
+    }
+
+    // 🛒 Streak Koruma Satın Alma Sistemi
+    buyStreakProtection(type) {
+        const prices = {
+            'streakFreeze': 100,    // 100 hasene
+            'weekendPass': 180      // 180 hasene (daha pahalı ama 2 gün)
+        };
+        
+        const price = prices[type];
+        if (!price) {
+            console.error('❌ Geçersiz koruma tipi!');
+            return false;
+        }
+        
+        // 💰 localStorage'dan güncel hasene al
+        const currentHasene = parseInt(localStorage.getItem('hasene')) || 0;
+        
+        if (currentHasene < price) {
+            console.log(`❌ Yetersiz hasene! ${type} için ${price} hasene gerekli, mevcut: ${currentHasene}`);
+            return false;
+        }
+        
+        // 💸 Hasene düş (hem localStorage hem de game object)
+        const newHasene = currentHasene - price;
+        localStorage.setItem('hasene', newHasene);
+        this.totalHasene = newHasene;
+        
+        // 🛡️ Koruma ekle
+        const currentCount = parseInt(localStorage.getItem(type + 's')) || 0;
+        localStorage.setItem(type + 's', currentCount + 1);
+        
+        console.log(`✅ ${type} satın alındı! ${price} hasene harcandı. Kalan: ${newHasene}`);
+        this.updateUI();
+        return true;
     }
     
     updateUI() {
@@ -892,7 +1006,10 @@ class ArabicLearningGame {
         safeUpdateElement('currentLevel', this.level);
         safeUpdateElement('nextLevel', this.level + 1);
         
-
+        // Update streak shop UI if available
+        if (typeof updateShopUI === 'function') {
+            updateShopUI();
+        }
     }
     
     startGame(mode = 'translation') {
@@ -997,9 +1114,13 @@ class ArabicLearningGame {
         console.log(`Generated ${this.questions.length} questions for ${this.gameMode} mode`);
     }
     
-    selectSmartWords(count, wordStats) {
+    selectSmartWords(count, difficulty) {
         // 🔧 Güvenli difficulty kullanımı
-        const safeDifficulty = this.getDifficulty();
+        const safeDifficulty = difficulty || this.getDifficulty();
+        
+        // 📊 localStorage'dan word statistics'i oku
+        const wordStats = JSON.parse(localStorage.getItem('wordStats') || '{}');
+        console.log(`📈 WordStats yüklendi: ${Object.keys(wordStats).length} kelime`);
         
         // Zorluk seviyesine göre kelime havuzunu filtrele
         const difficultyWords = this.getDifficultyWords(this.wordData, safeDifficulty);
@@ -1021,9 +1142,9 @@ class ArabicLearningGame {
             // Calculate priority weight
             let weight = 1;
             
-            // Recently wrong words get higher priority (3x)
+            // Recently wrong words get higher priority (25x for guaranteed visibility)
             if (stats.wrong > stats.correct) {
-                weight *= 3;
+                weight *= 25;
             }
             
             // Words never seen get medium priority (2x)
@@ -1051,6 +1172,29 @@ class ArabicLearningGame {
         const selected = [];
         const usedWords = new Set();
         
+        // 🎯 İLK ÖNCE YANLIŞ KELİMELERİ GARANTİ ET!
+        const wrongWords = difficultyWords.filter(word => {
+            const stats = wordStats[word.kelime];
+            return stats && stats.wrong > 0;
+        });
+        
+        console.log(`🔴 ${wrongWords.length} yanlış kelime bulundu`);
+        
+        // 🎯 TÜM YANLIŞ KELİMELERİ GARANTİLE! (maksimum count-2 adet)
+        const maxWrongWords = Math.min(wrongWords.length, count - 2); // En az 2 slot random için bırak
+        for (let i = 0; i < maxWrongWords; i++) {
+            const randomIndex = Math.floor(Math.random() * wrongWords.length);
+            const word = wrongWords[randomIndex];
+            
+            if (!usedWords.has(word.kelime)) {
+                selected.push(word);
+                usedWords.add(word.kelime);
+                console.log(`✅ Yanlış kelime eklendi: ${word.kelime} (wrong: ${wordStats[word.kelime]?.wrong})`);
+                wrongWords.splice(randomIndex, 1); // Kullanılan kelimeyi çıkar
+            }
+        }
+        
+        // Kalan slotları ağırlıklı sistemle doldur
         for (let word of shuffled) {
             if (!usedWords.has(word.kelime) && selected.length < count) {
                 selected.push(word);
@@ -1058,7 +1202,7 @@ class ArabicLearningGame {
             }
         }
         
-        // Fill remaining slots with random words if needed
+        // Son çare: rastgele kelimelerle doldur
         while (selected.length < count && difficultyWords.length > 0) {
             const randomWord = difficultyWords[Math.floor(Math.random() * difficultyWords.length)];
             if (!usedWords.has(randomWord.kelime)) {
@@ -2436,6 +2580,9 @@ class ArabicLearningGame {
     }
 
     checkNewAchievements() {
+        // DEVRE DIŞI: Oyun açılışında otomatik achievement gösterimini engelle
+        return;
+        
         console.log('🏆 Rozetler kontrol ediliyor...');
         console.log('Stats:', this.stats);
         console.log('Açılmış rozetler:', this.unlockedAchievements);
@@ -2455,8 +2602,8 @@ class ArabicLearningGame {
         this.unlockedAchievements.push(achievement.id);
         localStorage.setItem('unlockedAchievements', JSON.stringify(this.unlockedAchievements));
         
-        // Show unlock animation
-        this.showAchievementUnlock(achievement);
+        // DEVRE DIŞI: Otomatik achievement gösterimini engelle
+        // this.showAchievementUnlock(achievement);
         
         // Update notification badge
         this.updateNotificationBadges();
@@ -2615,6 +2762,7 @@ class ArabicLearningGame {
     }
 
     updateNotificationBadges() {
+        // Sadece bildirim sayısını güncelle, otomatik açılış yapma
         const newAchievements = Object.values(this.achievements).filter(achievement => 
             achievement.condition() && !this.unlockedAchievements.includes(achievement.id)
         ).length;
@@ -2849,6 +2997,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof game === 'undefined' || game === null) {
         game = new ArabicLearningGame();
     }
+    
+    // 🛍️ Shop UI'ını başlangıçta güncelle
+    updateShopUI();
     
     // Background müzik ayarlarını yükle
     initializeBackgroundMusic();
@@ -3546,6 +3697,74 @@ if (!document.getElementById('musicMenuStyles')) {
     `;
     document.head.appendChild(style);
 }
+
+// 🛡️ Streak Shop Fonksiyonları
+function showStreakShop() {
+    updateShopUI();
+    document.getElementById('streakShopModal').style.display = 'block';
+}
+
+function closeStreakShop() {
+    document.getElementById('streakShopModal').style.display = 'none';
+}
+
+function updateShopUI() {
+    // Sahip olunan koruma sayılarını güncelle
+    const streakFreezes = parseInt(localStorage.getItem('streakFreezes')) || 0;
+    const weekendPasses = parseInt(localStorage.getItem('weekendPasses')) || 0;
+    
+    // Shop modal'daki sayıları güncelle
+    document.getElementById('ownedStreakFreezes').textContent = streakFreezes;
+    document.getElementById('ownedWeekendPasses').textContent = weekendPasses;
+    
+    // Header'daki mini counter'ları güncelle
+    document.getElementById('streakFreezeCount').textContent = streakFreezes;
+    document.getElementById('weekendPassCount').textContent = weekendPasses;
+}
+
+function buyItem(itemType, buttonElement) {
+    if (window.game || game) {
+        const gameObj = window.game || game;
+        const success = gameObj.buyStreakProtection(itemType);
+        
+        if (success) {
+            updateShopUI();
+            
+            // Başarı animasyonu (sadece button varsa)
+            const buyBtn = buttonElement || event?.target;
+            if (buyBtn) {
+                buyBtn.style.background = '#4CAF50';
+                buyBtn.textContent = '✅ Satın Alındı!';
+                
+                setTimeout(() => {
+                    buyBtn.style.background = '#667eea';
+                    buyBtn.textContent = 'Satın Al';
+                }, 2000);
+            }
+        } else {
+            // Başarısız animasyonu (sadece button varsa)
+            const buyBtn = buttonElement || event?.target;
+            if (buyBtn) {
+                buyBtn.style.background = '#f44336';
+                buyBtn.textContent = '❌ Yetersiz Hasene';
+                
+                setTimeout(() => {
+                    buyBtn.style.background = '#667eea';
+                    buyBtn.textContent = 'Satın Al';
+                }, 2000);
+            }
+        }
+    } else {
+        console.error('❌ Game objesi bulunamadı!');
+    }
+}
+
+// Shop UI güncelleme devre dışı - manuel kullanım için
+// document.addEventListener('DOMContentLoaded', () => {
+//     setTimeout(() => {
+//         updateShopUI();
+//     }, 1000);
+// });
 
 
 
