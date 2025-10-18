@@ -1247,7 +1247,10 @@ class ArabicLearningGame {
         // 🔧 Güvenli difficulty kullanımı
         const safeDifficulty = difficulty || this.getDifficulty();
         
-        // 📊 localStorage'dan word statistics'i oku
+        // � Debug: Geçilen parametreleri kontrol et
+        console.log(`🔍 selectSmartWords parametreleri:`, { count, difficulty, safeDifficulty, type: typeof safeDifficulty });
+        
+        // �📊 localStorage'dan word statistics'i oku
         const wordStats = JSON.parse(localStorage.getItem('wordStats') || '{}');
         console.log(`📈 WordStats yüklendi: ${Object.keys(wordStats).length} kelime`);
         
