@@ -987,8 +987,9 @@ class ArabicLearningGame {
         // Zorluk seviyesine göre kelime havuzunu filtrele
         const difficultyWords = this.getDifficultyWords(this.wordData, safeDifficulty);
         
-        console.log(`Zorluk seviyesi: ${safeDifficulty}`);
-        console.log(`Toplam kelime: ${this.wordData.length}, Filtrelenmiş: ${difficultyWords.length}`);
+        console.log(`🎯 KELIME ÇEVİRİ OYUNU - Zorluk seviyesi: ${safeDifficulty}`);
+        console.log(`📊 Toplam kelime: ${this.wordData.length}, Filtrelenmiş: ${difficultyWords.length}`);
+        console.log(`🔢 Difficulty aralığı: ${safeDifficulty === 'easy' ? '3-7' : safeDifficulty === 'medium' ? '8-12' : '13-21'}`);
         
         const weightedWords = [];
         
@@ -1094,9 +1095,14 @@ class ArabicLearningGame {
     
     getWrongAnswers(correctAnswer, count) {
         const wrongAnswers = [];
-        // Use difficulty-filtered words for wrong answers too
-        const difficultyWords = this.getDifficultyWords(this.wordData, this.difficulty);
-        const allAnswers = difficultyWords.map(word => word.anlam).filter(answer => answer !== correctAnswer);
+        
+        // Cache için static değişken kullan - sadece bir kez hesapla
+        if (!this.cachedDifficultyWords || this.cachedDifficulty !== this.difficulty) {
+            this.cachedDifficultyWords = this.getDifficultyWords(this.wordData, this.difficulty);
+            this.cachedDifficulty = this.difficulty;
+        }
+        
+        const allAnswers = this.cachedDifficultyWords.map(word => word.anlam).filter(answer => answer !== correctAnswer);
         
         // If difficulty-filtered answers are too few, fallback to all words
         const answersPool = allAnswers.length >= count ? allAnswers : 
@@ -2650,6 +2656,7 @@ class ArabicLearningGame {
                 selectedWords = wordData.filter(word => 
                     word.difficulty >= 3 && word.difficulty <= 7
                 );
+                console.log(`🟢 EASY: Difficulty 3-7 arasında ${selectedWords.length} kelime bulundu`);
                 break;
                 
             case 'medium':
@@ -2657,6 +2664,7 @@ class ArabicLearningGame {
                 selectedWords = wordData.filter(word => 
                     word.difficulty >= 8 && word.difficulty <= 12
                 );
+                console.log(`🟡 MEDIUM: Difficulty 8-12 arasında ${selectedWords.length} kelime bulundu`);
                 break;
                 
             case 'hard':
@@ -2664,13 +2672,23 @@ class ArabicLearningGame {
                 selectedWords = wordData.filter(word => 
                     word.difficulty >= 13 && word.difficulty <= 21
                 );
+                console.log(`🔴 HARD: Difficulty 13-21 arasında ${selectedWords.length} kelime bulundu`);
                 break;
                 
             default:
                 selectedWords = wordData;
+                console.log(`⚪ DEFAULT: Tüm ${selectedWords.length} kelime kullanılıyor`);
         }
 
-        console.log(`${difficulty} seviyesi için ${selectedWords.length} kelime bulundu`);
+        // Seçilen kelimelerin difficulty dağılımını göster (sadece ilk seferde)
+        if (selectedWords.length > 0 && !this.difficultyStatsShown) {
+            const difficultyStats = selectedWords.reduce((acc, word) => {
+                acc[word.difficulty] = (acc[word.difficulty] || 0) + 1;
+                return acc;
+            }, {});
+            console.log(`📈 Difficulty dağılımı:`, difficultyStats);
+            this.difficultyStatsShown = true;
+        }
         return selectedWords;
     }
 
