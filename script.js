@@ -852,6 +852,8 @@ class ArabicLearningGame {
     }
     
     showScreen(screenId) {
+        console.log(`🖥️ showScreen çağrıldı: "${screenId}"`);
+        
         // Hide all screens
         document.querySelectorAll('.screen').forEach(screen => {
             screen.style.display = 'none';
@@ -860,8 +862,12 @@ class ArabicLearningGame {
         // Show requested screen
         const targetScreen = document.getElementById(screenId);
         if (targetScreen) {
+            console.log(`✅ Target screen bulundu: ${screenId}`);
             targetScreen.style.display = 'flex';
             targetScreen.scrollTop = 0;
+            console.log(`✅ Screen aktif edildi: ${screenId}`);
+        } else {
+            console.error(`❌ Screen bulunamadı: ${screenId}`);
         }
         
         // Music control based on screen
@@ -921,6 +927,51 @@ class ArabicLearningGame {
         
         localStorage.setItem('lastPlayDate', today);
         localStorage.setItem('streak', this.streak.toString());
+    }
+
+    // 🔥 Simplified Streak Update (called when game completed)
+    checkAndUpdateStreak() {
+        const today = new Date().toDateString();
+        const lastPlayDate = localStorage.getItem('lastPlayDate') || '';
+        
+        console.log(`🔥 Streak kontrol: Son oyun=${lastPlayDate}, Bugün=${today}`);
+        
+        if (lastPlayDate === today) {
+            // Bugün zaten oynandı - streak değişmez
+            console.log('✅ Bugün zaten oynandı, streak korunuyor');
+            return;
+        }
+        
+        if (!lastPlayDate || lastPlayDate === '') {
+            // İlk kez oynanıyor
+            this.streak = 1;
+            console.log('🎯 İlk oyun! Streak = 1');
+        } else {
+            const daysMissed = this.calculateDaysMissed(lastPlayDate, today);
+            
+            if (daysMissed === 1) {
+                // Ardışık gün - streak artır
+                this.streak++;
+                console.log(`🔥 Ardışık gün! Streak = ${this.streak}`);
+            } else if (daysMissed > 1) {
+                // Gün kaçırıldı - streak protection kontrol et
+                const streakProtectionUsed = this.useStreakProtection(daysMissed);
+                
+                if (!streakProtectionUsed) {
+                    // Streak kırıldı
+                    this.streak = 1;
+                    console.log(`💔 Streak kırıldı (${daysMissed} gün kaçırıldı). Yeni streak = 1`);
+                } else {
+                    // Protection kullanıldı, streak korundu
+                    console.log(`🛡️ Streak protection kullanıldı! Streak korundu: ${this.streak}`);
+                }
+            }
+        }
+        
+        // Save updated streak
+        localStorage.setItem('streak', this.streak.toString());
+        localStorage.setItem('lastPlayDate', today);
+        this.updateUI();
     }
 
     // 🛡️ Streak Koruma Sistemi
@@ -1199,6 +1250,13 @@ class ArabicLearningGame {
         console.log(`🎯 KELIME ÇEVİRİ OYUNU - Zorluk seviyesi: ${safeDifficulty}`);
         console.log(`📊 Toplam kelime: ${this.wordData.length}, Filtrelenmiş: ${difficultyWords.length}`);
         console.log(`🔢 Difficulty aralığı: ${safeDifficulty === 'easy' ? '3-7' : safeDifficulty === 'medium' ? '8-12' : '13-21'}`);
+        console.log(`🏪 localStorage difficulty: "${localStorage.getItem('difficulty')}"`);
+        console.log(`🎮 Game instance difficulty: "${this.difficulty}"`);
+        
+        // İlk 5 kelimeyi göster test için
+        if (difficultyWords.length > 0) {
+            console.log(`🔍 İlk 5 kelime örneği:`, difficultyWords.slice(0,5).map(w => `${w.kelime} (diff:${w.difficulty})`));
+        };
         
         const weightedWords = [];
         
@@ -1449,8 +1507,8 @@ class ArabicLearningGame {
             setTimeout(() => this.playAudio(), 500);
         }
         
-        // Show word ID for debugging
-        document.getElementById('wordId').textContent = `ID: ${question.word.id}`;
+        // Show word ID and difficulty for debugging
+        document.getElementById('wordId').textContent = `ID: ${question.word.id} | Difficulty: ${question.word.difficulty} | Mod: ${this.gameMode}`;
         
         // Show options, hide input and Arabic keyboard
         document.getElementById('optionsContainer').style.display = 'grid';
@@ -1477,8 +1535,8 @@ class ArabicLearningGame {
         document.getElementById('questionText').textContent = question.word.anlam;
         document.getElementById('audioBtn').style.display = 'inline-block';
         
-        // Show word ID for debugging
-        document.getElementById('wordId').textContent = `ID: ${question.word.id}`;
+        // Show word ID and difficulty for debugging
+        document.getElementById('wordId').textContent = `ID: ${question.word.id} | Difficulty: ${question.word.difficulty} | Mod: ${this.gameMode}`;
         
         // Show input and Arabic keyboard
         document.getElementById('optionsContainer').style.display = 'none';
@@ -1952,7 +2010,9 @@ class ArabicLearningGame {
                 // Continue with the new questions
             } else {
                 console.log('Game completed! Total questions:', this.questions.length);
+                console.log('🎮 completeGame() çağrılıyor...');
                 this.completeGame();
+                console.log('✅ completeGame() tamamlandı');
                 return;
             }
         }
@@ -1967,15 +2027,16 @@ class ArabicLearningGame {
     }
     
     skipQuestion() {
-        // Sonsuz modda soru tükendiyse yeni sorular ekle
+        // 🔍 Soru kontrolü - sadece aktif sorular için skip işlemi
         if (this.currentQuestion >= this.questions.length) {
-            if (this.isEndlessMode && this.hearts > 0) {
-                this.addMoreEndlessQuestions();
-            } else {
-                console.warn('Soru tükendi ve sonsuz mod değil');
-                this.completeGame();
-                return;
-            }
+            console.warn('⚠️ Skip tetiklendi ama soru kalmadı. Oyun zaten tamamlanmış olmalı.');
+            // Oyun zaten bitmiş, skip'i ignore et
+            return;
+        }
+        
+        // Sonsuz modda soru tükendiyse yeni sorular ekle
+        if (this.currentQuestion === this.questions.length - 1 && this.isEndlessMode && this.hearts > 0) {
+            this.addMoreEndlessQuestions();
         }
         
         // Mark as incorrect but don't lose heart
@@ -2102,68 +2163,112 @@ class ArabicLearningGame {
     }
     
     completeGame() {
-        // ❌ Kalp kontrolü kaldırıldı - artık kalp bitince de oyun tamamlanabilir
-        
-        // Calculate results
-        const totalQuestions = this.questions.length;
-        const accuracy = Math.round((this.score / totalQuestions) * 100);
-        
-        // Award Hasene and update stats
-        this.totalHasene += this.gameHasene;
-        this.dailyHasene += this.gameHasene;
-        
-        // Update words learned (mastery-based calculation)
-        // Gerçekten öğrenilen kelimeleri hesapla (en az 10 kez doğru)
-        this.wordsLearned = this.calculateMasteredWords();
-        
-        // Oyun modu sayacını güncelle
-        const modeKey = this.gameMode + 'Games'; // translationGames, listeningGames, speedGames, fillblankGames
-        const currentCount = parseInt(localStorage.getItem(modeKey)) || 0;
-        localStorage.setItem(modeKey, (currentCount + 1).toString());
-        
-        // Boşluk doldurma modunda mükemmel performansı kaydet
-        if (this.gameMode === 'fillblank' && accuracy === 100) {
-            localStorage.setItem('lastFillBlankPerfect', 'true');
-            console.log('🏆 Boşluk doldurma mükemmel performans kaydedildi!');
-        } else if (this.gameMode === 'fillblank') {
-            localStorage.setItem('lastFillBlankPerfect', 'false');
+        console.log('🎮 completeGame() başlatıldı');
+        try {
+            // ❌ Kalp kontrolü kaldırıldı - artık kalp bitince de oyun tamamlanabilir
+            
+            // Calculate results
+            console.log('📊 Results hesaplanıyor...');
+            const totalQuestions = this.questions.length;
+            const accuracy = Math.round((this.score / totalQuestions) * 100);
+            console.log(`📊 Results: ${this.score}/${totalQuestions} = ${accuracy}%`);
+            
+            // Award Hasene and update stats
+            console.log('💰 Hasene güncelleniyor...');
+            this.totalHasene += this.gameHasene;
+            this.dailyHasene += this.gameHasene;
+            console.log(`💰 Game hasene: ${this.gameHasene}, Total: ${this.totalHasene}`);
+            
+            // Update words learned (mastery-based calculation)
+            console.log('📚 Öğrenilen kelimeler hesaplanıyor...');
+            // Gerçekten öğrenilen kelimeleri hesapla (en az 10 kez doğru)
+            this.wordsLearned = this.calculateMasteredWords();
+            console.log(`📚 Öğrenilen kelimeler: ${this.wordsLearned}`);
+            
+            // Oyun modu sayacını güncelle
+            console.log('🎮 Game mode counter güncelleniyor...');
+            const modeKey = this.gameMode + 'Games'; // translationGames, listeningGames, speedGames, fillblankGames
+            const currentCount = parseInt(localStorage.getItem(modeKey)) || 0;
+            localStorage.setItem(modeKey, (currentCount + 1).toString());
+            console.log(`🎮 ${modeKey}: ${currentCount + 1}`);
+            
+            // Boşluk doldurma modunda mükemmel performansı kaydet
+            if (this.gameMode === 'fillblank' && accuracy === 100) {
+                localStorage.setItem('lastFillBlankPerfect', 'true');
+                console.log('🏆 Boşluk doldurma mükemmel performans kaydedildi!');
+            } else if (this.gameMode === 'fillblank') {
+                localStorage.setItem('lastFillBlankPerfect', 'false');
+            }
+            
+            // Check for level up - Progressive system
+            console.log('⭐ Level kontrol ediliyor...');
+            const oldLevel = this.level;
+            this.level = this.calculateLevel(this.totalHasene);
+            console.log(`⭐ Level: ${oldLevel} → ${this.level}`);
+            
+            // Update streak if daily goal is met (1000 hasene)
+            if (this.dailyHasene >= 1000 && this.streak === 0) {
+                this.streak = 1;
+                console.log('🔥 Daily goal reached, streak = 1');
+            }
+            
+            // Save to localStorage
+            console.log('💾 localStorage kaydediliyor...');
+            localStorage.setItem('totalHasene', this.totalHasene.toString());
+            localStorage.setItem('dailyHasene', this.dailyHasene.toString());
+            localStorage.setItem('streak', this.streak.toString());
+            
+            // Store daily hasene in calendar data
+            console.log('📅 Calendar data güncelleniyor...');
+            const today = new Date().toDateString();
+            this.storeDailyHasene(today, this.gameHasene);
+            
+            // 🔥 STREAK UPDATE: Oyun tamamlanması = streak güncellemesi
+            console.log('🔥 Streak kontrol ediliyor...');
+            const hasPlayedToday = this.hasPlayedToday(today);
+            if (!hasPlayedToday) {
+                // İlk kez bugün oynadı - streak güncelle
+                this.checkAndUpdateStreak();
+                this.updateStreakData(today, true);
+                console.log(`🔥 Streak güncellendi! Yeni streak: ${this.streak}`);
+            }
+            
+            // Update streak data if daily goal met (bonus)
+            if (this.dailyHasene >= 1000) {
+                console.log('🎯 Daily goal completed! Bonus streak reinforcement.');
+            }
+            
+            // Update game statistics and check achievements
+            console.log('📊 Game stats güncelleniyor...');
+            this.updateGameStats();
+            
+            // Show results screen
+            console.log('🎉 Results screen gösteriliyor...');
+            this.showGameComplete(totalQuestions, accuracy, oldLevel);
+            
+            console.log('✅ completeGame() tamamlandı!');
+            
+        } catch (error) {
+            console.error('❌ completeGame() ERROR:', error);
+            console.error('Stack trace:', error.stack);
+            // Fallback: En azından results screen'i göstermeye çalış
+            try {
+                this.showGameComplete(10, 0, 1);
+            } catch (fallbackError) {
+                console.error('❌ Fallback de başarısız:', fallbackError);
+            }
         }
-        
-        // Check for level up - Progressive system
-        const oldLevel = this.level;
-        this.level = this.calculateLevel(this.totalHasene);
-        
-        // Update streak if daily goal is met (1000 hasene)
-        if (this.dailyHasene >= 1000 && this.streak === 0) {
-            this.streak = 1;
-        }
-        
-        // Save to localStorage
-        localStorage.setItem('totalHasene', this.totalHasene.toString());
-        localStorage.setItem('dailyHasene', this.dailyHasene.toString());
-        localStorage.setItem('streak', this.streak.toString());
-        
-        // Store daily hasene in calendar data
-        const today = new Date().toDateString();
-        this.storeDailyHasene(today, this.gameHasene);
-        
-        // Update streak data if daily goal met
-        if (this.dailyHasene >= 1000) {
-            this.updateStreakData(today, true);
-        }
-        
-        // Update game statistics and check achievements
-        this.updateGameStats();
-        
-        // Show results screen
-        this.showGameComplete(totalQuestions, accuracy, oldLevel);
     }
     
     showGameComplete(totalQuestions, accuracy, oldLevel) {
+        console.log('🎉 showGameComplete başlatıldı:', {totalQuestions, accuracy, oldLevel});
+        
         // Play success fanfare
         if (window.soundManager) {
             window.soundManager.playSuccess();
         }
+        
+        console.log('📊 Results güncelleniyor...');
         
         // Update results display
         document.getElementById('earnedHasene').textContent = this.gameHasene;
@@ -2187,7 +2292,17 @@ class ArabicLearningGame {
         }
         
         // Show complete screen
+        console.log('🖥️ showScreen("gameComplete") çağrılıyor...');
         this.showScreen('gameComplete');
+        console.log('✅ showScreen tamamlandı');
+        
+        // 🎮 Game tamamlandı - UI temizle
+        const skipBtn = document.querySelector('.skip-btn');
+        if (skipBtn) {
+            skipBtn.style.display = 'none'; // Skip butonunu gizle
+        }
+        
+        console.log('🎉 Game complete screen gösteriliyor...');
         
         // Check for level up
         if (this.level > oldLevel) {
@@ -2488,6 +2603,12 @@ class ArabicLearningGame {
     
     isStreakDay(dateString) {
         // Check if this day is part of current streak
+        const streakData = JSON.parse(localStorage.getItem('streakData') || '{}');
+        return streakData[dateString] === true;
+    }
+    
+    hasPlayedToday(dateString) {
+        // Check if any game was played today (based on streak data)
         const streakData = JSON.parse(localStorage.getItem('streakData') || '{}');
         return streakData[dateString] === true;
     }
