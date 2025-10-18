@@ -1002,21 +1002,32 @@ class ArabicLearningGame {
         }
         
         // 💰 localStorage'dan güncel hasene al
-        const currentHasene = parseInt(localStorage.getItem('hasene')) || 0;
+        const currentHasene = parseInt(localStorage.getItem('totalHasene')) || 0;
+        console.log(`💰 Satın alma kontrolü: ${type} | Fiyat: ${price} | Mevcut: ${currentHasene}`);
         
         if (currentHasene < price) {
             console.log(`❌ Yetersiz hasene! ${type} için ${price} hasene gerekli, mevcut: ${currentHasene}`);
             return false;
         }
         
-        // 💸 Hasene düş (hem localStorage hem de game object)
+        // 💸 Hasene düş (localStorage priority)
         const newHasene = currentHasene - price;
-        localStorage.setItem('hasene', newHasene);
-        this.stats.totalHasene = newHasene;
+        localStorage.setItem('totalHasene', newHasene);  // totalHasene key kullan
+        
+        // 📊 Game stats güncelle (varsa)
+        if (this.stats && typeof this.stats === 'object') {
+            this.stats.totalHasene = newHasene;
+        }
         
         // 🛡️ Koruma ekle
         const currentCount = parseInt(localStorage.getItem(type + 's')) || 0;
         localStorage.setItem(type + 's', currentCount + 1);
+        
+        console.log(`✅ ${type} satın alındı! ${price} hasene harcandı. Kalan: ${newHasene} | ${type}s: ${currentCount + 1}`);
+        
+        // 🔄 UI güncelle
+        this.updateUI();
+        return true;
         
         console.log(`✅ ${type} satın alındı! ${price} hasene harcandı. Kalan: ${newHasene}`);
         this.updateUI();
@@ -3855,6 +3866,9 @@ function updateShopUI() {
     // Sahip olunan koruma sayılarını güncelle
     const streakFreezes = parseInt(localStorage.getItem('streakFreezes')) || 0;
     const weekendPasses = parseInt(localStorage.getItem('weekendPasses')) || 0;
+    const currentHasene = parseInt(localStorage.getItem('totalHasene')) || 0;  // totalHasene key kullan
+    
+    console.log(`🛍️ Shop UI güncelleniyor: Hasene=${currentHasene}, Freezes=${streakFreezes}, Passes=${weekendPasses}`);
     
     // Shop modal'daki sayıları güncelle
     document.getElementById('ownedStreakFreezes').textContent = streakFreezes;
@@ -3863,6 +3877,12 @@ function updateShopUI() {
     // Header'daki mini counter'ları güncelle
     document.getElementById('streakFreezeCount').textContent = streakFreezes;
     document.getElementById('weekendPassCount').textContent = weekendPasses;
+    
+    // 💰 Hasene görünümünü güncelle (varsa)
+    const haseneDisplay = document.getElementById('hasene');
+    if (haseneDisplay) {
+        haseneDisplay.textContent = currentHasene;
+    }
 }
 
 function buyItem(itemType, buttonElement) {
@@ -3871,7 +3891,7 @@ function buyItem(itemType, buttonElement) {
     
     if (gameObj && typeof gameObj.buyStreakProtection === 'function') {
         console.log(`🛒 Satın alma işlemi başlatılıyor: ${itemType}`);
-        console.log(`💰 Mevcut hasene: ${localStorage.getItem('hasene') || 0}`);
+        console.log(`💰 Mevcut hasene: ${localStorage.getItem('totalHasene') || 0}`);  // totalHasene key
         
         const success = gameObj.buyStreakProtection(itemType);
         
