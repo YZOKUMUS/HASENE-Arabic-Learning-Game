@@ -1,6 +1,5 @@
 ﻿// Sound Manager Class
-if (typeof SoundManager === 'undefined') {
-    class SoundManager {
+class SoundManager {
         constructor() {
             this.audioGenerator = null;
             this.soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
@@ -176,7 +175,6 @@ if (typeof SoundManager === 'undefined') {
         // Müzik durdurma devre dışı bırakıldı
         return;
     }
-}
 }
 
 // Global SoundManager instance
@@ -2286,7 +2284,7 @@ class ArabicLearningGame {
             btn.classList.remove('active');
         });
         
-        const activeBtn = document.getElementById(savedDifficulty + 'Btn');
+        const activeBtn = document.getElementById(this.difficulty + 'Btn');
         if (activeBtn) {
             activeBtn.classList.add('active');
         }

@@ -7,8 +7,8 @@
   "background_color": "#667eea",
   "theme_color": "#58cc02",
   "orientation": "portrait",
-  "id": "/SES_DINLE_ANLAM_BUL/",
-  "scope": "/SES_DINLE_ANLAM_BUL/",
+  "id": "./",
+  "scope": "./",
   "lang": "tr",
   "dir": "rtl",
   "categories": [
