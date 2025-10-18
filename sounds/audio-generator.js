@@ -303,6 +303,46 @@ class AudioGenerator {
             });
         }, 650);
     }
+    
+    // 🎯 NEW: Smart Learner Achievement Sound
+    playSmartLearnerSound() {
+        if (!this.audioContext) return;
+        
+        // Enlightenment melody - progression representing learning
+        const melody = [
+            {freq: 440, duration: 0.15, delay: 0},      // A4
+            {freq: 523.25, duration: 0.15, delay: 150}, // C5
+            {freq: 659.25, duration: 0.15, delay: 300}, // E5
+            {freq: 783.99, duration: 0.3, delay: 450},  // G5 (longer)
+        ];
+        
+        melody.forEach(({freq, duration, delay}) => {
+            setTimeout(() => {
+                this.createTone(freq, duration, 'triangle', 0.4);
+                // Add harmonics for richness
+                this.createTone(freq * 1.5, duration, 'sine', 0.2);
+            }, delay);
+        });
+        
+        // Add final flourish
+        setTimeout(() => {
+            this.createTone(880, 0.4, 'sine', 0.3); // A5
+        }, 750);
+    }
+    
+    // 🎯 NEW: Streak Protection Used Sound
+    playStreakProtectionSound() {
+        if (!this.audioContext) return;
+        
+        // Shield activation sound
+        this.createTone(880, 0.1, 'sawtooth', 0.4);
+        setTimeout(() => {
+            this.createTone(1108.7, 0.2, 'triangle', 0.3);
+        }, 100);
+        setTimeout(() => {
+            this.createTone(1318.5, 0.3, 'sine', 0.2);
+        }, 250);
+    }
 }
 
 // Global instance

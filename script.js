@@ -571,6 +571,16 @@ class ArabicLearningGame {
                 icon: 'fas fa-crown',
                 condition: () => this.stats.totalHasene >= 500
             },
+            smartLearner: {
+                id: 'smartLearner',
+                title: '🧠 Akıllı Öğrenci',
+                description: 'Yanlış yaptığın bir kelimeyi doğru yaptın! Bu öğrenmenin gücüdür.',
+                icon: 'fas fa-lightbulb',
+                condition: () => {
+                    // Bu achievement özel olarak checkSmartLearner() fonksiyonunda kontrol edilecek
+                    return false;
+                }
+            },
             perfect10: {
                 id: 'perfect10',
                 title: '📿 Kemâl Sahibi',
@@ -1582,6 +1592,9 @@ class ArabicLearningGame {
             clearQuestionTimer();
         }
         
+        // 🧠 Smart Learner için son cevabı kaydet
+        this.lastAnswerCorrect = isCorrect;
+        
         const question = this.questions[this.currentQuestion];
         
         // Update word statistics for smart repetition (sadece kelime modları için)
@@ -2276,6 +2289,9 @@ class ArabicLearningGame {
         
         // Check for new achievements
         this.checkNewAchievements();
+        
+        // 🧠 Smart Learner Achievement kontrolü
+        this.checkSmartLearnerAchievement();
         
         // Update notification badges
         this.updateNotificationBadges();
@@ -3000,6 +3016,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 🛍️ Shop UI'ını başlangıçta güncelle
     updateShopUI();
+    
+    // 🌙 Tema sistemini başlat
+    initializeTheme();
+    
+    // 🔊 Enhanced Sound System'i başlat
+    initializeEnhancedSounds();
     
     // Background müzik ayarlarını yükle
     initializeBackgroundMusic();
@@ -3730,6 +3752,11 @@ function buyItem(itemType, buttonElement) {
         if (success) {
             updateShopUI();
             
+            // 🔊 Purchase success sound
+            if (window.audioGenerator) {
+                window.audioGenerator.playPurchaseSound();
+            }
+            
             // Başarı animasyonu (sadece button varsa)
             const buyBtn = buttonElement || event?.target;
             if (buyBtn) {
@@ -3757,6 +3784,338 @@ function buyItem(itemType, buttonElement) {
     } else {
         console.error('❌ Game objesi bulunamadı!');
     }
+}
+
+// 📊 Statistics Modal Functions
+function showStatsModal() {
+    updateStatsDisplay();
+    document.getElementById('statsModal').style.display = 'block';
+    
+    // 🔊 Stats open sound effect
+    if (window.audioGenerator) {
+        window.audioGenerator.playStatsOpenSound();
+    }
+}
+
+function closeStatsModal() {
+    document.getElementById('statsModal').style.display = 'none';
+}
+
+function updateStatsDisplay() {
+    // localStorage'dan istatistikleri al
+    const wordStats = JSON.parse(localStorage.getItem('wordStats') || '{}');
+    const totalGames = parseInt(localStorage.getItem('totalGamesPlayed')) || 0;
+    const streak = parseInt(localStorage.getItem('streak')) || 0;
+    const bestStreak = parseInt(localStorage.getItem('bestStreak')) || 0;
+    
+    // Doğru/yanlış hesapla
+    let totalCorrect = 0;
+    let totalWrong = 0;
+    const wrongWords = [];
+    
+    Object.entries(wordStats).forEach(([word, stats]) => {
+        totalCorrect += stats.correct || 0;
+        totalWrong += stats.wrong || 0;
+        
+        if (stats.wrong > 0) {
+            wrongWords.push({ word, count: stats.wrong });
+        }
+    });
+    
+    // Başarı oranı hesapla
+    const totalAnswers = totalCorrect + totalWrong;
+    const accuracy = totalAnswers > 0 ? Math.round((totalCorrect / totalAnswers) * 100) : 0;
+    
+    // UI'ı güncelle
+    document.getElementById('totalGamesPlayed').textContent = totalGames;
+    document.getElementById('totalCorrectAnswers').textContent = totalCorrect;
+    document.getElementById('totalWrongAnswers').textContent = totalWrong;
+    document.getElementById('accuracyRate').textContent = `${accuracy}%`;
+    document.getElementById('currentStreak').textContent = streak;
+    document.getElementById('bestStreak').textContent = bestStreak;
+    
+    // En çok yanlış yapılan kelimeleri göster
+    updateMostWrongWords(wrongWords);
+    
+    console.log('📊 Stats güncellendi:', { totalGames, totalCorrect, totalWrong, accuracy, streak });
+}
+
+function updateMostWrongWords(wrongWords) {
+    const container = document.getElementById('mostWrongWords');
+    
+    // En çok yanlış yapılanları sırala (en fazla 5 tane)
+    const sortedWords = wrongWords
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+    
+    if (sortedWords.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: #777;">Henüz yanlış cevap yok! 🎉</p>';
+        return;
+    }
+    
+    container.innerHTML = sortedWords
+        .map(item => `
+            <div class="wrong-word-item">
+                <span class="wrong-word-text">${item.word}</span>
+                <span class="wrong-word-count">${item.count}x</span>
+            </div>
+        `).join('');
+}
+
+// 🧠 Smart Learner Achievement Functions
+// 🧠 Smart Learner Achievement Functions
+ArabicLearningGame.prototype.checkSmartLearnerAchievement = function() {
+    // Sadece doğru cevap verildiyse kontrol et
+    if (this.lastAnswerCorrect && this.currentQuestion && this.currentQuestion.word) {
+        const currentWord = this.currentQuestion.word.kelime;
+        const wordStats = JSON.parse(localStorage.getItem('wordStats') || '{}');
+        
+        console.log(`🧠 Smart Learner kontrol: ${currentWord}`);
+        console.log(`📊 Word stats:`, wordStats[currentWord]);
+        
+        // Bu kelime daha önce yanlış yapılmış mı?
+        if (wordStats[currentWord] && wordStats[currentWord].wrong > 0) {
+            console.log(`✅ ${currentWord} kelimesi daha önce yanlış yapılmış (${wordStats[currentWord].wrong}x)`);
+            
+            // Smart Learner achievement'ı zaten kazanılmış mı?
+            if (!this.unlockedAchievements.includes('smartLearner')) {
+                this.unlockAchievement('smartLearner');
+                console.log('🏆 Smart Learner Achievement kazanıldı!');
+            } else {
+                console.log('🏆 Smart Learner zaten kazanılmış');
+            }
+        } else {
+            console.log(`❌ ${currentWord} kelimesi daha önce yanlış yapılmamış`);
+        }
+    } else {
+        console.log('❌ Smart Learner kontrol edilemedi - son cevap yanlış veya kelime yok');
+    }
+};
+
+ArabicLearningGame.prototype.unlockAchievement = function(achievementId) {
+    // Use the new effects-enabled function
+    return this.unlockAchievementWithEffects(achievementId);
+};
+
+ArabicLearningGame.prototype.showAchievementNotification = function(achievementId) {
+    const achievement = this.achievements[achievementId];
+    if (!achievement) return;
+    
+    // Console log for debugging
+    console.log(`🎉 ACHIEVEMENT UNLOCKED: ${achievement.title}`);
+    console.log(`📝 ${achievement.description}`);
+    
+    // 🎨 Show visual achievement notification
+    this.showVisualAchievement(achievement);
+};
+
+// 🎨 NEW: Visual Achievement System
+ArabicLearningGame.prototype.showVisualAchievement = function(achievement) {
+    // Create achievement overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'achievement-overlay';
+    
+    // Determine if this is a special achievement
+    const isSpecial = ['smartLearner', 'hasene1000', 'streak30', 'perfectStreak'].includes(achievement.id);
+    if (isSpecial) {
+        overlay.classList.add('special-achievement');
+    }
+    
+    overlay.innerHTML = `
+        <div class="achievement-card">
+            <div class="particles">
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+            </div>
+            <div class="achievement-icon">${this.getAchievementEmoji(achievement.id)}</div>
+            <h2 class="achievement-title">${achievement.title}</h2>
+            <p class="achievement-description">${achievement.description}</p>
+            <div class="progress-ring">
+                <svg>
+                    <circle class="bg-circle" cx="30" cy="30" r="30"></circle>
+                    <circle class="progress-circle" cx="30" cy="30" r="30"></circle>
+                </svg>
+                <div class="percentage">100%</div>
+            </div>
+            <button class="achievement-close-btn" onclick="this.parentElement.parentElement.remove()">
+                ✨ Harika! ✨
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(overlay);
+    
+    // Trigger animation
+    setTimeout(() => {
+        overlay.classList.add('show');
+    }, 100);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (overlay.parentElement) {
+            overlay.classList.remove('show');
+            setTimeout(() => {
+                if (overlay.parentElement) {
+                    overlay.remove();
+                }
+            }, 300);
+        }
+    }, 5000);
+    
+    // 🔊 Play achievement sound
+    if (this.soundManager) {
+        this.soundManager.playAchievementUnlocked();
+    }
+    
+    // 🔊 Enhanced achievement sound
+    if (window.audioGenerator) {
+        window.audioGenerator.playAchievementSound();
+        
+        // Special sound for Smart Learner
+        if (achievement.id === 'smartLearner') {
+            setTimeout(() => {
+                window.audioGenerator.playSmartLearnerSound();
+            }, 500);
+        }
+    }
+};
+
+// 🎨 Get Achievement Emoji
+ArabicLearningGame.prototype.getAchievementEmoji = function(achievementId) {
+    const emojiMap = {
+        ayetListener: '📖',
+        duaListener: '📿',
+        firstGame: '🕌',
+        streak3: '📿',
+        streak7: '🕌',
+        streak30: '📅',
+        hasene100: '💎',
+        hasene500: '👑',
+        hasene1000: '🔥',
+        smartLearner: '💡',
+        perfect10: '⭐',
+        perfectStreak: '💎',
+        speedster: '⚡',
+        fastLearner: '🚀',
+        wordMaster: '📚',
+        wordGuru: '🎓',
+        gameAddict: '🎮',
+        quranLover: '📖',
+        fillBlankMaster: '🧩',
+        fillBlankPerfect: '📚'
+    };
+    
+    return emojiMap[achievementId] || '🏆';
+};
+
+// 🎨 Mini Achievement Notification (for less important achievements)
+ArabicLearningGame.prototype.showMiniAchievement = function(achievement) {
+    const mini = document.createElement('div');
+    mini.className = 'mini-achievement';
+    
+    mini.innerHTML = `
+        <div class="mini-achievement-icon">${this.getAchievementEmoji(achievement.id)}</div>
+        <div class="mini-achievement-text">
+            <div class="mini-achievement-title">${achievement.title}</div>
+            <div class="mini-achievement-desc">${achievement.description.substring(0, 50)}...</div>
+        </div>
+    `;
+    
+    document.body.appendChild(mini);
+    
+    // Show animation
+    setTimeout(() => {
+        mini.classList.add('show');
+    }, 100);
+    
+    // Auto remove
+    setTimeout(() => {
+        mini.classList.remove('show');
+        setTimeout(() => {
+            if (mini.parentElement) {
+                mini.remove();
+            }
+        }, 500);
+    }, 3000);
+};
+
+// 🎨 Enhanced Achievement Unlock Function
+ArabicLearningGame.prototype.unlockAchievementWithEffects = function(achievementId) {
+    const achievement = this.achievements[achievementId];
+    if (!achievement || this.unlockedAchievements.includes(achievementId)) {
+        return false;
+    }
+    
+    // Unlock the achievement
+    this.unlockedAchievements.push(achievementId);
+    localStorage.setItem('unlockedAchievements', JSON.stringify(this.unlockedAchievements));
+    
+    // Determine notification type
+    const majorAchievements = ['smartLearner', 'hasene1000', 'streak30', 'perfectStreak', 'wordGuru'];
+    
+    if (majorAchievements.includes(achievementId)) {
+        // Full screen achievement
+        this.showVisualAchievement(achievement);
+    } else {
+        // Mini notification
+        this.showMiniAchievement(achievement);
+    }
+    
+    return true;
+};
+
+// 🎨 TEST FUNCTIONS for Development
+function testMajorAchievement() {
+    console.log('🧪 Testing Major Achievement...');
+    const majorAchievements = ['smartLearner', 'hasene1000', 'streak30', 'perfectStreak', 'wordGuru'];
+    const randomAchievement = majorAchievements[Math.floor(Math.random() * majorAchievements.length)];
+    
+    // Temporarily remove from unlocked list to test again
+    const index = game.unlockedAchievements.indexOf(randomAchievement);
+    if (index > -1) {
+        game.unlockedAchievements.splice(index, 1);
+    }
+    
+    game.unlockAchievementWithEffects(randomAchievement);
+}
+
+function testMiniAchievement() {
+    console.log('🧪 Testing Mini Achievement...');
+    const miniAchievements = ['firstGame', 'streak3', 'hasene100', 'perfect10', 'speedster'];
+    const randomAchievement = miniAchievements[Math.floor(Math.random() * miniAchievements.length)];
+    
+    // Temporarily remove from unlocked list to test again
+    const index = game.unlockedAchievements.indexOf(randomAchievement);
+    if (index > -1) {
+        game.unlockedAchievements.splice(index, 1);
+    }
+    
+    game.unlockAchievementWithEffects(randomAchievement);
+}
+
+function testAllAchievementEffects() {
+    console.log('🧪 Testing All Achievement Effects...');
+    const allAchievements = Object.keys(game.achievements);
+    
+    let delay = 0;
+    allAchievements.forEach(achievement => {
+        setTimeout(() => {
+            // Remove from unlocked temporarily
+            const index = game.unlockedAchievements.indexOf(achievement);
+            if (index > -1) {
+                game.unlockedAchievements.splice(index, 1);
+            }
+            game.unlockAchievementWithEffects(achievement);
+        }, delay);
+        delay += 6000; // 6 second intervals
+    });
 }
 
 // Shop UI güncelleme devre dışı - manuel kullanım için

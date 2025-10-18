@@ -108,6 +108,17 @@
                     <i class="fas fa-volume-up" id="soundIcon"></i>
                     <span>Ses</span>
                 </button>
+                
+                <!-- 🎨 Achievement Test Buttons (Development) -->
+                <button class="action-btn dev-test" onclick="testMajorAchievement()" style="background: linear-gradient(135deg, #ffd700, #ff8c00);">
+                    <i class="fas fa-star"></i>
+                    <span>Test Büyük Rozet</span>
+                </button>
+                <button class="action-btn dev-test" onclick="testMiniAchievement()" style="background: linear-gradient(135deg, #58cc02, #4caf02);">
+                    <i class="fas fa-trophy"></i>
+                    <span>Test Mini Rozet</span>
+                </button>
+                
                 <div class="music-container">
                     <button class="action-btn sound-control" id="musicToggle" 
                             onclick="window.soundManager.toggleMusic()"
@@ -579,6 +590,10 @@
                         <i class="fas fa-shopping-cart"></i>
                         Koruma Mağazası
                     </button>
+                    
+                    <button class="shop-access-btn" onclick="showStatsModal()" style="margin-top: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                        📊 İstatistiklerim
+                    </button>
                 </div>
                 
                 <div class="stats-charts">
@@ -642,6 +657,60 @@
     </div>
 
     <!-- Achievement Unlock Modal -->
+    
+    <!-- 📊 Statistics Dashboard Modal -->
+    <div id="statsModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeStatsModal()">&times;</span>
+            <h2>📊 İstatistiklerim</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">🎮</div>
+                    <div class="stat-number" id="totalGamesPlayed">0</div>
+                    <div class="stat-label">Toplam Oyun</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-number" id="totalCorrectAnswers">0</div>
+                    <div class="stat-label">Doğru Cevap</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">❌</div>
+                    <div class="stat-number" id="totalWrongAnswers">0</div>
+                    <div class="stat-label">Yanlış Cevap</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">📈</div>
+                    <div class="stat-number" id="accuracyRate">0%</div>
+                    <div class="stat-label">Başarı Oranı</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">🔥</div>
+                    <div class="stat-number" id="currentStreak">0</div>
+                    <div class="stat-label">Mevcut Streak</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">🏆</div>
+                    <div class="stat-number" id="bestStreak">0</div>
+                    <div class="stat-label">En İyi Streak</div>
+                </div>
+            </div>
+            
+            <div class="stats-details">
+                <h3>📚 En Çok Yanlış Yapılan Kelimeler</h3>
+                <div id="mostWrongWords" class="wrong-words-list">
+                    <!-- Dinamik içerik buraya gelecek -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Streak Shop Modal -->
     <div id="streakShopModal" class="modal" style="display: none;">
         <div class="modal-content">
@@ -706,6 +775,17 @@
     </audio>
     <audio id="correctSound" src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+D2u2ccBSuBzvLZjTgHEWe57+OZUQ4IVKTk97VaFws+ltryxXksBS6Hz/LdjTgIG2q+7eSXSAoOVKLm9L1mFgkugM3110g+CV+16iKcWAcLflG1cfkGrrcY0U4YwyZs3+LB9M8H4VLQ+K36oLoi4WEYyCNU4dLDzOAfAAAA"></audio>
     <audio id="incorrectSound" src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+D2u2ccBSuBzvLZjTgHEWe57+OZUQ4IVKTk97VaFws+ltryxXksBS6Hz/LdjTgIG2q+7eSXSAoOVKLm9L1mFgkugM3110g+CV+16iKcWAcLflG1cfkGrrcY0U4YwyZs3+LB9M8H4VLQ+K36oLoi4WEYyCNU4dLDzOAfAAAA"></audio>
+    
+    <!-- 🎵 Enhanced Sound Effects - Web Audio API -->
+    <audio id="achievementSound" preload="auto">
+        <!-- Placeholder for achievement sound -->
+    </audio>
+    <audio id="streakSound" preload="auto">
+        <!-- Placeholder for streak sound -->
+    </audio>
+    <audio id="levelUpSound" preload="auto">
+        <!-- Placeholder for level up sound -->
+    </audio>
 
     <script src="sounds/audio-generator.js"></script>
     <script src="party-effects.js"></script>
