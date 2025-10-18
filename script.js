@@ -3109,6 +3109,10 @@ if (typeof game === 'undefined') {
 document.addEventListener('DOMContentLoaded', () => {
     if (typeof game === 'undefined' || game === null) {
         game = new ArabicLearningGame();
+        // 🌍 Global erişim için window'a da ekle
+        window.game = game;
+        window.arabicLearningGame = game;
+        console.log('✅ Game objesi başarıyla başlatıldı!');
     }
     
     // 🛍️ Shop UI'ını başlangıçta güncelle
@@ -3836,8 +3840,13 @@ function updateShopUI() {
 }
 
 function buyItem(itemType, buttonElement) {
-    if (window.game || game) {
-        const gameObj = window.game || game;
+    // 🎮 Game objesi kontrolü - Global game'i kullan
+    const gameObj = window.game || window.arabicLearningGame || game;
+    
+    if (gameObj && typeof gameObj.buyStreakProtection === 'function') {
+        console.log(`🛒 Satın alma işlemi başlatılıyor: ${itemType}`);
+        console.log(`💰 Mevcut hasene: ${localStorage.getItem('hasene') || 0}`);
+        
         const success = gameObj.buyStreakProtection(itemType);
         
         if (success) {
@@ -3874,6 +3883,13 @@ function buyItem(itemType, buttonElement) {
         }
     } else {
         console.error('❌ Game objesi bulunamadı!');
+        console.error('🔍 Debug bilgileri:');
+        console.error('- window.game:', window.game);
+        console.error('- window.arabicLearningGame:', window.arabicLearningGame);
+        console.error('- global game:', typeof game !== 'undefined' ? game : 'undefined');
+        
+        // Kullanıcıya hata göster
+        alert('❌ Oyun başlatılmadı! Sayfayı yenileyin.');
     }
 }
 
