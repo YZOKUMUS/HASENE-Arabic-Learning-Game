@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="tr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HASENE - Duolingo Tarzı Arapça Öğrenme</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon-192-v4-RED-MUSHAF.png">
+    <link rel="apple-touch-icon" href="icon-192-v4-RED-MUSHAF.png">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="screen">
+        <div class="loading-content">
+            <div class="loading-logo">
+                <i class="fas fa-quran"></i>
+                <h1>HASENE</h1>
+            </div>
+            
+            <!-- Hadis Metni -->
+            <div class="loading-hadis">
+                <div class="hadis-arabic">
+                    مَنْ قَرَأَ حَرْفًا مِنْ كِتَابِ اللَّهِ فَلَهُ بِهِ حَسَنَةٌ
+                </div>
+                <div class="hadis-translation">
+                    "Kim Kur'ân-ı Kerîm'den bir harf okursa, onun için bir iyilik sevabı vardır. Her bir iyiliğin karşılığı da on sevaptır. Ben, elif lâm mîm bir harftir demiyorum; bilâkis elif bir harftir, lâm bir harftir, mîm de bir harftir."
+                </div>
+                <div class="hadis-source">
+                    - Tirmizî, Sevâbü'l-Kur'ân 16
+                </div>
+            </div>
+            
+            <div class="loading-area">
+                <div class="loading-spinner"></div>
+                <div class="loading-progress">
+                    <div class="progress-bar-loading">
+                        <div class="progress-fill-loading" id="loadingProgress"></div>
+                    </div>
+                    <div class="loading-text" id="loadingText">Oyun yükleniyor...</div>
+                    <div class="loading-percentage" id="loadingPercentage">0%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Menu Screen -->
+    <div id="mainMenu" class="screen" style="display: none;">
+        <div class="header">
+            <div class="user-info">
+                <div class="streak-info">
+                    <i class="fas fa-fire streak-icon"></i>
+                    <span id="streakCount">0</span>
+                </div>
+                <div class="hasene-info">
+                    <i class="fas fa-star hasene-icon"></i>
+                    <span id="haseneCount">0</span>
+                </div>
+                <div class="level-info">
+                    <span>Seviye <span id="levelCount">1</span></span>
+                    <i class="fas fa-trophy level-icon"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="progress-section">
+                <div class="daily-goal">
+                    <h3>🎯 Günlük Hedef</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="dailyProgress" style="width: 0%"></div>
+                    </div>
+                    <p><span id="dailyHasene">0</span>/1000 Hasene</p>
+                </div>
+                
+                <!-- XP Progress -->
+                <div class="xp-section" style="margin-top: 15px;">
+                    <h3>⚡ Seviye İlerlemen</h3>
+                    <div class="level-progress">
+                        <span class="current-level">Seviye <span id="currentLevel">1</span></span>
+                        <div class="xp-bar">
+                            <div class="xp-fill" id="xpProgress" style="width: 0%"></div>
+                        </div>
+                        <span class="next-level">Seviye <span id="nextLevel">2</span></span>
+                    </div>
+                    <p class="xp-info"><span id="currentXP">0</span>/<span id="nextLevelXP">500</span> XP</p>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <button class="action-btn achievements" onclick="showAchievements()">
+                    <i class="fas fa-trophy"></i>
+                    <span>Rozetler</span>
+                    <div class="notification-badge" id="achievementsBadge" style="display: none;">!</div>
+                </button>
+                <button id="statsBtn" class="action-btn stats" onclick="showStats()">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>İstatistikler</span>
+                </button>
+                <button class="action-btn calendar" onclick="toggleCalendar()">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Takvim</span>
+                </button>
+                
+                <button id="musicButton" class="action-btn sound-control" onclick="playMusic()">
+                    <i class="fas fa-music"></i> İlahi
+                </button>
+
+                <script>
+                    let currentAudio = null; // Global değişken
+
+                    function playMusic() {
+                        if (currentAudio) {
+                            if (!currentAudio.paused) {
+                                currentAudio.pause(); // Çalan sesi durdur
+                                currentAudio.currentTime = 0; // Sesi başa sar
+                                return;
+                            }
+                        } else {
+                            currentAudio = new Audio('https://dinimizislam.com/Download/Ses/Ilahiler/4/AyDo%C4%9Fdu.mp3');
+                        }
+
+                        currentAudio.currentTime = 0; // Sesi başa sar
+                        currentAudio.play(); // Sesi çal
+                    }
+                </script>
+            </div>
+
+            <!-- Zorluk Seçimi -->
+            <div class="difficulty-section">
+                <h3>🎯 Zorluk Seviyesi Seç</h3>
+                <div class="difficulty-buttons">
+                    <button class="difficulty-btn easy" id="easyBtn" onclick="setDifficulty('easy')">
+                        <i class="fas fa-seedling"></i>
+                        <span>Kolay</span>
+                        <small>Temel kelimeler</small>
+                    </button>
+                    <button class="difficulty-btn medium active" id="mediumBtn" onclick="setDifficulty('medium')">
+                        <i class="fas fa-leaf"></i>
+                        <span>Orta</span>
+                        <small>Karışık seviye</small>
+                    </button>
+                    <button class="difficulty-btn hard" id="hardBtn" onclick="setDifficulty('hard')">
+                        <i class="fas fa-fire"></i>
+                        <span>Zor</span>
+                        <small>İleri seviye</small>
+                    </button>
+                </div>
+            </div>
+
+            <div class="game-modes">
+                <button class="game-mode-btn primary" onclick="startGame('translation')">
+                    <i class="fas fa-language"></i>
+                    <h3>Çeviri Oyunu</h3>
+                    <p>Arapça kelimeleri Türkçe'ye çevir</p>
+                </button>
+                <button class="game-mode-btn secondary" onclick="startGame('listening')">
+                    <i class="fas fa-headphones"></i>
+                    <h3>Dinleme Oyunu</h3>
+                    <p>Sesi dinle ve anlamını bul</p>
+                </button>
+                <button class="game-mode-btn challenge" onclick="startGame('speed')" style="background: linear-gradient(135deg, #ff6b6b, #ee5a24);">
+                    <i class="fas fa-bolt"></i>
+                    <h3>Hız Modu ⚡</h3>
+                    <p>15 saniyede cevapla! Hızlı puan kazan!</p>
+                </button>
+                <button class="game-mode-btn fillblank" onclick="startGame('fillblank')" style="background: linear-gradient(135deg, #9c27b0, #673ab7);">
+                    <i class="fas fa-puzzle-piece"></i>
+                    <h3>Boşluk Doldur 📝</h3>
+                    <p>Ayet'teki eksik kelimeleri bul!</p>
+                </button>
+                <button class="game-mode-btn ayet" onclick="showAyetTask()" style="background: linear-gradient(135deg, #3f51b5, #2196f3); color: #fff; text-shadow: 0 2px 8px #0008;">
+                    <i class="fas fa-book-open"></i>
+                    <h3 style="color:#fff;text-shadow:0 2px 8px #0008;">Ayet Dinle &amp; Oku</h3>
+                    <p style="color:#fff;text-shadow:0 2px 8px #0008;">Her gün bir ayet dinle ve oku!</p>
+                </button>
+                <button class="game-mode-btn dua" onclick="showDuaTask()" style="background: linear-gradient(135deg, #009688, #26a69a); color: #fff; text-shadow: 0 2px 8px #0008;">
+                    <i class="fas fa-pray"></i>
+                    <h3 style="color:#fff;text-shadow:0 2px 8px #0008;">Dua Dinleme Görevi</h3>
+                    <p style="color:#fff;text-shadow:0 2px 8px #0008;">Gün içinde dinlediğin dua kadar hasene kazan!</p>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="gameScreen" class="screen" style="display: none;">
+        <div class="game-header">
+            <div class="game-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="gameProgress"></div>
+                </div>
+                <span class="progress-text"><span id="currentQuestion">1</span>/<span id="totalQuestions">10</span></span>
+            </div>
+            <div class="game-stats">
+                <div class="hearts">
+                    <i class="fas fa-heart" id="heart1"></i>
+                    <i class="fas fa-heart" id="heart2"></i>
+                    <i class="fas fa-heart" id="heart3"></i>
+                    <i class="fas fa-heart" id="heart4"></i>
+                    <i class="fas fa-heart" id="heart5"></i>
+                </div>
+                <div class="game-hasene">
+                    <i class="fas fa-star"></i>
+                    <span id="gameHasene">0</span>
+                </div>
+            </div>
+            <button class="close-btn" onclick="returnToMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="game-content">
+            <div class="question-section">
+                <div class="question-type" id="questionType">Arapça kelimeyi çevir</div>
+                <div class="question-text" id="questionText">خَتَمَ</div>
+                <div class="word-id" id="wordId">ID: 2:7:1</div>
+                <button class="audio-btn" id="audioBtn" onclick="playAudio()">
+                    <i class="fas fa-volume-up"></i>
+                </button>
+            </div>
+
+            <div class="answer-section">
+                <!-- Multiple Choice Mode -->
+                <div class="options-container" id="optionsContainer">
+                    <button class="option-btn" onclick="selectOption(this, 0)">mühürlemiştir</button>
+                    <button class="option-btn" onclick="selectOption(this, 1)">neredeyse</button>
+                    <button class="option-btn" onclick="selectOption(this, 2)">isterler</button>
+                    <button class="option-btn" onclick="selectOption(this, 3)">değildir</button>
+                </div>
+
+                <!-- Text Input Mode -->
+                <div class="input-container" id="inputContainer" style="display: none;">
+                    <input type="text" id="answerInput" placeholder="Arapça kelimeyi yazın..." onkeypress="checkEnter(event)" readonly>
+                    <button class="check-btn" onclick="checkAnswer()">Kontrol Et</button>
+                    
+                    <!-- Arabic Virtual Keyboard -->
+                    <div class="arabic-keyboard" id="arabicKeyboard">
+                        <div class="keyboard-row">
+                            <button class="key-btn" data-char="ء">ء</button>
+                            <button class="key-btn" data-char="ا">ا</button>
+                            <button class="key-btn" data-char="ب">ب</button>
+                            <button class="key-btn" data-char="ت">ت</button>
+                            <button class="key-btn" data-char="ث">ث</button>
+                            <button class="key-btn" data-char="ج">ج</button>
+                            <button class="key-btn" data-char="ح">ح</button>
+                            <button class="key-btn" data-char="خ">خ</button>
+                        </div>
+                        <div class="keyboard-row">
+                            <button class="key-btn" data-char="د">د</button>
+                            <button class="key-btn" data-char="ذ">ذ</button>
+                            <button class="key-btn" data-char="ر">ر</button>
+                            <button class="key-btn" data-char="ز">ز</button>
+                            <button class="key-btn" data-char="س">س</button>
+                            <button class="key-btn" data-char="ش">ش</button>
+                            <button class="key-btn" data-char="ص">ص</button>
+                        </div>
+                        <div class="keyboard-row">
+                            <button class="key-btn" data-char="ض">ض</button>
+                            <button class="key-btn" data-char="ط">ط</button>
+                            <button class="key-btn" data-char="ظ">ظ</button>
+                            <button class="key-btn" data-char="ع">ع</button>
+                            <button class="key-btn" data-char="غ">غ</button>
+                            <button class="key-btn" data-char="ف">ف</button>
+                            <button class="key-btn" data-char="ق">ق</button>
+                        </div>
+                        <div class="keyboard-row">
+                            <button class="key-btn" data-char="ك">ك</button>
+                            <button class="key-btn" data-char="ل">ل</button>
+                            <button class="key-btn" data-char="م">م</button>
+                            <button class="key-btn" data-char="ن">ن</button>
+                            <button class="key-btn" data-char="ه">ه</button>
+                            <button class="key-btn" data-char="و">و</button>
+                            <button class="key-btn" data-char="ي">ي</button>
+                        </div>
+                        <div class="keyboard-row hemze-row">
+                            <button class="key-btn hemze" data-char="أ">أ</button>
+                            <button class="key-btn hemze" data-char="إ">إ</button>
+                            <button class="key-btn hemze" data-char="ؤ">ؤ</button>
+                            <button class="key-btn hemze" data-char="ئ">ئ</button>
+                        </div>
+                        <div class="keyboard-row harakat-row">
+                            <button class="key-btn haraka" data-char="َ">َ</button>
+                            <button class="key-btn haraka" data-char="ُ">ُ</button>
+                            <button class="key-btn haraka" data-char="ِ">ِ</button>
+                            <button class="key-btn haraka" data-char="ْ">ْ</button>
+                            <button class="key-btn haraka" data-char="ً">ً</button>
+                            <button class="key-btn haraka" data-char="ٌ">ٌ</button>
+                            <button class="key-btn haraka" data-char="ٍ">ٍ</button>
+                        </div>
+                        <div class="keyboard-row special-row">
+                            <button class="key-btn space-btn" onclick="addChar(' ')">Boşluk</button>
+                            <button class="key-btn backspace-btn" onclick="deleteLastChar()">⌫</button>
+                            <button class="key-btn clear-btn" onclick="clearInput()">Temizle</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="skip-btn" onclick="skipQuestion()">Geç</button>
+            </div>
+        </div>
+
+        <!-- Result Feedback -->
+        <div class="result-feedback" id="resultFeedback" style="display: none;">
+            <div class="feedback-content">
+                <div class="feedback-icon" id="feedbackIcon">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div class="feedback-text" id="feedbackText">Doğru!</div>
+                <div class="feedback-meaning" id="feedbackMeaning">خَتَمَ = mühürlemiştir</div>
+                <div class="feedback-actions">
+                    <button class="continue-btn" id="continueBtn" onclick="nextQuestion()" style="display: none;">Devam Et</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hearts Depleted Screen -->
+    <div id="heartsDepleted" class="screen" style="display: none;">
+        <div class="hearts-depleted-content">
+            <div class="broken-heart-animation">
+                <i class="fas fa-heart-broken"></i>
+            </div>
+            
+            <h2>Kalplerin Bitti!</h2>
+            <p>Endişelenme, kalp yenilemenin birkaç yolu var:</p>
+            
+            <div class="heart-refill-options">
+                <button class="refill-option watch-ad" onclick="watchAdForHearts()">
+                    <i class="fas fa-play-circle"></i>
+                    <div class="option-content">
+                        <h3>Reklam İzle</h3>
+                        <p>30 saniyelik reklam izle, 1 kalp kazan!</p>
+                        <span class="reward">+1 ❤️</span>
+                    </div>
+                </button>
+                
+                <button class="refill-option wait-time" onclick="showWaitTimer()">
+                    <i class="fas fa-clock"></i>
+                    <div class="option-content">
+                        <h3>Bekle</h3>
+                        <p>Her 30 dakikada 1 kalp yenilenir</p>
+                        <span class="timer" id="heartTimer">29:45</span>
+                    </div>
+                </button>
+                
+                <button class="refill-option unlimited" onclick="buyUnlimitedHearts()">
+                    <i class="fas fa-infinity"></i>
+                    <div class="option-content">
+                        <h3>Sınırsız Kalp</h3>
+                        <p>Hiç kalp kaybetme! (Simülasyon)</p>
+                        <span class="price">100 Hasene</span>
+                    </div>
+                </button>
+            </div>
+            
+            <div class="hearts-depleted-actions">
+                <button class="menu-btn" onclick="returnToMenu()">
+                    <i class="fas fa-home"></i>
+                    Ana Menü
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Complete Screen -->
+    <div id="gameComplete" class="screen" style="display: none;">
+        <div class="complete-content">
+            <div class="complete-animation">
+                <div class="trophy-animation">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div class="stars">
+                    <i class="fas fa-star" id="star1"></i>
+                    <i class="fas fa-star" id="star2"></i>
+                    <i class="fas fa-star" id="star3"></i>
+                </div>
+            </div>
+            
+            <h2>Tebrikler!</h2>
+            <p>Dersi tamamladın!</p>
+            
+            <div class="results-summary">
+                <div class="result-item">
+                    <i class="fas fa-star"></i>
+                    <span>Kazanılan Hasene</span>
+                    <span id="earnedHasene">0</span>
+                </div>
+                <div class="result-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Doğru Cevaplar</span>
+                    <span id="correctAnswers">0/10</span>
+                </div>
+                <div class="result-item">
+                    <i class="fas fa-percentage"></i>
+                    <span>Doğruluk Oranı</span>
+                    <span id="gameAccuracy">0%</span>
+                </div>
+                <div class="result-item">
+                    <i class="fas fa-fire"></i>
+                    <span>Streak</span>
+                    <span id="finalStreak">0 gün</span>
+                </div>
+            </div>
+            
+            <div class="complete-actions">
+                <button class="continue-learning-btn" onclick="startGame()">
+                    <i class="fas fa-redo"></i>
+                    Tekrar Oyna
+                </button>
+                <button class="menu-btn" onclick="returnToMenu()">
+                    <i class="fas fa-home"></i>
+                    Ana Menü
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Level Up Modal -->
+    <div id="levelUpModal" class="modal" style="display: none;">
+        <div class="modal-content level-up">
+            <div class="level-up-animation">
+                <i class="fas fa-trophy"></i>
+                <div class="level-badge">
+                    <span id="newLevel">2</span>
+                </div>
+            </div>
+            <h2>Seviye Atladın!</h2>
+            <p>Seviye <span id="newLevelText">2</span>'ye ulaştın!</p>
+            <button class="modal-btn" onclick="closeLevelUpModal()">Harika!</button>
+        </div>
+    </div>
+
+    <!-- Streak Modal -->
+    <div id="streakModal" class="modal" style="display: none;">
+        <div class="modal-content streak-modal">
+            <div class="streak-animation">
+                <i class="fas fa-fire"></i>
+            </div>
+            <h2>Streak Korundu!</h2>
+            <p><span id="streakDays">1</span> günlük streak'in devam ediyor!</p>
+            <button class="modal-btn" onclick="closeStreakModal()">Devam Et!</button>
+        </div>
+    </div>
+
+    <!-- Achievements Modal -->
+    <div id="achievementsModal" class="modal" style="display: none;">
+        <div class="modal-content achievements-modal">
+            <div class="modal-header">
+                <h2><i class="fas fa-trophy"></i> Başarı Rozetleri</h2>
+                <button class="close-modal-btn" onclick="closeAchievementsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="achievements-grid" id="achievementsGrid">
+                <!-- Rozetler JavaScript ile eklenecek -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar Modal -->
+    <div id="calendarModal" class="modal" style="display: none;">
+        <div class="modal-content calendar-modal">
+            <div class="modal-header">
+                <h2><i class="fas fa-calendar-alt"></i> Streak Takviminiz</h2>
+                <button class="close-modal-btn" onclick="closeCalendarModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="calendar-modal-content">
+                <div class="calendar-header">
+                    <button class="calendar-nav" onclick="changeMonth(-1)">‹</button>
+                    <h4 id="currentMonth">Ekim 2025</h4>
+                    <button class="calendar-nav" onclick="changeMonth(1)">›</button>
+                </div>
+                <div class="calendar-grid" id="calendarGrid">
+                    <!-- Takvim günleri buraya JavaScript ile eklenecek -->
+                </div>
+                <div class="calendar-legend">
+                    <div class="legend-item empty">
+                        <div class="legend-dot"></div>
+                        <span>Oynanmadı</span>
+                    </div>
+                    <div class="legend-item partial">
+                        <div class="legend-dot"></div>
+                        <span>Kısmi (1-999)</span>
+                    </div>
+                    <div class="legend-item complete">
+                        <div class="legend-dot"></div>
+                        <span>Tamamlandı (1000+)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Modal -->
+    <div id="statsModal" class="modal" style="display: none;">
+        <div class="modal-content stats-modal">
+            <div class="modal-header">
+                <h2><i class="fas fa-chart-bar"></i> Detaylı İstatistikler</h2>
+                <button class="close-modal-btn" onclick="closeStatsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="stats-content">
+                <div class="stats-summary">
+                    <div class="stat-item">
+                        <i class="fas fa-star"></i>
+                        <div>
+                            <h3 id="statTotalHasene">0</h3>
+                            <p>Toplam Hasene</p>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-calendar-check"></i>
+                        <div>
+                            <h3 id="statMaxStreak">0</h3>
+                            <p>En Uzun Streak</p>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-gamepad"></i>
+                        <div>
+                            <h3 id="statTotalGames">0</h3>
+                            <p>Doğru Kelimeler</p>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-fire"></i>
+                        <div>
+                            <h3 id="statCurrentStreak">0</h3>
+                            <p>Günlük Streak</p>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-brain"></i>
+                        <div>
+                            <h3 id="statWordsLearned">0</h3>
+                            <p>Öğrenilen Kelimeler</p>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-percentage"></i>
+                        <div>
+                            <h3 id="statAccuracyRate">0%</h3>
+                            <p>Doğruluk Oranı</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Streak Shop Section -->
+                <div class="streak-protection-section">
+                    <div class="protection-header">
+                        <h3>🛡️ Streak Koruması</h3>
+                        <p>Streak'ini korumak için özel öğeler!</p>
+                    </div>
+                    <div class="protection-inventory">
+                        <div class="protection-item">
+                            <span class="protection-icon">🛡️</span>
+                            <span class="protection-name">Streak Freeze</span>
+                            <span class="protection-count" id="streakFreezeCount">0</span>
+                        </div>
+                        <div class="protection-item">
+                            <span class="protection-icon">🏖️</span>
+                            <span class="protection-name">Weekend Pass</span>
+                            <span class="protection-count" id="weekendPassCount">0</span>
+                        </div>
+                    </div>
+                    <button class="shop-access-btn" onclick="showStreakShop()">
+                        <i class="fas fa-shopping-cart"></i>
+                        Koruma Mağazası
+                    </button>
+                    
+                    <button class="shop-access-btn" onclick="closeStatsModal()" style="margin-top: 10px; background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); color: white;">
+                        ❌ Kapat
+                    </button>
+                </div>
+                
+                <div class="stats-charts">
+                    <div class="chart-section">
+                        <h3>Haftalık Hasene Grafiği</h3>
+                        <div class="weekly-chart" id="weeklyChart">
+                            <!-- Grafik buraya eklenecek -->
+                        </div>
+                    </div>
+                    
+                    <div class="stats-details">
+                        <h3>Oyun Modu İstatistikleri</h3>
+                        <div class="game-mode-stats">
+                            <div class="mode-stat">
+                                <span class="mode-name">Çeviri</span>
+                                <div class="mode-progress">
+                                    <div class="mode-bar translation" id="translationBar"></div>
+                                </div>
+                                <span class="mode-percentage" id="translationPercent">0%</span>
+                            </div>
+                            <div class="mode-stat">
+                                <span class="mode-name">Dinleme</span>
+                                <div class="mode-progress">
+                                    <div class="mode-bar listening" id="listeningBar"></div>
+                                </div>
+                                <span class="mode-percentage" id="listeningPercent">0%</span>
+                            </div>
+                            <div class="mode-stat">
+                                <span class="mode-name">Hız</span>
+                                <div class="mode-progress">
+                                    <div class="mode-bar speed" id="speedBar"></div>
+                                </div>
+                                <span class="mode-percentage" id="speedPercent">0%</span>
+                            </div>
+                            <div class="mode-stat">
+                                <span class="mode-name">Boşluk Doldur</span>
+                                <div class="mode-progress">
+                                    <div class="mode-bar fillblank" id="fillblankBar"></div>
+                                </div>
+                                <span class="mode-percentage" id="fillblankPercent">0%</span>
+                            </div>
+                            <div class="mode-stat">
+                                <span class="mode-name">Ayet Dinleme</span>
+                                <div class="mode-progress">
+                                    <div class="mode-bar ayet" id="ayetBar"></div>
+                                </div>
+                                <span class="mode-percentage" id="ayetPercent">0%</span>
+                            </div>
+                            <div class="mode-stat">
+                                <span class="mode-name">Dua Dinleme</span>
+                                <div class="mode-progress">
+                                    <div class="mode-bar dua" id="duaBar"></div>
+                                </div>
+                                <span class="mode-percentage" id="duaPercent">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Achievement Unlock Modal -->
+    
+    <!-- 📊 Statistics Dashboard Modal -->
+    <div id="statsModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeStatsModal()">&times;</span>
+            <h2>📊 İstatistiklerim</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">🎮</div>
+                    <div class="stat-number" id="totalGamesPlayed">0</div>
+                    <div class="stat-label">Doğru Kelimeler</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-number" id="totalCorrectAnswers">0</div>
+                    <div class="stat-label">Doğru Cevap</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">❌</div>
+                    <div class="stat-number" id="totalWrongAnswers">0</div>
+                    <div class="stat-label">Yanlış Cevap</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">📈</div>
+                    <div class="stat-number" id="accuracyRate">0%</div>
+                    <div class="stat-label">Başarı Oranı</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">🔥</div>
+                    <div class="stat-number" id="currentStreak">0</div>
+                    <div class="stat-label">Mevcut Streak</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">🏆</div>
+                    <div class="stat-number" id="bestStreak">0</div>
+                    <div class="stat-label">En İyi Streak</div>
+                </div>
+            </div>
+            
+            <div class="stats-details">
+                <h3>📚 En Çok Yanlış Yapılan Kelimeler</h3>
+                <div id="mostWrongWords" class="wrong-words-list">
+                    <!-- Dinamik içerik buraya gelecek -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Streak Shop Modal -->
+    <div id="streakShopModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeStreakShop()">&times;</span>
+            <h2>🛡️ Streak Koruma Mağazası</h2>
+            <p>Streak'ini korumak için özel öğeler satın al!</p>
+            
+            <div class="shop-items-grid">
+                <div class="shop-item">
+                    <div class="item-icon">🛡️</div>
+                    <h3>Streak Freeze</h3>
+                    <p>1 gün koruma sağlar. Bir gün oynayamazsan streak'in kırılmaz.</p>
+                    <div class="item-price">💰 100 Hasene</div>
+                    <div class="item-owned">Sahip olduğun: <span id="ownedStreakFreezes">0</span></div>
+                    <button class="shop-buy-btn" onclick="buyItem('streakFreeze')">Satın Al</button>
+                </div>
+                
+                <div class="shop-item">
+                    <div class="item-icon">🏖️</div>
+                    <h3>Weekend Pass</h3>
+                    <p>2 gün koruma sağlar. Hafta sonu için mükemmel!</p>
+                    <div class="item-price">💰 180 Hasene</div>
+                    <div class="item-owned">Sahip olduğun: <span id="ownedWeekendPasses">0</span></div>
+                    <button class="shop-buy-btn" onclick="buyItem('weekendPass')">Satın Al</button>
+                </div>
+            </div>
+            
+            <div class="shop-info">
+                <h4>📖 Nasıl Çalışır?</h4>
+                <ul>
+                    <li>🛡️ Streak Freeze: 1 gün kaçırırsan otomatik devreye girer</li>
+                    <li>🏖️ Weekend Pass: 2 gün kaçırırsan otomatik devreye girer</li>
+                    <li>⚡ Koruma kullanıldığında streak'in kırılmaz</li>
+                    <li>📱 Korumaların stokunu üstteki butondan görebilirsin</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Achievement Unlock Modal DEVRE DIŞI -->
+    <!-- 
+    <div id="achievementUnlockModal" class="modal">
+        <div class="modal-content achievement-unlock">
+            <div class="achievement-unlock-animation">
+                <i class="fas fa-trophy" id="unlockedAchievementIcon"></i>
+            </div>
+            <h2>Yeni Rozet Kazandın!</h2>
+            <h3 id="unlockedAchievementTitle">Başarı Adı</h3>
+            <p id="unlockedAchievementDesc">Açıklama</p>
+            <button class="modal-btn" onclick="closeAchievementUnlockModal()">Harika!</button>
+        </div>
+    </div>
+    -->
+
+    <audio id="audioPlayer" preload="none"></audio>
+    <audio id="backgroundMusic" preload="auto" loop>
+        <source src="sounds/game-music.mp4" type="audio/mp4">
+        <source src="sounds/melody.wav" type="audio/wav">
+        <source src="sounds/test-music.wav" type="audio/wav">
+        <source src="sounds/test-silent.wav" type="audio/wav">
+        Tarayıcınız audio elementini desteklemiyor.
+    </audio>
+    <audio id="correctSound" src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+D2u2ccBSuBzvLZjTgHEWe57+OZUQ4IVKTk97VaFws+ltryxXksBS6Hz/LdjTgIG2q+7eSXSAoOVKLm9L1mFgkugM3110g+CV+16iKcWAcLflG1cfkGrrcY0U4YwyZs3+LB9M8H4VLQ+K36oLoi4WEYyCNU4dLDzOAfAAAA"></audio>
+    <audio id="incorrectSound" src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+D2u2ccBSuBzvLZjTgHEWe57+OZUQ4IVKTk97VaFws+ltryxXksBS6Hz/LdjTgIG2q+7eSXSAoOVKLm9L1mFgkugM3110g+CV+16iKcWAcLflG1cfkGrrcY0U4YwyZs3+LB9M8H4VLQ+K36oLoi4WEYyCNU4dLDzOAfAAAA"></audio>
+    <audio id="ayDogduAudio" src="https://dinimizlam.com/Download/Ses/Ilahiler/4/AyDo%C4%9Fdu.mp3" preload="auto"></audio>
+    
+    <!-- 🎵 Enhanced Sound Effects - Web Audio API -->
+    <audio id="achievementSound" preload="auto">
+        <!-- Placeholder for achievement sound -->
+    </audio>
+    <audio id="streakSound" preload="auto">
+        <!-- Placeholder for streak sound -->
+    </audio>
+    <audio id="levelUpSound" preload="auto">
+        <!-- Placeholder for level up sound -->
+    </audio>
+
+    <!-- Debug Panel (Hidden by default) -->
+    <div id="debugPanel" style="display: none; position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.9); color: white; padding: 15px; border-radius: 10px; z-index: 10000; font-size: 12px; max-width: 300px;">
+        <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 10px;">
+            <h4 style="margin: 0; color: #00ff00;">🔧 DEBUG PANEL</h4>
+            <button onclick="window.debugManager.togglePanel()" style="background: #ff4444; color: white; border: none; border-radius: 3px; padding: 2px 6px; cursor: pointer;">✕</button>
+        </div>
+        
+        <div id="debugStats" style="margin-bottom: 10px;">
+            <div><strong>localStorage Data:</strong></div>
+            <div id="debugLocalStorage" style="font-size: 10px; background: #222; padding: 5px; border-radius: 3px; margin: 5px 0;"></div>
+        </div>
+        
+        <div style="margin-bottom: 10px;">
+            <strong>Quick Actions:</strong><br>
+            <button onclick="window.debugManager.resetStreak()" style="margin: 2px; padding: 3px 6px; font-size: 10px;">Reset Streak</button>
+            <button onclick="window.debugManager.addFakeStats()" style="margin: 2px; padding: 3px 6px; font-size: 10px;">+100 Stats</button><br>
+            <button onclick="window.debugManager.addFakeLearnedWords()" style="margin: 2px; padding: 3px 6px; font-size: 10px;">+30 Words</button>
+            <button onclick="window.debugManager.clearAllData()" style="margin: 2px; padding: 3px 6px; font-size: 10px;">Clear All</button><br>
+            <button onclick="window.debugManager.exportData()" style="margin: 2px; padding: 3px 6px; font-size: 10px;">Export</button>
+        </div>
+        
+        <div>
+            <input type="text" id="debugCommand" placeholder="Debug command..." style="width: 90%; padding: 3px; font-size: 10px;" onkeypress="if(event.key==='Enter') window.debugManager.executeCommand(this.value)">
+        </div>
+    </div>
+
+    <script src="sounds/audio-generator.js"></script>
+    <script src="party-effects.js"></script>
+    <script src="script.js"></script>
+    <script src="debug-manager.js"></script>
+</body>
+</html>

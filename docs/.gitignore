@@ -1,0 +1,52 @@
+# Node modules
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# APK files (will be uploaded via GitHub Releases)
+# *.apk
+
+# Android build files
+android/app/build/
+android/app/release/
+android/build/
+android/.gradle/
+android/gradle/
+android/gradlew
+android/gradlew.bat
+android/local.properties
+
+# Capacitor
+www/
+.capacitor/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+
+# Build artifacts
+dist/
+build/
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Package lock (optional - uncomment if you want to ignore it)
+# package-lock.json

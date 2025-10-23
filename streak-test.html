@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STREAK TEST - Debug Version</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #222;
+            color: white;
+        }
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #333;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .streak-display {
+            font-size: 24px;
+            color: #00ff00;
+            margin: 20px 0;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .debug-info {
+            background: #111;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔧 STREAK BUG TEST</h1>
+        
+        <div class="streak-display">
+            Streak: <span id="streakValue">Loading...</span>
+        </div>
+        
+        <div class="debug-info">
+            <div>localStorage streak: <span id="localStorageStreak">-</span></div>
+            <div>Game object streak: <span id="gameObjectStreak">-</span></div>
+            <div>Last play date: <span id="lastPlayDate">-</span></div>
+        </div>
+        
+        <button onclick="resetStreak()">Reset Streak</button>
+        <button onclick="setStreak1()">Set Streak = 1</button>
+        <button onclick="clearAll()">Clear All Data</button>
+        <button onclick="refreshData()">Refresh</button>
+        
+        <div id="log" style="background: #000; padding: 10px; margin-top: 20px; border-radius: 5px; font-family: monospace; font-size: 12px;"></div>
+    </div>
+
+    <script>
+        // Mini game class to test streak
+        class TestGame {
+            constructor() {
+                this.streak = parseInt(localStorage.getItem('streak')) || 0;
+                this.log('TestGame initialized with streak:', this.streak);
+                this.updateDisplay();
+            }
+            
+            updateDisplay() {
+                document.getElementById('streakValue').textContent = this.streak;
+                document.getElementById('localStorageStreak').textContent = localStorage.getItem('streak') || '0';
+                document.getElementById('gameObjectStreak').textContent = this.streak;
+                document.getElementById('lastPlayDate').textContent = localStorage.getItem('lastPlayDate') || 'none';
+            }
+            
+            log(message, ...args) {
+                const logDiv = document.getElementById('log');
+                const timestamp = new Date().toLocaleTimeString();
+                logDiv.innerHTML += `[${timestamp}] ${message} ${args.join(' ')}\n`;
+                logDiv.scrollTop = logDiv.scrollHeight;
+                console.log(message, ...args);
+            }
+        }
+        
+        let testGame;
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            testGame = new TestGame();
+        });
+        
+        function resetStreak() {
+            localStorage.setItem('streak', '0');
+            testGame.streak = 0;
+            testGame.log('Streak reset to 0');
+            testGame.updateDisplay();
+        }
+        
+        function setStreak1() {
+            localStorage.setItem('streak', '1');
+            testGame.streak = 1;
+            testGame.log('Streak set to 1');
+            testGame.updateDisplay();
+        }
+        
+        function clearAll() {
+            localStorage.clear();
+            testGame.streak = 0;
+            testGame.log('All data cleared');
+            testGame.updateDisplay();
+        }
+        
+        function refreshData() {
+            testGame.streak = parseInt(localStorage.getItem('streak')) || 0;
+            testGame.log('Data refreshed from localStorage');
+            testGame.updateDisplay();
+        }
+    </script>
+</body>
+</html>

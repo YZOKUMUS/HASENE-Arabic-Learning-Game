@@ -1,0 +1,28 @@
+{
+  "name": "hasene-arabic-learning",
+  "version": "2.0.0",
+  "description": "🕌 İslami temalı Arapça öğrenme oyunu! Kelime çevir, ayet dinle, dua oku. Hasene topla, seviye atla!",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yzokumus/HASENE-Arabic-Learning-Game.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yzokumus/HASENE-Arabic-Learning-Game/issues"
+  },
+  "homepage": "https://github.com/yzokumus/HASENE-Arabic-Learning-Game#readme",
+  "dependencies": {
+    "sharp": "^0.34.4"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/cli": "^7.4.3",
+    "@capacitor/core": "^7.4.3"
+  }
+}
