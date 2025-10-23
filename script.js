@@ -807,6 +807,28 @@ class ArabicLearningGame {
         localStorage.setItem(key, currentCount + 1);
     }
     
+    // Update calendar data after game completion
+    updateCalendarData(totalQuestions, accuracy) {
+        const today = new Date();
+        const dateString = today.toDateString();
+        
+        // Update daily hasene
+        const currentHasene = this.getDailyHasene(dateString);
+        this.storeDailyHasene(dateString, currentHasene + this.gameHasene);
+        
+        // Update daily games count
+        const currentGames = this.getDailyGames(dateString);
+        this.storeDailyGames(dateString, currentGames + 1);
+        
+        // Check if this was a perfect day (high accuracy)
+        if (accuracy >= 90) {
+            this.storePerfectDay(dateString, true);
+        }
+        
+        // Update streak data
+        this.updateStreakData(dateString, true);
+    }
+    
     setupAchievementListeners() {
         // Achievements button
         const achievementsBtn = document.getElementById('achievementsBtn');
@@ -2379,6 +2401,9 @@ class ArabicLearningGame {
         // Track game mode completion for achievements
         this.trackGameModeCompletion();
         
+        // Update enhanced calendar data
+        this.updateCalendarData(totalQuestions, accuracy);
+        
         
         // Animate stars based on performance
         const stars = document.querySelectorAll('.stars i');
@@ -2645,10 +2670,18 @@ class ArabicLearningGame {
         for (let day = 1; day <= daysInMonth; day++) {
             const dayEl = document.createElement('div');
             dayEl.className = 'calendar-day';
-            dayEl.textContent = day;
             
             const currentDate = new Date(this.currentCalendarYear, this.currentCalendarMonth, day);
             const dateString = currentDate.toDateString();
+            const isWeekend = currentDate.getDay() === 0 || currentDate.getDay() === 6;
+            
+            // Create day structure with Duolingo-style elements
+            const dayNumber = document.createElement('div');
+            dayNumber.className = 'day-number';
+            dayNumber.textContent = day;
+            
+            const dayContent = document.createElement('div');
+            dayContent.className = 'day-content';
             
             // Check if it's today
             if (currentDate.toDateString() === today.toDateString()) {
@@ -2658,34 +2691,103 @@ class ArabicLearningGame {
             // Check if it's in the future
             if (currentDate > today) {
                 dayEl.classList.add('future');
+                dayContent.innerHTML = '<i class="fas fa-lock"></i>';
             } else {
-                // Get hasene data for this date
+                // Get data for this date
                 const haseneData = this.getDailyHasene(dateString);
+                const gamesPlayed = this.getDailyGames(dateString);
+                const isStreak = this.isStreakDay(dateString);
+                const isPerfectDay = this.isPerfectDay(dateString);
+                const hasStreakFreeze = this.hasStreakFreezeUsed(dateString);
                 
-                if (haseneData >= 1000) {
-                    dayEl.classList.add('complete');
-                    if (this.isStreakDay(dateString)) {
-                        dayEl.classList.add('streak');
-                    }
-                } else if (haseneData > 0) {
+                // Determine day status
+                if (haseneData >= 500) { // Perfect day
+                    dayEl.classList.add('perfect');
+                    dayContent.innerHTML = `
+                        <div class="hasene-count">${haseneData}</div>
+                        <div class="perfect-badge">👑</div>
+                        ${isStreak ? '<div class="streak-flame">🔥</div>' : ''}
+                    `;
+                } else if (haseneData >= 200) { // Great day
+                    dayEl.classList.add('great');
+                    dayContent.innerHTML = `
+                        <div class="hasene-count">${haseneData}</div>
+                        <div class="great-badge">⭐</div>
+                        ${isStreak ? '<div class="streak-flame">🔥</div>' : ''}
+                    `;
+                } else if (haseneData > 0) { // Partial completion
                     dayEl.classList.add('partial');
-                } else {
+                    dayContent.innerHTML = `
+                        <div class="hasene-count">${haseneData}</div>
+                        ${isStreak ? '<div class="streak-flame">🔥</div>' : ''}
+                    `;
+                } else if (hasStreakFreeze) { // Streak freeze used
+                    dayEl.classList.add('freeze');
+                    dayContent.innerHTML = '<div class="freeze-badge">🛡️</div>';
+                } else { // Empty day
                     dayEl.classList.add('empty');
                 }
                 
-                // Add tooltip
-                const tooltip = document.createElement('div');
-                tooltip.className = 'calendar-tooltip';
-                if (haseneData > 0) {
-                    tooltip.textContent = `${haseneData} hasene kazanıldı`;
-                } else {
-                    tooltip.textContent = 'Henüz oynanmadı';
+                // Add weekend bonus indicator
+                if (isWeekend && haseneData > 0) {
+                    dayEl.classList.add('weekend-bonus');
+                    const weekendBonus = document.createElement('div');
+                    weekendBonus.className = 'weekend-indicator';
+                    weekendBonus.innerHTML = '✨';
+                    dayContent.appendChild(weekendBonus);
                 }
+                
+                // Create enhanced tooltip
+                const tooltip = document.createElement('div');
+                tooltip.className = 'calendar-tooltip enhanced-tooltip';
+                tooltip.innerHTML = `
+                    <div class="tooltip-header">
+                        <strong>${day} ${monthNames[this.currentCalendarMonth]}</strong>
+                        ${isWeekend ? '<span class="weekend-label">Hafta sonu</span>' : ''}
+                    </div>
+                    <div class="tooltip-stats">
+                        ${haseneData > 0 ? `
+                            <div class="stat-row">
+                                <i class="fas fa-gem"></i>
+                                <span>${haseneData} hasene kazanıldı</span>
+                            </div>
+                        ` : '<div class="stat-row">Henüz oynanmadı</div>'}
+                        ${gamesPlayed > 0 ? `
+                            <div class="stat-row">
+                                <i class="fas fa-gamepad"></i>
+                                <span>${gamesPlayed} oyun tamamlandı</span>
+                            </div>
+                        ` : ''}
+                        ${isStreak ? `
+                            <div class="stat-row streak-stat">
+                                <i class="fas fa-fire"></i>
+                                <span>Streak günü!</span>
+                            </div>
+                        ` : ''}
+                        ${isPerfectDay ? `
+                            <div class="stat-row perfect-stat">
+                                <i class="fas fa-crown"></i>
+                                <span>Mükemmel gün!</span>
+                            </div>
+                        ` : ''}
+                        ${hasStreakFreeze ? `
+                            <div class="stat-row freeze-stat">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Streak koruması kullanıldı</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
                 dayEl.appendChild(tooltip);
             }
             
+            dayEl.appendChild(dayNumber);
+            dayEl.appendChild(dayContent);
             grid.appendChild(dayEl);
         }
+        
+        // Add monthly statistics
+        this.renderMonthlyStats();
     }
     
     getDailyHasene(dateString) {
@@ -2701,10 +2803,49 @@ class ArabicLearningGame {
         localStorage.setItem('dailyHaseneData', JSON.stringify(haseneData));
     }
     
+    getDailyGames(dateString) {
+        // Get daily games played count
+        const gamesData = JSON.parse(localStorage.getItem('dailyGamesData') || '{}');
+        return gamesData[dateString] || 0;
+    }
+    
+    storeDailyGames(dateString, count) {
+        // Store daily games count
+        const gamesData = JSON.parse(localStorage.getItem('dailyGamesData') || '{}');
+        gamesData[dateString] = count;
+        localStorage.setItem('dailyGamesData', JSON.stringify(gamesData));
+    }
+    
     isStreakDay(dateString) {
         // Check if this day is part of current streak
         const streakData = JSON.parse(localStorage.getItem('streakData') || '{}');
         return streakData[dateString] === true;
+    }
+    
+    isPerfectDay(dateString) {
+        // Check if this was a perfect day (high hasene, no mistakes)
+        const perfectData = JSON.parse(localStorage.getItem('perfectDaysData') || '{}');
+        return perfectData[dateString] === true;
+    }
+    
+    storePerfectDay(dateString, isPerfect) {
+        // Store perfect day status
+        const perfectData = JSON.parse(localStorage.getItem('perfectDaysData') || '{}');
+        perfectData[dateString] = isPerfect;
+        localStorage.setItem('perfectDaysData', JSON.stringify(perfectData));
+    }
+    
+    hasStreakFreezeUsed(dateString) {
+        // Check if streak freeze was used on this day
+        const freezeData = JSON.parse(localStorage.getItem('streakFreezeData') || '{}');
+        return freezeData[dateString] === true;
+    }
+    
+    storeStreakFreeze(dateString, used) {
+        // Store streak freeze usage
+        const freezeData = JSON.parse(localStorage.getItem('streakFreezeData') || '{}');
+        freezeData[dateString] = used;
+        localStorage.setItem('streakFreezeData', JSON.stringify(freezeData));
     }
     
     hasPlayedToday(dateString) {
@@ -2718,6 +2859,94 @@ class ArabicLearningGame {
         const streakData = JSON.parse(localStorage.getItem('streakData') || '{}');
         streakData[dateString] = isStreak;
         localStorage.setItem('streakData', JSON.stringify(streakData));
+    }
+    
+    renderMonthlyStats() {
+        // Add monthly statistics panel to calendar
+        const modal = document.getElementById('calendarModal');
+        let statsPanel = modal.querySelector('.monthly-stats-panel');
+        
+        if (!statsPanel) {
+            statsPanel = document.createElement('div');
+            statsPanel.className = 'monthly-stats-panel';
+            modal.querySelector('.calendar-modal-content').appendChild(statsPanel);
+        }
+        
+        // Calculate monthly statistics
+        const monthStats = this.calculateMonthlyStats();
+        
+        statsPanel.innerHTML = `
+            <h3><i class="fas fa-chart-bar"></i> Bu Ayın Özeti</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">🔥</div>
+                    <div class="stat-info">
+                        <div class="stat-value">${monthStats.streakDays}</div>
+                        <div class="stat-label">Streak Günü</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💎</div>
+                    <div class="stat-info">
+                        <div class="stat-value">${monthStats.totalHasene}</div>
+                        <div class="stat-label">Toplam Hasene</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">👑</div>
+                    <div class="stat-info">
+                        <div class="stat-value">${monthStats.perfectDays}</div>
+                        <div class="stat-label">Mükemmel Gün</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🎮</div>
+                    <div class="stat-info">
+                        <div class="stat-value">${monthStats.activeDays}</div>
+                        <div class="stat-label">Aktif Gün</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    calculateMonthlyStats() {
+        const firstDay = new Date(this.currentCalendarYear, this.currentCalendarMonth, 1);
+        const lastDay = new Date(this.currentCalendarYear, this.currentCalendarMonth + 1, 0);
+        
+        let streakDays = 0;
+        let totalHasene = 0;
+        let perfectDays = 0;
+        let activeDays = 0;
+        
+        for (let day = 1; day <= lastDay.getDate(); day++) {
+            const date = new Date(this.currentCalendarYear, this.currentCalendarMonth, day);
+            const dateString = date.toDateString();
+            
+            // Skip future days
+            if (date > new Date()) continue;
+            
+            const hasene = this.getDailyHasene(dateString);
+            if (hasene > 0) {
+                activeDays++;
+                totalHasene += hasene;
+                
+                if (this.isStreakDay(dateString)) {
+                    streakDays++;
+                }
+                
+                if (this.isPerfectDay(dateString)) {
+                    perfectDays++;
+                }
+            }
+        }
+        
+        return {
+            streakDays,
+            totalHasene,
+            perfectDays,
+            activeDays
+        };
     }
     
     // Loading Animation Functions
