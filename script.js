@@ -9,6 +9,31 @@ const APP_VERSION = {
     features: ["Console.log Cleanup", "RED-MUSHAF Icons", "Calendar Sync", "Production Ready"]
 };
 
+// 🎯 Onboarding Check - Redirect to onboarding if first time user
+function checkOnboarding() {
+    // Check if user has completed onboarding
+    const onboardingCompleted = localStorage.getItem('onboardingCompleted');
+    
+    if (!onboardingCompleted || onboardingCompleted !== 'true') {
+        // First time user - redirect to onboarding
+        window.location.href = 'onboarding.html';
+        return false;
+    }
+    
+    return true;
+}
+
+// Run onboarding check when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Check onboarding first
+    if (!checkOnboarding()) {
+        return; // Stop execution if redirecting to onboarding
+    }
+    
+    // Continue with normal game initialization
+    initializeGame();
+});
+
 // Update version info in UI
 function updateVersionInfo() {
     const buildInfoElement = document.getElementById('buildInfo');
@@ -2626,12 +2651,12 @@ class ArabicLearningGame {
 
     simulateLoading() {
         const messages = [
-            { text: 'Hadis-i Şeriften istifade ediniz...', duration: 2500, spinnerState: 'normal', progress: 5 },
-            { text: 'Kuran verileri yükleniyor...', duration: 3000, spinnerState: 'loading', progress: 25 },
-            { text: 'Kelime hazinesi hazırlanıyor...', duration: 2200, spinnerState: 'pause', progress: 50 },
-            { text: 'Ayet koleksiyonu işleniyor...', duration: 2200, spinnerState: 'loading', progress: 75 },
-            { text: 'Ses dosyaları kontrol ediliyor...', duration: 2200, spinnerState: 'slow', progress: 90 },
-            { text: 'Bismillah! Hazır...', duration: 2000, spinnerState: 'complete', progress: 100 }
+            { text: 'Hadis-i Şeriften istifade ediniz...', duration: 800, spinnerState: 'normal', progress: 5 },
+            { text: 'Kuran verileri yükleniyor...', duration: 900, spinnerState: 'loading', progress: 25 },
+            { text: 'Kelime hazinesi hazırlanıyor...', duration: 700, spinnerState: 'pause', progress: 50 },
+            { text: 'Ayet koleksiyonu işleniyor...', duration: 700, spinnerState: 'loading', progress: 75 },
+            { text: 'Ses dosyaları kontrol ediliyor...', duration: 700, spinnerState: 'slow', progress: 90 },
+            { text: 'Bismillah! Hazır...', duration: 600, spinnerState: 'complete', progress: 100 }
         ];
         
         let currentMessage = 0;
@@ -2667,7 +2692,7 @@ class ArabicLearningGame {
         };
         
         // Start message sequence after initial delay
-        setTimeout(changeMessage, 100);
+        setTimeout(changeMessage, 50);
     }
 
     updateProgress(targetProgress, duration) {
@@ -2675,7 +2700,7 @@ class ArabicLearningGame {
         
         const startProgress = parseInt(this.progressFill.style.width) || 0;
         const progressDiff = targetProgress - startProgress;
-        const stepTime = 50; // Update every 50ms
+        const stepTime = 30; // Update every 30ms (faster)
         const steps = Math.floor(duration / stepTime);
         const progressStep = progressDiff / steps;
         
@@ -2911,8 +2936,8 @@ class ArabicLearningGame {
         setTimeout(() => {
             this.showScreen('mainMenu');
             // Setup event listeners after DOM is ready
-            setTimeout(() => this.setupAchievementListeners(), 200);
-        }, 800);
+            setTimeout(() => this.setupAchievementListeners(), 100);
+        }, 500);
     }
 
     initializeDifficultyUI() {
@@ -3615,8 +3640,8 @@ if (typeof game === 'undefined') {
     var game;
 }
 
-// Initialize game when page loads
-document.addEventListener('DOMContentLoaded', () => {
+// Initialize game function
+function initializeGame() {
     // 🏷️ Update version info in UI
     updateVersionInfo();
     
@@ -3632,6 +3657,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Background müzik ayarlarını yükle
     initializeBackgroundMusic();
+}
+
+// Initialize game when page loads (kept for fallback)
+document.addEventListener('DOMContentLoaded', () => {
+    // This will be overridden by the onboarding check above
+    initializeGame();
 });
 
 // Background müzik başlatma fonksiyonu
