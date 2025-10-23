@@ -2625,36 +2625,111 @@ class ArabicLearningGame {
 
     simulateLoading() {
         const messages = [
-            'Hadis-i Şeriften istifade ediniz...',
-            'Kuran verileri yükleniyor...',
-            'Kelime hazinesi hazırlanıyor...',
-            'Ayet koleksiyonu işleniyor...',
-            'Ses dosyaları kontrol ediliyor...',
-            'Bismillah! Hazır...'
+            { text: 'Hadis-i Şeriften istifade ediniz...', duration: 2500, spinnerState: 'normal', progress: 5 },
+            { text: 'Kuran verileri yükleniyor...', duration: 3000, spinnerState: 'loading', progress: 25 },
+            { text: 'Kelime hazinesi hazırlanıyor...', duration: 2200, spinnerState: 'pause', progress: 50 },
+            { text: 'Ayet koleksiyonu işleniyor...', duration: 2200, spinnerState: 'loading', progress: 75 },
+            { text: 'Ses dosyaları kontrol ediliyor...', duration: 2200, spinnerState: 'slow', progress: 90 },
+            { text: 'Bismillah! Hazır...', duration: 2000, spinnerState: 'complete', progress: 100 }
         ];
         
         let currentMessage = 0;
         
+        // Get progress elements
+        this.progressFill = document.getElementById('loadingProgress');
+        this.progressPercentage = document.getElementById('loadingPercentage');
+        
         const changeMessage = () => {
             if (this.loadingText && currentMessage < messages.length) {
-                this.loadingText.textContent = messages[currentMessage];
+                const currentStep = messages[currentMessage];
+                
+                // Update text
+                this.loadingText.textContent = currentStep.text;
+                
+                // Update spinner animation based on state
+                this.updateSpinnerState(currentStep.spinnerState);
+                
+                // Update progress bar with realistic loading behavior
+                this.updateProgress(currentStep.progress, currentStep.duration);
+                
                 currentMessage++;
                 
                 if (currentMessage < messages.length) {
-                    // Slower timing to allow reading the Hadis
-                    const delay = currentMessage === 1 ? 3000 : 2200; // Extra time for first message
-                    setTimeout(changeMessage, delay);
+                    setTimeout(changeMessage, currentStep.duration);
                 } else {
-                    // Final pause before completing
+                    // Final completion
                     setTimeout(() => {
                         this.completeLoadingAnimation();
-                    }, 2000);
+                    }, currentStep.duration);
                 }
             }
         };
         
-        // Start message sequence after initial delay (time to read Hadis)
-        setTimeout(changeMessage, 2500);
+        // Start message sequence after initial delay
+        setTimeout(changeMessage, 100);
+    }
+
+    updateProgress(targetProgress, duration) {
+        if (!this.progressFill || !this.progressPercentage) return;
+        
+        const startProgress = parseInt(this.progressFill.style.width) || 0;
+        const progressDiff = targetProgress - startProgress;
+        const stepTime = 50; // Update every 50ms
+        const steps = Math.floor(duration / stepTime);
+        const progressStep = progressDiff / steps;
+        
+        let currentProgress = startProgress;
+        let step = 0;
+        
+        const progressInterval = setInterval(() => {
+            step++;
+            
+            if (step < steps) {
+                // Realistic loading with occasional pauses and bursts
+                let increment = progressStep;
+                
+                // Add some randomness to make it feel more realistic
+                if (Math.random() < 0.3) {
+                    increment *= 0.5; // Slow down sometimes
+                } else if (Math.random() < 0.1) {
+                    increment *= 2; // Speed up sometimes
+                }
+                
+                currentProgress += increment;
+            } else {
+                currentProgress = targetProgress; // Ensure we hit the target
+                clearInterval(progressInterval);
+            }
+            
+            this.progressFill.style.width = `${Math.min(currentProgress, 100)}%`;
+            this.progressPercentage.textContent = `${Math.round(Math.min(currentProgress, 100))}%`;
+        }, stepTime);
+    }
+
+    updateSpinnerState(state) {
+        if (!this.spinner) return;
+        
+        // Remove all previous state classes
+        this.spinner.classList.remove('loading-pause', 'loading-slow', 'loading-complete');
+        
+        switch (state) {
+            case 'pause':
+                // Pause the spinner for a moment
+                this.spinner.classList.add('loading-pause');
+                break;
+            case 'slow':
+                // Slow down the spinner
+                this.spinner.classList.add('loading-slow');
+                break;
+            case 'complete':
+                // Show completion state
+                this.spinner.classList.add('loading-complete');
+                break;
+            case 'loading':
+            default:
+                // Normal spinning state - no additional classes needed
+                break;
+        }
     }
 
     injectLoadingFooter() {
