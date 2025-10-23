@@ -789,6 +789,38 @@ body {
     transform: scale(0.8);
 }
 
+.speed-timer {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 600;
+    color: var(--primary-red);
+    background: rgba(255, 75, 75, 0.1);
+    padding: 5px 10px;
+    border-radius: 15px;
+    border: 2px solid var(--primary-red);
+    animation: pulse 1s infinite;
+}
+
+.speed-timer.warning {
+    animation: fastPulse 0.5s infinite;
+    color: #ff4444;
+    border-color: #ff4444;
+    background: rgba(255, 68, 68, 0.2);
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+@keyframes fastPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
 .game-hasene {
     display: flex;
     align-items: center;

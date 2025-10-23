@@ -1377,6 +1377,66 @@ class ArabicLearningGame {
         };
         document.getElementById('questionType').textContent = questionTypeTexts[this.gameMode];
     }
+    startQuestionTimer() {
+        if (!this.isSpeedMode) return;
+        
+        // Clear any existing timer
+        this.clearQuestionTimer();
+        
+        // Initialize timer (10 seconds for speed mode)
+        this.timeLeft = 10;
+        
+        // Show timer display
+        const speedTimer = document.getElementById('speedTimer');
+        const timerCount = document.getElementById('timerCount');
+        
+        if (speedTimer && timerCount) {
+            speedTimer.style.display = 'flex';
+            timerCount.textContent = this.timeLeft;
+            speedTimer.classList.remove('warning');
+        }
+        
+        // Start countdown
+        this.questionTimer = setInterval(() => {
+            this.timeLeft--;
+            
+            if (timerCount) {
+                timerCount.textContent = this.timeLeft;
+            }
+            
+            // Add warning animation when time is low
+            if (this.timeLeft <= 3 && speedTimer) {
+                speedTimer.classList.add('warning');
+            }
+            
+            // Time's up - automatically select wrong answer or move to next
+            if (this.timeLeft <= 0) {
+                this.clearQuestionTimer();
+                
+                // Auto-submit as incorrect answer
+                this.processAnswer(false);
+            }
+        }, 1000);
+        
+        console.log('⏱️ Hız modu için soru zamanlayıcısı başlatıldı - 10 saniye');
+    }
+
+    clearQuestionTimer() {
+        if (this.questionTimer) {
+            clearInterval(this.questionTimer);
+            this.questionTimer = null;
+        }
+        
+        // Hide timer display
+        const speedTimer = document.getElementById('speedTimer');
+        if (speedTimer) {
+            speedTimer.style.display = 'none';
+            speedTimer.classList.remove('warning');
+        }
+        
+        this.timeLeft = 0;
+    }
+
     
     showQuestion() {
         if (this.currentQuestion >= this.questions.length) {
@@ -1404,7 +1464,7 @@ class ArabicLearningGame {
         
         // Hız modu için timer başlat
         if (this.isSpeedMode) {
-            startQuestionTimer();
+            this.startQuestionTimer();
         }
     }
     
@@ -1622,7 +1682,7 @@ class ArabicLearningGame {
     processAnswer(isCorrect, selectedButton = null) {
         // Hız modunda timer'ı temizle
         if (this.isSpeedMode) {
-            clearQuestionTimer();
+            this.clearQuestionTimer();
         }
         
         // 🧠 Smart Learner için son cevabı kaydet
@@ -2077,6 +2137,9 @@ class ArabicLearningGame {
     
     completeGame() {
         try {
+            // Clear any running timers
+            this.clearQuestionTimer();
+            
             // ❌ Kalp kontrolü kaldırıldı - artık kalp bitince de oyun tamamlanabilir
             // Calculate results
             const totalQuestions = this.questions.length;
@@ -2365,6 +2428,9 @@ class ArabicLearningGame {
     }
     
     returnToMenu() {
+        // Clear any running timers
+        this.clearQuestionTimer();
+        
         // Update UI with latest stats
         this.updateUI();
         
