@@ -543,167 +543,246 @@ class ArabicLearningGame {
     }
     
     initializeAchievements() {
-        // Başarımları tanımla - İslami Temalar 🕌📿
-    this.achievements = {
-            ayetListener: {
-                id: 'ayetListener',
-                title: '📖 Ayet Dinleyici',
-                description: '10 ayet dinledin!',
-                icon: 'fas fa-book-open',
-                condition: () => {
-                    let ayetHasene = parseInt(localStorage.getItem('ayetHasene')) || 0;
-                    return ayetHasene >= 100; // 10 ayet x 10 hasene
-                }
-            },
-            duaListener: {
-                id: 'duaListener',
-                title: '📿 Dua Dinleyici',
-                description: '10 farklı dua dinledin! Dualarla kalbin huzur buldu.',
-                icon: 'fas fa-pray',
-                condition: () => (parseInt(localStorage.getItem('listenedDuaCount')) || 0) >= 10
-            },
-            firstGame: {
-                id: 'firstGame',
-                title: '🕌 İlk Namaz',
-                description: 'İlk öğrenme yolculuğunuzu başlattınız!',
+        // 🏆 Optimized Achievement System - Logical & Compact Badges
+        this.achievements = {
+            // 🎯 Beginner Badges
+            firstSteps: {
+                id: 'firstSteps',
+                title: '🌱 İlk Adım',
+                description: 'Yolculuğa başladın!',
                 icon: 'fas fa-play',
                 condition: () => this.stats.gamesPlayed >= 1
             },
-            streak3: {
-                id: 'streak3',
-                title: '📿 Sabırlı Mümin',
-                description: '3 gün üst üste sebat gösterdiniz!',
+            earlyBird: {
+                id: 'earlyBird',
+                title: '🐣 Erken Kuş',
+                description: '5 oyun tamamla',
+                icon: 'fas fa-egg',
+                condition: () => this.stats.gamesPlayed >= 5
+            },
+            dedication: {
+                id: 'dedication',
+                title: '� Azim',
+                description: '3 gün streak',
                 icon: 'fas fa-fire',
                 condition: () => this.stats.currentStreak >= 3
             },
-            streak7: {
-                id: 'streak7',
-                title: '🕌 Haftalık Mücahit',
-                description: '7 gün üst üste ilimle mücadele ettiniz!',
-                icon: 'fas fa-medal',
-                condition: () => this.stats.currentStreak >= 7
+            
+            // 💎 Hasene Collection Badges
+            collector: {
+                id: 'collector',
+                title: '� Toplayıcı',
+                description: '50 hasene biriktir',
+                icon: 'fas fa-coins',
+                condition: () => this.stats.totalHasene >= 50
             },
-            hasene100: {
-                id: 'hasene100',
-                title: '📿 Hasene Toplayıcısı',
-                description: '100 hasene ile sevap defterin güzelleşti!',
+            treasurer: {
+                id: 'treasurer',
+                title: '� Hazine',
+                description: '200 hasene biriktir',
                 icon: 'fas fa-gem',
-                condition: () => this.stats.totalHasene >= 100
+                condition: () => this.stats.totalHasene >= 200
             },
-            hasene500: {
-                id: 'hasene500',
-                title: '🕌 Hasene Sultanı',
-                description: '500 hasene! Allah razı olsun!',
+            magnate: {
+                id: 'magnate',
+                title: '� Sultan',
+                description: '500 hasene biriktir',
                 icon: 'fas fa-crown',
                 condition: () => this.stats.totalHasene >= 500
             },
-            smartLearner: {
-                id: 'smartLearner',
-                title: '🧠 Akıllı Öğrenci',
-                description: 'Yanlış yaptığın bir kelimeyi doğru yaptın! Bu öğrenmenin gücüdür.',
-                icon: 'fas fa-lightbulb',
-                condition: () => {
-                    // Bu achievement özel olarak checkSmartLearner() fonksiyonunda kontrol edilecek
-                    return false;
-                }
-            },
-            perfect10: {
-                id: 'perfect10',
-                title: '📿 Kemâl Sahibi',
-                description: 'Mükemmel performans! 10/10 doğru!',
-                icon: 'fas fa-star',
-                condition: () => this.stats.perfectGames >= 1
-            },
-            speedster: {
-                id: 'speedster',
-                title: '🕌 Çevik Talebe',
-                description: 'Hızlı öğrenme! Ortalama 3 saniye!',
-                icon: 'fas fa-bolt',
-                condition: () => this.stats.averageTime <= 3000
-            },
-            wordMaster: {
-                id: 'wordMaster',
-                title: '📿 İlim Hazinesi',
-                description: '50 kelime! İlim tahsil etmeye devam!',
-                icon: 'fas fa-book',
-                condition: () => this.stats.wordsLearned >= 50
-            },
-            hasene1000: {
-                id: 'hasene1000',
-                title: '🕌 Hasene Emiri',
-                description: '1000 hasene! Masha Allah!',
-                icon: 'fas fa-fire',
+            tycoon: {
+                id: 'tycoon',
+                title: '🏰 Padişah',
+                description: '1000 hasene biriktir',
+                icon: 'fas fa-chess-king',
                 condition: () => this.stats.totalHasene >= 1000
             },
-            streak30: {
-                id: 'streak30',
-                title: '📿 Aylık Mücahit',
-                description: '30 gün streak! İnanılmaz kararlılık!',
-                icon: 'fas fa-calendar-check',
-                condition: () => this.stats.currentStreak >= 30
+            
+            // ⚡ Speed & Accuracy Badges
+            quickLearner: {
+                id: 'quickLearner',
+                title: '⚡ Çevik',
+                description: 'Ort. 4 saniye',
+                icon: 'fas fa-bolt',
+                condition: () => this.stats.averageTime <= 4000
             },
-            wordGuru: {
-                id: 'wordGuru',
-                title: '🕌 Kelime Üstadı',
-                description: '100 kelime öğrendin! Ustasın!',
-                icon: 'fas fa-graduation-cap',
-                condition: () => this.stats.wordsLearned >= 100
-            },
-            fastLearner: {
-                id: 'fastLearner',
-                title: '📿 Hızlı Öğrenci',
-                description: 'Ortalama 2 saniye! Çok hızlısın!',
+            speedDemon: {
+                id: 'speedDemon',
+                title: '🚀 Hızlı',
+                description: 'Ort. 2 saniye',
                 icon: 'fas fa-rocket',
                 condition: () => this.stats.averageTime <= 2000
             },
-            perfectStreak: {
-                id: 'perfectStreak',
-                title: '🕌 Mükemmel Seri',
-                description: '5 mükemmel oyun üst üste!',
-                icon: 'fas fa-diamond',
-                condition: () => this.stats.perfectStreak >= 5
+            perfectionist: {
+                id: 'perfectionist',
+                title: '⭐ Mükemmel',
+                description: '1 hatasız oyun',
+                icon: 'fas fa-star',
+                condition: () => this.stats.perfectGames >= 1
             },
-            gameAddict: {
-                id: 'gameAddict',
-                title: '📿 Oyun Bağımlısı',
-                description: '100 oyun tamamladın!',
-                icon: 'fas fa-gamepad',
-                condition: () => this.stats.gamesPlayed >= 100
+            flawless: {
+                id: 'flawless',
+                title: '� Kusursuz',
+                description: '5 hatasız oyun',
+                icon: 'fas fa-trophy',
+                condition: () => this.stats.perfectGames >= 5
             },
-            quranLover: {
-                id: 'quranLover',
-                title: '🕌 Kuran Sevdalısı',
-                description: 'Her sure türünden kelime öğrendin!',
-                icon: 'fas fa-quran',
-                condition: () => this.getUniqueSuras() >= 10
+            
+            // 📚 Learning Progress Badges
+            wordsmith: {
+                id: 'wordsmith',
+                title: '� Kelimeci',
+                description: '25 kelime öğren',
+                icon: 'fas fa-pen',
+                condition: () => this.stats.wordsLearned >= 25
             },
-            fillBlankMaster: {
-                id: 'fillBlankMaster',
-                title: '🧩 Boşluk Doldurma Üstadı',
-                description: '10 boşluk doldurma oyunu tamamladın! Ayetleri iyi biliyorsun!',
+            scholar: {
+                id: 'scholar',
+                title: '🎓 Bilgin',
+                description: '75 kelime öğren',
+                icon: 'fas fa-graduation-cap',
+                condition: () => this.stats.wordsLearned >= 75
+            },
+            master: {
+                id: 'master',
+                title: '�‍🏫 Üstad',
+                description: '150 kelime öğren',
+                icon: 'fas fa-user-graduate',
+                condition: () => this.stats.wordsLearned >= 150
+            },
+            
+            // 🔄 Consistency Badges
+            consistent: {
+                id: 'consistent',
+                title: '� Düzenli',
+                description: '7 gün streak',
+                icon: 'fas fa-calendar-check',
+                condition: () => this.stats.currentStreak >= 7
+            },
+            persistent: {
+                id: 'persistent',
+                title: '� Sebatlı',
+                description: '15 gün streak',
+                icon: 'fas fa-dumbbell',
+                condition: () => this.stats.currentStreak >= 15
+            },
+            unstoppable: {
+                id: 'unstoppable',
+                title: '🔥 Durdurulamaz',
+                description: '30 gün streak',
+                icon: 'fas fa-fire-flame-curved',
+                condition: () => this.stats.currentStreak >= 30
+            },
+            
+            // 🎮 Game Mode Mastery
+            translator: {
+                id: 'translator',
+                title: '🌐 Çevirmen',
+                description: '20 çeviri oyunu',
+                icon: 'fas fa-language',
+                condition: () => (parseInt(localStorage.getItem('translationGames')) || 0) >= 20
+            },
+            listener: {
+                id: 'listener',
+                title: '� Dinleyici',
+                description: '20 dinleme oyunu',
+                icon: 'fas fa-headphones',
+                condition: () => (parseInt(localStorage.getItem('listeningGames')) || 0) >= 20
+            },
+            speedRunner: {
+                id: 'speedRunner',
+                title: '⏰ Hız Kurdu',
+                description: '20 hız modu oyunu',
+                icon: 'fas fa-stopwatch',
+                condition: () => (parseInt(localStorage.getItem('speedGames')) || 0) >= 20
+            },
+            puzzler: {
+                id: 'puzzler',
+                title: '🧩 Bulmacacı',
+                description: '10 boşluk doldur',
                 icon: 'fas fa-puzzle-piece',
                 condition: () => (parseInt(localStorage.getItem('fillblankGames')) || 0) >= 10
             },
-            fillBlankPerfect: {
-                id: 'fillBlankPerfect',
-                title: '📝 Ayet Hafızı',
-                description: 'Boşluk doldurma oyununda mükemmel skor! Ayetleri ezberlemişsin!',
-                icon: 'fas fa-book-reader',
+            
+            // 📖 Islamic Learning Badges
+            ayahStudent: {
+                id: 'ayahStudent',
+                title: '� Ayet Öğrenci',
+                description: '5 ayet dinle',
+                icon: 'fas fa-book-open',
                 condition: () => {
-                    // Son fillblank oyununda %100 başarı gösterdi mi?
-                    const lastFillBlankScore = localStorage.getItem('lastFillBlankPerfect');
-                    return lastFillBlankScore === 'true';
+                    let ayetHasene = parseInt(localStorage.getItem('ayetHasene')) || 0;
+                    return ayetHasene >= 50; // 5 ayet x 10 hasene
                 }
             },
-            ayahExplorer: {
-                id: 'ayahExplorer',
-                title: '🔍 Ayet Araştırmacısı',
-                description: '50 farklı ayetten kelime öğrendin! Kur\'an keşfin devam ediyor!',
-                icon: 'fas fa-search',
-                condition: () => (parseInt(localStorage.getItem('fillblankGames')) || 0) >= 50
+            prayerful: {
+                id: 'prayerful',
+                title: '🤲 Duacı',
+                description: '5 dua dinle',
+                icon: 'fas fa-pray',
+                condition: () => (parseInt(localStorage.getItem('listenedDuaCount')) || 0) >= 5
+            },
+            quranLover: {
+                id: 'quranLover',
+                title: '� Kuran Sevdalısı',
+                description: '5 farklı sureden kel.',
+                icon: 'fas fa-quran',
+                condition: () => this.getUniqueSuras() >= 5
+            },
+            
+            // 🧠 Special Achievement Badges
+            smartLearner: {
+                id: 'smartLearner',
+                title: '� Zeki Öğrenci',
+                description: 'Hatayı düzelt',
+                icon: 'fas fa-lightbulb',
+                condition: () => false // Özel kontrol
+            },
+            comeback: {
+                id: 'comeback',
+                title: '💪 Geri Dönüş',
+                description: 'Kalp bitince devam et',
+                icon: 'fas fa-heart',
+                condition: () => (parseInt(localStorage.getItem('heartsRefilled')) || 0) >= 1
+            },
+            explorer: {
+                id: 'explorer',
+                title: '�️ Kaşif',
+                description: 'Tüm oyun modlarını oyna',
+                icon: 'fas fa-compass',
+                condition: () => {
+                    const translation = (parseInt(localStorage.getItem('translationGames')) || 0) > 0;
+                    const listening = (parseInt(localStorage.getItem('listeningGames')) || 0) > 0;
+                    const speed = (parseInt(localStorage.getItem('speedGames')) || 0) > 0;
+                    const fillblank = (parseInt(localStorage.getItem('fillblankGames')) || 0) > 0;
+                    return translation && listening && speed && fillblank;
+                }
+            },
+            
+            // 🏆 Elite Badges
+            veteran: {
+                id: 'veteran',
+                title: '🎖️ Veteran',
+                description: '100 oyun tamamla',
+                icon: 'fas fa-medal',
+                condition: () => this.stats.gamesPlayed >= 100
+            },
+            legend: {
+                id: 'legend',
+                title: '🏆 Efsane',
+                description: '250 oyun tamamla',
+                icon: 'fas fa-trophy',
+                condition: () => this.stats.gamesPlayed >= 250
+            },
+            champion: {
+                id: 'champion',
+                title: '� Şampiyon',
+                description: '500 oyun tamamla',
+                icon: 'fas fa-crown',
+                condition: () => this.stats.gamesPlayed >= 500
             }
         };
-
+        
         // İstatistikler
         this.stats = {
             gamesPlayed: parseInt(localStorage.getItem('gamesPlayed')) || 0,
@@ -718,6 +797,14 @@ class ArabicLearningGame {
 
         // Başarım verilerini yükle
         this.unlockedAchievements = JSON.parse(localStorage.getItem('unlockedAchievements')) || [];
+    }
+    
+    // Track completed game modes for achievements
+    trackGameModeCompletion() {
+        const currentMode = this.gameMode;
+        const key = currentMode + 'Games';
+        const currentCount = parseInt(localStorage.getItem(key)) || 0;
+        localStorage.setItem(key, currentCount + 1);
     }
     
     setupAchievementListeners() {
@@ -2288,6 +2375,9 @@ class ArabicLearningGame {
         // 8. ✅ OYUN BİTİMİ - save ve UI güncelleme
         this.saveGameData();
         this.updateUI();
+        
+        // Track game mode completion for achievements
+        this.trackGameModeCompletion();
         
         
         // Animate stars based on performance
