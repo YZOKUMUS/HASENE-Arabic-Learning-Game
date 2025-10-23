@@ -2700,32 +2700,64 @@ class ArabicLearningGame {
                 const isPerfectDay = this.isPerfectDay(dateString);
                 const hasStreakFreeze = this.hasStreakFreezeUsed(dateString);
                 
-                // Determine day status
-                if (haseneData >= 500) { // Perfect day
-                    dayEl.classList.add('perfect');
+                // Determine day status with enhanced Duolingo-style visualization
+                if (haseneData >= 500) { // Perfect day - Duolingo Crown level
+                    dayEl.classList.add('perfect', 'duolingo-perfect');
                     dayContent.innerHTML = `
+                        <div class="progress-ring perfect-ring">
+                            <div class="ring-fill"></div>
+                        </div>
                         <div class="hasene-count">${haseneData}</div>
-                        <div class="perfect-badge">👑</div>
-                        ${isStreak ? '<div class="streak-flame">🔥</div>' : ''}
+                        <div class="perfect-badge animate-bounce">👑</div>
+                        ${isStreak ? '<div class="streak-flame animate-flame">🔥</div>' : ''}
+                        <div class="achievement-glow"></div>
                     `;
-                } else if (haseneData >= 200) { // Great day
-                    dayEl.classList.add('great');
+                } else if (haseneData >= 200) { // Great day - Duolingo Gold level
+                    dayEl.classList.add('great', 'duolingo-great');
                     dayContent.innerHTML = `
+                        <div class="progress-ring great-ring">
+                            <div class="ring-fill"></div>
+                        </div>
                         <div class="hasene-count">${haseneData}</div>
-                        <div class="great-badge">⭐</div>
-                        ${isStreak ? '<div class="streak-flame">🔥</div>' : ''}
+                        <div class="great-badge animate-pulse">⭐</div>
+                        ${isStreak ? '<div class="streak-flame animate-flame">🔥</div>' : ''}
+                        <div class="progress-glow"></div>
                     `;
-                } else if (haseneData > 0) { // Partial completion
-                    dayEl.classList.add('partial');
+                } else if (haseneData >= 100) { // Good day - Duolingo Silver level
+                    dayEl.classList.add('good', 'duolingo-good');
                     dayContent.innerHTML = `
+                        <div class="progress-ring good-ring">
+                            <div class="ring-fill" style="--progress: ${(haseneData/200)*100}%"></div>
+                        </div>
                         <div class="hasene-count">${haseneData}</div>
-                        ${isStreak ? '<div class="streak-flame">🔥</div>' : ''}
+                        <div class="good-badge">💎</div>
+                        ${isStreak ? '<div class="streak-flame animate-flame">🔥</div>' : ''}
                     `;
-                } else if (hasStreakFreeze) { // Streak freeze used
-                    dayEl.classList.add('freeze');
-                    dayContent.innerHTML = '<div class="freeze-badge">🛡️</div>';
-                } else { // Empty day
-                    dayEl.classList.add('empty');
+                } else if (haseneData > 0) { // Partial completion - Duolingo Bronze level
+                    dayEl.classList.add('partial', 'duolingo-partial');
+                    dayContent.innerHTML = `
+                        <div class="progress-ring partial-ring">
+                            <div class="ring-fill" style="--progress: ${(haseneData/100)*100}%"></div>
+                        </div>
+                        <div class="hasene-count">${haseneData}</div>
+                        <div class="partial-badge">🥉</div>
+                        ${isStreak ? '<div class="streak-flame animate-flame">🔥</div>' : ''}
+                    `;
+                } else if (hasStreakFreeze) { // Streak freeze used - Duolingo Protection
+                    dayEl.classList.add('freeze', 'duolingo-freeze');
+                    dayContent.innerHTML = `
+                        <div class="freeze-ring">
+                            <div class="shield-effect"></div>
+                        </div>
+                        <div class="freeze-badge animate-shield">🛡️</div>
+                        <div class="protection-text">Korundu</div>
+                    `;
+                } else { // Empty day - Duolingo style empty with ice icons
+                    dayEl.classList.add('empty', 'duolingo-empty');
+                    dayContent.innerHTML = `
+                        <div class="empty-ring"></div>
+                        <div class="empty-dot">❄️</div>
+                    `;
                 }
                 
                 // Add weekend bonus indicator
