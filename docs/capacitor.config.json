@@ -1,6 +1,6 @@
 {
-  "appId": "com.hasene.ultimate.clean.version",
-  "appName": "HASENE ULTIMATE CLEAN",
+  "appId": "com.hasene.ultimate.clean.version.v2",
+  "appName": "HASENE ULTIMATE CLEAN V2",
   "webDir": "www",
   "server": {
     "androidScheme": "https"

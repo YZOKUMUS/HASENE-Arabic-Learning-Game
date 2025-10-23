@@ -2881,7 +2881,7 @@ class ArabicLearningGame {
                     dayEl.classList.add('empty', 'duolingo-empty');
                     dayContent.innerHTML = `
                         <div class="empty-ring"></div>
-                        <div class="empty-dot"></div>
+                        <div class="empty-dot">❄️</div>
                     `;
                 }
                 
