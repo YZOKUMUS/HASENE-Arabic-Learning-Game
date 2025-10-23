@@ -114,20 +114,116 @@
 
                 <script>
                     let currentAudio = null; // Global değişken
+                    let isPlaying = false;
+
+                    // Web Audio API ile basit bir melodi oluştur
+                    function createSimpleMelody() {
+                        try {
+                            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                            const duration = 3; // 3 saniye
+                            
+                            // İlahi tarzı basit notalar (La minim perde)
+                            const notes = [440, 494, 523, 494, 440, 392, 349, 392]; // A, B, C, B, A, G, F, G
+                            let currentNoteIndex = 0;
+                            
+                            function playNote() {
+                                if (!isPlaying || currentNoteIndex >= notes.length) {
+                                    currentNoteIndex = 0;
+                                    if (isPlaying) setTimeout(playNote, 500); // Döngü için kısa ara
+                                    return;
+                                }
+                                
+                                const oscillator = audioContext.createOscillator();
+                                const gainNode = audioContext.createGain();
+                                
+                                oscillator.connect(gainNode);
+                                gainNode.connect(audioContext.destination);
+                                
+                                oscillator.frequency.setValueAtTime(notes[currentNoteIndex], audioContext.currentTime);
+                                oscillator.type = 'sine'; // Yumuşak ton
+                                
+                                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
+                                
+                                oscillator.start();
+                                oscillator.stop(audioContext.currentTime + 0.8);
+                                
+                                currentNoteIndex++;
+                                setTimeout(playNote, 600);
+                            }
+                            
+                            return { play: playNote, stop: () => { isPlaying = false; } };
+                        } catch (error) {
+                            console.log('Web Audio API desteklenmiyor:', error);
+                            return null;
+                        }
+                    }
 
                     function playMusic() {
-                        if (currentAudio) {
+                        if (currentAudio && currentAudio.pause) {
                             if (!currentAudio.paused) {
-                                currentAudio.pause(); // Çalan sesi durdur
-                                currentAudio.currentTime = 0; // Sesi başa sar
+                                currentAudio.pause();
+                                currentAudio.currentTime = 0;
+                                isPlaying = false;
+                                console.log('İlahi durduruldu');
                                 return;
                             }
-                        } else {
-                            currentAudio = new Audio('sounds/demo-music.mp3');
                         }
 
-                        currentAudio.currentTime = 0; // Sesi başa sar
-                        currentAudio.play(); // Sesi çal
+                        // İlahi URL'lerini sırayla dene
+                        const ilahiUrls = [
+                            'https://dinimizislam.com/Download/Ses/Ilahiler/4/AyDo%C4%9Fdu.mp3',
+                            'https://dinimizislam.com/Download/Ses/Ilahiler/4/AyDoğdu.mp3', // Alternatif encoding
+                            'sounds/game-music.mp4',
+                            'sounds/melody.wav'
+                        ];
+                        
+                        let urlIndex = 0;
+                        
+                        function tryNextUrl() {
+                            if (urlIndex >= ilahiUrls.length) {
+                                // Tüm URL'ler başarısız, Web Audio API ile melodi çal
+                                console.log('Tüm ses dosyaları başarısız, basit melodi çalınıyor...');
+                                const melody = createSimpleMelody();
+                                if (melody) {
+                                    isPlaying = true;
+                                    melody.play();
+                                    alert('İlahi yüklenemedi, basit bir melodi çalınıyor. 🎵');
+                                } else {
+                                    alert('Ses sistemi desteklenmiyor. Lütfen tarayıcınızı güncelleyin.');
+                                }
+                                return;
+                            }
+                            
+                            currentAudio = new Audio(ilahiUrls[urlIndex]);
+                            console.log(`Deneniyor: ${ilahiUrls[urlIndex]}`);
+                            
+                            currentAudio.onerror = function(e) {
+                                console.log(`URL başarısız (${urlIndex + 1}/${ilahiUrls.length}):`, e);
+                                urlIndex++;
+                                tryNextUrl();
+                            };
+                            
+                            currentAudio.oncanplay = function() {
+                                console.log('İlahi yüklendi, çalınıyor...');
+                                isPlaying = true;
+                            };
+                            
+                            currentAudio.onended = function() {
+                                isPlaying = false;
+                                console.log('İlahi sona erdi');
+                            };
+                            
+                            // Çalmayı dene
+                            currentAudio.currentTime = 0;
+                            currentAudio.play().catch(error => {
+                                console.log(`Çalma hatası: ${error}`);
+                                urlIndex++;
+                                tryNextUrl();
+                            });
+                        }
+                        
+                        tryNextUrl();
                     }
                 </script>
             </div>
