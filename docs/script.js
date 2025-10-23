@@ -432,6 +432,7 @@ class ArabicLearningGame {
         localStorage.setItem('difficulty', this.difficulty);
         this.questions = [];
         this.currentAudio = null;
+        this.dataLoaded = false; // Flag to track data loading completion
         
         // Legacy difficulty migration (artık normalizeDifficulty ile otomatik)
         this.migrateDifficultyValues();
@@ -742,10 +743,10 @@ class ArabicLearningGame {
         this.showScreen('loadingScreen');
         
         try {
-            // Start loading animation
+            // Start loading animation (this will manage the loading process)
             this.startLoadingAnimation();
             
-            // Load word data
+            // Load word data in background
             await this.loadWordData();
             
             // Update UI (streak will be checked when game is completed)
@@ -754,8 +755,8 @@ class ArabicLearningGame {
             // Initialize difficulty UI
             this.initializeDifficultyUI();
             
-            // Complete loading animation
-            this.completeLoadingAnimation();
+            // Set flag that data is loaded - loading animation will check this
+            this.dataLoaded = true;
         } catch (error) {
             console.error('Game initialization failed:', error);
             alert('Oyun yüklenirken bir hata oluştu. Lütfen sayfayı yenileyin.');
@@ -840,19 +841,46 @@ class ArabicLearningGame {
     }
     
     showScreen(screenId) {
-        
-        // Hide all screens
-        document.querySelectorAll('.screen').forEach(screen => {
-            screen.style.display = 'none';
-        });
-        
-        // Show requested screen
+        // Get current and target screens
+        const currentScreen = document.querySelector('.screen[style*="flex"]');
         const targetScreen = document.getElementById(screenId);
-        if (targetScreen) {
+        
+        if (!targetScreen) {
+            console.error(`❌ Screen bulunamadı: ${screenId}`);
+            return;
+        }
+        
+        // If there's a current screen, fade it out
+        if (currentScreen && currentScreen !== targetScreen) {
+            currentScreen.classList.add('fade-out');
+            
+            setTimeout(() => {
+                // Hide all screens
+                document.querySelectorAll('.screen').forEach(screen => {
+                    screen.style.display = 'none';
+                    screen.classList.remove('fade-out', 'active');
+                });
+                
+                // Show and animate in the target screen
+                targetScreen.style.display = 'flex';
+                targetScreen.scrollTop = 0;
+                
+                // Force reflow then add active class for smooth animation
+                targetScreen.offsetHeight;
+                targetScreen.classList.add('active');
+                
+            }, 600); // Match fade-out duration
+        } else {
+            // No current screen, show immediately
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.style.display = 'none';
+                screen.classList.remove('fade-out', 'active');
+            });
+            
             targetScreen.style.display = 'flex';
             targetScreen.scrollTop = 0;
-        } else {
-            console.error(`❌ Screen bulunamadı: ${screenId}`);
+            targetScreen.offsetHeight;
+            targetScreen.classList.add('active');
         }
 
         // 🏷️ GLOBAL FOOTER INJECTION - Her ekranda footer göster
@@ -2579,18 +2607,54 @@ class ArabicLearningGame {
     // Loading Animation Functions
     startLoadingAnimation() {
         // Store elements in instance variables for scope access
-        this.progressBar = document.getElementById('loadingProgress');
         this.loadingText = document.getElementById('loadingText');
-        this.loadingPercentage = document.getElementById('loadingPercentage');
+        this.spinner = document.querySelector('.loading-spinner');
         
         // DOM safety check
-        if (!this.progressBar || !this.loadingText || !this.loadingPercentage) {
+        if (!this.loadingText) {
             console.warn('Loading animation elements not found, skipping animation');
             return;
         }
 
         // 🏷️ FOOTER INJECTION - Directly add footer to loading screen
         this.injectLoadingFooter();
+        
+        // Start smooth loading sequence
+        this.simulateLoading();
+    }
+
+    simulateLoading() {
+        const messages = [
+            'Hadis-i Şeriften istifade ediniz...',
+            'Kuran verileri yükleniyor...',
+            'Kelime hazinesi hazırlanıyor...',
+            'Ayet koleksiyonu işleniyor...',
+            'Ses dosyaları kontrol ediliyor...',
+            'Bismillah! Hazır...'
+        ];
+        
+        let currentMessage = 0;
+        
+        const changeMessage = () => {
+            if (this.loadingText && currentMessage < messages.length) {
+                this.loadingText.textContent = messages[currentMessage];
+                currentMessage++;
+                
+                if (currentMessage < messages.length) {
+                    // Slower timing to allow reading the Hadis
+                    const delay = currentMessage === 1 ? 3000 : 2200; // Extra time for first message
+                    setTimeout(changeMessage, delay);
+                } else {
+                    // Final pause before completing
+                    setTimeout(() => {
+                        this.completeLoadingAnimation();
+                    }, 2000);
+                }
+            }
+        };
+        
+        // Start message sequence after initial delay (time to read Hadis)
+        setTimeout(changeMessage, 2500);
     }
 
     injectLoadingFooter() {
@@ -2787,23 +2851,25 @@ class ArabicLearningGame {
     }
     
     completeLoadingAnimation() {
-        // Use instance variables instead of local
-        if (this.progressBar) {
-            this.progressBar.style.width = '100%';
+        // Wait for data to be loaded before transitioning
+        if (!this.dataLoaded) {
+            // If data not loaded yet, wait a bit and try again
+            setTimeout(() => this.completeLoadingAnimation(), 500);
+            return;
         }
-        if (this.loadingPercentage) {
-            this.loadingPercentage.textContent = '100%';
-        }
-        if (this.loadingText) {
-            this.loadingText.textContent = 'Hazır! Bismillah...';
+
+        // Add fade-out class to loading screen
+        const loadingScreen = document.getElementById('loadingScreen');
+        if (loadingScreen) {
+            loadingScreen.classList.add('fade-out');
         }
         
-        // Wait a bit then show main menu
+        // Wait for fade-out animation then show main menu
         setTimeout(() => {
             this.showScreen('mainMenu');
             // Setup event listeners after DOM is ready
             setTimeout(() => this.setupAchievementListeners(), 200);
-        }, 1500);
+        }, 800);
     }
 
     initializeDifficultyUI() {
@@ -3528,11 +3594,15 @@ document.addEventListener('DOMContentLoaded', () => {
 // Background müzik başlatma fonksiyonu
 function initializeBackgroundMusic() {
     const backgroundMusic = document.getElementById('backgroundMusic');
-    const musicIcon = document.getElementById('musicIcon');
-    const musicBtn = document.getElementById('musicToggle');
+    const musicBtn = document.getElementById('musicButton');
     
     if (!backgroundMusic) {
         console.warn('Background music element bulunamadı');
+        return;
+    }
+
+    if (!musicBtn) {
+        console.warn('Music button element bulunamadı');
         return;
     }
 
@@ -3541,14 +3611,19 @@ function initializeBackgroundMusic() {
     
     if (musicEnabled === 'true') {
         // Müzik açık olarak ayarlanmış
-        musicIcon.className = 'fas fa-music';
+        const musicIcon = musicBtn.querySelector('i');
+        if (musicIcon) {
+            musicIcon.className = 'fas fa-music';
+        }
         musicBtn.style.opacity = '1';
     } else {
         // Müziği kapalı (varsayılan)
-        musicIcon.className = 'fas fa-music-slash';
+        const musicIcon = musicBtn.querySelector('i');
+        if (musicIcon) {
+            musicIcon.className = 'fas fa-music-slash';
+        }
         musicBtn.style.opacity = '0.5';
     }
-    
 }
 
 // Test function for validating difficulty levels

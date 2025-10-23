@@ -3,18 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>HASENE - Duolingo Tarzı Arapça Öğrenme</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon-192-v4-RED-MUSHAF.png">
     <link rel="apple-touch-icon" href="icon-192-v4-RED-MUSHAF.png">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=2.0.1">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <!-- Loading Screen -->
-    <div id="loadingScreen" class="screen">
+    <div id="loadingScreen" class="screen active">
         <div class="loading-content">
             <div class="loading-logo">
                 <i class="fas fa-quran"></i>
@@ -36,13 +39,7 @@
             
             <div class="loading-area">
                 <div class="loading-spinner"></div>
-                <div class="loading-progress">
-                    <div class="progress-bar-loading">
-                        <div class="progress-fill-loading" id="loadingProgress"></div>
-                    </div>
-                    <div class="loading-text" id="loadingText">Oyun yükleniyor...</div>
-                    <div class="loading-percentage" id="loadingPercentage">0%</div>
-                </div>
+                <div class="loading-text" id="loadingText">Oyun yükleniyor...</div>
             </div>
         </div>
     </div>
@@ -120,7 +117,7 @@
                                 return;
                             }
                         } else {
-                            currentAudio = new Audio('https://dinimizislam.com/Download/Ses/Ilahiler/4/AyDo%C4%9Fdu.mp3');
+                            currentAudio = new Audio('sounds/demo-music.mp3');
                         }
 
                         currentAudio.currentTime = 0; // Sesi başa sar
@@ -766,7 +763,7 @@
     </audio>
     <audio id="correctSound" src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+D2u2ccBSuBzvLZjTgHEWe57+OZUQ4IVKTk97VaFws+ltryxXksBS6Hz/LdjTgIG2q+7eSXSAoOVKLm9L1mFgkugM3110g+CV+16iKcWAcLflG1cfkGrrcY0U4YwyZs3+LB9M8H4VLQ+K36oLoi4WEYyCNU4dLDzOAfAAAA"></audio>
     <audio id="incorrectSound" src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+D2u2ccBSuBzvLZjTgHEWe57+OZUQ4IVKTk97VaFws+ltryxXksBS6Hz/LdjTgIG2q+7eSXSAoOVKLm9L1mFgkugM3110g+CV+16iKcWAcLflG1cfkGrrcY0U4YwyZs3+LB9M8H4VLQ+K36oLoi4WEYyCNU4dLDzOAfAAAA"></audio>
-    <audio id="ayDogduAudio" src="https://dinimizlam.com/Download/Ses/Ilahiler/4/AyDo%C4%9Fdu.mp3" preload="auto"></audio>
+    <audio id="ayDogduAudio" src="sounds/demo-music.mp3" preload="none"></audio>
     
     <!-- 🎵 Enhanced Sound Effects - Web Audio API -->
     <audio id="achievementSound" preload="auto">
@@ -805,9 +802,9 @@
         </div>
     </div>
 
-    <script src="sounds/audio-generator.js"></script>
-    <script src="party-effects.js"></script>
-    <script src="script.js"></script>
-    <script src="debug-manager.js"></script>
+    <script src="sounds/audio-generator.js?v=2.0.1"></script>
+    <script src="party-effects.js?v=2.0.1"></script>
+    <script src="script.js?v=2.0.1"></script>
+    <script src="debug-manager.js?v=2.0.1"></script>
 </body>
 </html>
