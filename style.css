@@ -3052,11 +3052,13 @@ input:focus {
 
 .monthly-stats-panel h3 {
     margin-bottom: 15px;
-    color: var(--text-dark);
-    font-weight: 700;
+    color: #0f172a;
+    font-weight: 800;
     display: flex;
     align-items: center;
     gap: 10px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(255, 255, 255, 0.9);
+    font-size: 1.2rem;
 }
 
 .stats-grid {
@@ -3066,15 +3068,16 @@ input:focus {
 }
 
 .stat-card {
-    background: white;
+    background: rgba(255, 255, 255, 0.95);
     padding: 15px;
     border-radius: var(--border-radius-small);
     display: flex;
     align-items: center;
     gap: 12px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    border: 1px solid #f1f5f9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    border: 2px solid #e2e8f0;
     transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
 }
 
 .stat-card:hover {
@@ -3086,11 +3089,15 @@ input:focus {
     font-size: 1.5rem;
     width: 40px;
     height: 40px;
-    background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
+    color: #1e3a8a;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    border: 2px solid #3b82f6;
 }
 
 .stat-info {
@@ -3098,16 +3105,19 @@ input:focus {
 }
 
 .stat-value {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--primary-blue);
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #0f172a;
     line-height: 1;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(255, 255, 255, 0.9);
 }
 
 .stat-label {
-    font-size: 0.7rem;
-    color: #64748b;
+    font-size: 0.8rem;
+    color: #1e293b;
     margin-top: 2px;
+    font-weight: 600;
+    text-shadow: 0 2px 3px rgba(0, 0, 0, 0.2), 0 1px 1px rgba(255, 255, 255, 0.9);
 }
 
 /* Original Calendar tooltip */
