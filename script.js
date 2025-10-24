@@ -2,8 +2,8 @@
 const APP_VERSION = {
     version: "2.1.20385",
     buildDate: "2025-10-24",
-    buildTime: "23:32",
-    buildNumber: "20251024-2332",
+    buildTime: "01:43",
+    buildNumber: "20251024-0143",
     codeStatus: "Auto Optimized",
     copyright: "© 2025 YZOKUMUS",
     features: ["Auto Build", "Size Optimized", "Cache Managed", "Production Ready"]
@@ -1908,6 +1908,7 @@ class ArabicLearningGame {
             
             // 7. ✅ CALENDAR GÜNCELLEME - her doğru cevaptan sonra
             const today = new Date().toDateString();
+            console.log(`📅 Hasene güncellendi: ${today} -> ${this.dailyHasene} (+${earnedHasene})`);
             this.storeDailyHasene(today, this.dailyHasene);
             
             // Play correct sound
@@ -2863,14 +2864,22 @@ class ArabicLearningGame {
     getDailyHasene(dateString) {
         // Get stored daily hasene data from localStorage
         const haseneData = JSON.parse(localStorage.getItem('dailyHaseneData') || '{}');
-        return haseneData[dateString] || 0;
+        const value = haseneData[dateString] || 0;
+        
+        // Debug log
+        console.log(`📖 Calendar okunuyor: ${dateString} = ${value}`);
+        return value;
     }
     
     storeDailyHasene(dateString, hasene) {
         // Store daily hasene data (set total, don't add)
         const haseneData = JSON.parse(localStorage.getItem('dailyHaseneData') || '{}');
+        const oldValue = haseneData[dateString] || 0;
         haseneData[dateString] = hasene; // Set total daily hasene, don't add
         localStorage.setItem('dailyHaseneData', JSON.stringify(haseneData));
+        
+        // Debug log
+        console.log(`💾 Calendar kaydedildi: ${dateString} = ${hasene} (eski: ${oldValue})`);
     }
     
     getDailyGames(dateString) {
@@ -3951,16 +3960,24 @@ ArabicLearningGame.prototype.loadGameData = function() {
     }
     
     
-    // ✅ CALENDAR DATA RESTORE - oyun başlarken bugünkü hasene'yi restore et
+    // 🛡️ GÜNLÜKHASENERe RESTORE SİSTEMİ - SADECE BUGÜN İLK KEZ OYUN BAŞLATIYORSA
     const today = new Date().toDateString();
-    const calendarData = JSON.parse(localStorage.getItem('dailyHaseneData') || '{}');
-    const todaysCalendarHasene = calendarData[today] || 0;
+    const lastPlayDate = this.lastPlayDate;
     
-    // Eğer calendar'da bugün için veri varsa ve dailyHasene ile uyuşmuyorsa
-    if (todaysCalendarHasene > 0 && todaysCalendarHasene !== this.dailyHasene) {
-        this.dailyHasene = todaysCalendarHasene;
-        // localStorage'ı da güncelle
-        localStorage.setItem('dailyHasene', this.dailyHasene.toString());
+    // Eğer son oyun tarihi bugün değilse, dailyHasene sıfırlanmalı
+    if (lastPlayDate && lastPlayDate !== today) {
+        console.log(`🔄 Yeni gün tespit edildi: ${lastPlayDate} → ${today}`);
+        this.dailyHasene = 0;
+        localStorage.setItem('dailyHasene', '0');
+    } else if (lastPlayDate === today) {
+        // Bugün zaten oyun oynandıysa, mevcut dailyHasene değerini koru
+        // Bu durumda loadGameData başında yüklenen değer doğru olmalı
+        console.log(`📅 Bugün devam ediliyor: ${today} - dailyHasene: ${this.dailyHasene}`);
+    } else {
+        // İlk defa oyun oynuyorsa
+        console.log(`🎉 İlk oyun başlıyor: ${today}`);
+        this.dailyHasene = 0;
+        localStorage.setItem('dailyHasene', '0');
     }
     
     // UI'yi güncelle

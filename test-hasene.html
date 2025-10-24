@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hasene Test</title>
+</head>
+<body>
+    <h1>Daily Hasene Test</h1>
+    <button onclick="createTestData()">Test Verisi Oluştur</button>
+    <button onclick="showData()">Veriyi Göster</button>
+    <button onclick="clearData()">Temizle</button>
+    
+    <div id="output" style="margin-top: 20px; font-family: monospace;"></div>
+
+    <script>
+        function createTestData() {
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+
+            const todayStr = today.toISOString().split('T')[0];
+            const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+            // Test verisi oluştur
+            const haseneData = {
+                [yesterdayStr]: 1315,  // Dün 1315 hasene
+                [todayStr]: 70         // Bugün 70 hasene
+            };
+
+            localStorage.setItem('dailyHaseneData', JSON.stringify(haseneData));
+            localStorage.setItem('dailyHasene', '70');
+
+            document.getElementById('output').innerHTML = `
+                <h3>✅ Test Verisi Oluşturuldu:</h3>
+                <p>📅 Bugün (${todayStr}): 70 hasene</p>
+                <p>📅 Dün (${yesterdayStr}): 1315 hasene</p>
+                <p>🔄 Şimdi ana oyunu aç ve calendar'a bak!</p>
+            `;
+        }
+
+        function showData() {
+            const dailyHaseneData = localStorage.getItem('dailyHaseneData');
+            const dailyHasene = localStorage.getItem('dailyHasene');
+            
+            document.getElementById('output').innerHTML = `
+                <h3>📊 Mevcut Veriler:</h3>
+                <p><strong>dailyHaseneData:</strong> ${dailyHaseneData || 'YOK'}</p>
+                <p><strong>dailyHasene:</strong> ${dailyHasene || 'YOK'}</p>
+            `;
+        }
+
+        function clearData() {
+            localStorage.removeItem('dailyHaseneData');
+            localStorage.removeItem('dailyHasene');
+            document.getElementById('output').innerHTML = '<p>🗑️ Veriler temizlendi</p>';
+        }
+    </script>
+</body>
+</html>
