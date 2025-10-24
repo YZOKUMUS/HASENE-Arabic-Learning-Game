@@ -1,12 +1,12 @@
 // 🏷️ Version Management System
 const APP_VERSION = {
-    version: "2.1.0",
+    version: "2.1.1761335058",
     buildDate: "2025-10-24",
-    buildTime: "18:30",
-    buildNumber: "1024-1830",
-    codeStatus: "FINAL Calendar Fix",
+    buildTime: "22:44",
+    buildNumber: "20251024-2244",
+    codeStatus: "Auto Optimized",
     copyright: "© 2025 YZOKUMUS",
-    features: ["Calendar Colors Fixed", "Statistics Fixed", "APK Ready", "Production Final"]
+    features: ["Auto Build", "Size Optimized", "Cache Managed", "Production Ready"]
 };
 
 // 🎯 Onboarding Check - Redirect to onboarding if first time user

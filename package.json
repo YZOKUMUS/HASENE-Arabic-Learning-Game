@@ -4,7 +4,11 @@
   "description": "🕌 İslami temalı Arapça öğrenme oyunu! Kelime çevir, ayet dinle, dua oku. Hasene topla, seviye atla!",
   "main": "index.html",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-apk": "node build-optimize.js",
+    "optimize": "node build-optimize.js",
+    "clean-build": "node build-optimize.js && git push origin master",
+    "quick-build": "npx cap sync android && cd android && .\\gradlew.bat assembleDebug"
   },
   "repository": {
     "type": "git",

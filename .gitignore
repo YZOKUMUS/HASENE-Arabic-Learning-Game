@@ -7,6 +7,14 @@ yarn-error.log*
 # APK files (will be uploaded via GitHub Releases)
 # *.apk
 
+# 🚫 Büyük medya dosyaları (>1MB) - APK boyutunu küçük tutar
+**/*.mp4
+**/*.avi  
+**/*.mov
+**/*.mkv
+**/game-music.*
+**/large-audio.*
+
 # Android build files
 android/app/build/
 android/app/release/
