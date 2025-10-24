@@ -212,6 +212,14 @@ if (typeof window.soundManager === 'undefined') {
 // Ayet Dinle ve Oku görevini tetikleyen fonksiyon
 async function showAyetTask() {
     
+    // Get game reference first
+    const game = window.arabicLearningGame;
+    
+    // Oyun modu set et
+    if (game) {
+        game.gameMode = 'ayet';
+    }
+    
     // Zorluk sistemine entegre et - önce localStorage'dan oku
     let difficulty = localStorage.getItem('difficulty') || 'medium';
     
@@ -229,8 +237,6 @@ async function showAyetTask() {
     if (!['easy', 'medium', 'hard'].includes(difficulty)) {
         difficulty = 'medium';
     }
-    
-    const game = window.arabicLearningGame;
     let ayetler = [];
     
     if (game && game.ayetData && game.ayetData.length > 0) {
@@ -313,32 +319,12 @@ async function showAyetTask() {
     let haseneGiven = false;
     function giveAyetHasene() {
         if (!haseneGiven) {
-            let ayetHasene = parseInt(localStorage.getItem('ayetHasene')) || 0;
-            ayetHasene += 10;
-            localStorage.setItem('ayetHasene', ayetHasene.toString());
-            
-            // Ayet dinleme sayısını artır (istatistik için)
-            let ayetListens = parseInt(localStorage.getItem('ayetListens')) || 0;
-            ayetListens += 1;
-            localStorage.setItem('ayetListens', ayetListens.toString());
-            
-            // Toplam ve günlük hasene'ye de ekle
-            let totalHasene = parseInt(localStorage.getItem('totalHasene')) || 0;
-            totalHasene += 10;
-            localStorage.setItem('totalHasene', totalHasene.toString());
-            let dailyHasene = parseInt(localStorage.getItem('dailyHasene')) || 0;
-            dailyHasene += 10;
-            localStorage.setItem('dailyHasene', dailyHasene.toString());
-            if (document.getElementById('haseneCount')) {
-                document.getElementById('haseneCount').textContent = totalHasene;
-            }
-            if (document.getElementById('haseneCountBottom')) {
-                document.getElementById('haseneCountBottom').textContent = totalHasene;
-            }
-            if (document.getElementById('dailyHasene')) {
-                document.getElementById('dailyHasene').textContent = dailyHasene;
-            }
             haseneGiven = true;
+            
+            // Only call completeGame - let it handle all the statistics
+            if (game) {
+                game.completeGame();
+            }
         }
     }
     if (ayetAudio) {
@@ -350,6 +336,14 @@ async function showAyetTask() {
 
 // Dua dinleme görevini tetikleyen fonksiyon
 async function showDuaTask() {
+    // Get game reference first
+    const game = window.arabicLearningGame;
+    
+    // Oyun modu set et
+    if (game) {
+        game.gameMode = 'dua';
+    }
+    
     // dualar.json dosyasını oku
     let response = await fetch('dualar.json');
     let dualar = await response.json();
@@ -386,32 +380,12 @@ async function showDuaTask() {
     let haseneGiven = false;
     function giveDuaHasene() {
         if (!haseneGiven) {
-            let listenedDuaCount = parseInt(localStorage.getItem('listenedDuaCount')) || 0;
-            listenedDuaCount++;
-            localStorage.setItem('listenedDuaCount', listenedDuaHasene);
-            
-            // Dua dinleme sayısını artır (istatistik için)
-            let duaListens = parseInt(localStorage.getItem('duaListens')) || 0;
-            duaListens += 1;
-            localStorage.setItem('duaListens', duaListens.toString());
-            
-            let haseneEarned = 10;
-            let totalHasene = parseInt(localStorage.getItem('totalHasene')) || 0;
-            totalHasene += haseneEarned;
-            localStorage.setItem('totalHasene', totalHasene);
-            let dailyHasene = parseInt(localStorage.getItem('dailyHasene')) || 0;
-            dailyHasene += haseneEarned;
-            localStorage.setItem('dailyHasene', dailyHasene);
-            if (document.getElementById('haseneCount')) {
-                document.getElementById('haseneCount').textContent = totalHasene;
-            }
-            if (document.getElementById('haseneCountBottom')) {
-                document.getElementById('haseneCountBottom').textContent = totalHasene;
-            }
-            if (document.getElementById('dailyHasene')) {
-                document.getElementById('dailyHasene').textContent = dailyHasene;
-            }
             haseneGiven = true;
+            
+            // Only call completeGame - let it handle all the statistics
+            if (game) {
+                game.completeGame();
+            }
         }
     }
     if (duaAudio) {
@@ -556,46 +530,46 @@ class ArabicLearningGame {
             earlyBird: {
                 id: 'earlyBird',
                 title: '🐣 Erken Kuş',
-                description: '5 oyun tamamla',
+                description: '15 oyun tamamla',
                 icon: 'fas fa-egg',
-                condition: () => this.stats.gamesPlayed >= 5
+                condition: () => this.stats.gamesPlayed >= 15
             },
             dedication: {
                 id: 'dedication',
                 title: '� Azim',
-                description: '3 gün streak',
+                description: '7 gün streak',
                 icon: 'fas fa-fire',
-                condition: () => this.stats.currentStreak >= 3
+                condition: () => this.stats.currentStreak >= 7
             },
             
             // 💎 Hasene Collection Badges
             collector: {
                 id: 'collector',
                 title: '� Toplayıcı',
-                description: '50 hasene biriktir',
+                description: '150 hasene biriktir',
                 icon: 'fas fa-coins',
-                condition: () => this.stats.totalHasene >= 50
+                condition: () => this.stats.totalHasene >= 150
             },
             treasurer: {
                 id: 'treasurer',
                 title: '� Hazine',
-                description: '200 hasene biriktir',
+                description: '500 hasene biriktir',
                 icon: 'fas fa-gem',
-                condition: () => this.stats.totalHasene >= 200
+                condition: () => this.stats.totalHasene >= 500
             },
             magnate: {
                 id: 'magnate',
                 title: '� Sultan',
-                description: '500 hasene biriktir',
+                description: '1000 hasene biriktir',
                 icon: 'fas fa-crown',
-                condition: () => this.stats.totalHasene >= 500
+                condition: () => this.stats.totalHasene >= 1000
             },
             tycoon: {
                 id: 'tycoon',
                 title: '🏰 Padişah',
-                description: '1000 hasene biriktir',
+                description: '2500 hasene biriktir',
                 icon: 'fas fa-chess-king',
-                condition: () => this.stats.totalHasene >= 1000
+                condition: () => this.stats.totalHasene >= 2500
             },
             
             // ⚡ Speed & Accuracy Badges
@@ -616,39 +590,39 @@ class ArabicLearningGame {
             perfectionist: {
                 id: 'perfectionist',
                 title: '⭐ Mükemmel',
-                description: '1 hatasız oyun',
+                description: '3 hatasız oyun',
                 icon: 'fas fa-star',
-                condition: () => this.stats.perfectGames >= 1
+                condition: () => this.stats.perfectGames >= 3
             },
             flawless: {
                 id: 'flawless',
                 title: '� Kusursuz',
-                description: '5 hatasız oyun',
+                description: '10 hatasız oyun',
                 icon: 'fas fa-trophy',
-                condition: () => this.stats.perfectGames >= 5
+                condition: () => this.stats.perfectGames >= 10
             },
             
             // 📚 Learning Progress Badges
             wordsmith: {
                 id: 'wordsmith',
                 title: '� Kelimeci',
-                description: '25 kelime öğren',
+                description: '50 kelime öğren',
                 icon: 'fas fa-pen',
-                condition: () => this.stats.wordsLearned >= 25
+                condition: () => this.stats.wordsLearned >= 50
             },
             scholar: {
                 id: 'scholar',
                 title: '🎓 Bilgin',
-                description: '75 kelime öğren',
+                description: '150 kelime öğren',
                 icon: 'fas fa-graduation-cap',
-                condition: () => this.stats.wordsLearned >= 75
+                condition: () => this.stats.wordsLearned >= 150
             },
             master: {
                 id: 'master',
                 title: '�‍🏫 Üstad',
-                description: '150 kelime öğren',
+                description: '300 kelime öğren',
                 icon: 'fas fa-user-graduate',
-                condition: () => this.stats.wordsLearned >= 150
+                condition: () => this.stats.wordsLearned >= 300
             },
             
             // 🔄 Consistency Badges
@@ -678,30 +652,44 @@ class ArabicLearningGame {
             translator: {
                 id: 'translator',
                 title: '🌐 Çevirmen',
-                description: '20 çeviri oyunu',
+                description: '50 çeviri oyunu',
                 icon: 'fas fa-language',
-                condition: () => (parseInt(localStorage.getItem('translationGames')) || 0) >= 20
+                condition: () => (parseInt(localStorage.getItem('translationGames')) || 0) >= 50
             },
             listener: {
                 id: 'listener',
                 title: '� Dinleyici',
-                description: '20 dinleme oyunu',
+                description: '50 dinleme oyunu',
                 icon: 'fas fa-headphones',
-                condition: () => (parseInt(localStorage.getItem('listeningGames')) || 0) >= 20
+                condition: () => (parseInt(localStorage.getItem('listeningGames')) || 0) >= 50
             },
             speedRunner: {
                 id: 'speedRunner',
                 title: '⏰ Hız Kurdu',
-                description: '20 hız modu oyunu',
+                description: '50 hız modu oyunu',
                 icon: 'fas fa-stopwatch',
-                condition: () => (parseInt(localStorage.getItem('speedGames')) || 0) >= 20
+                condition: () => (parseInt(localStorage.getItem('speedGames')) || 0) >= 50
             },
             puzzler: {
                 id: 'puzzler',
                 title: '🧩 Bulmacacı',
-                description: '10 boşluk doldur',
+                description: '25 boşluk doldur',
                 icon: 'fas fa-puzzle-piece',
-                condition: () => (parseInt(localStorage.getItem('fillblankGames')) || 0) >= 10
+                condition: () => (parseInt(localStorage.getItem('fillblankGames')) || 0) >= 25
+            },
+            ayetListener: {
+                id: 'ayetListener',
+                title: '📿 Ayet Dinleyici',
+                description: '20 ayet dinle',
+                icon: 'fas fa-quran',
+                condition: () => (parseInt(localStorage.getItem('ayetGames')) || 0) >= 20
+            },
+            duaListener: {
+                id: 'duaListener',
+                title: '🤲 Dua Dinleyici',
+                description: '20 dua dinle',
+                icon: 'fas fa-hands-praying',
+                condition: () => (parseInt(localStorage.getItem('duaGames')) || 0) >= 20
             },
             
             // 📖 Islamic Learning Badges
@@ -2303,8 +2291,42 @@ class ArabicLearningGame {
             // Clear any running timers
             this.clearQuestionTimer();
             
+            // Handle ayet and dua modes specially
+            if (this.gameMode === 'ayet' || this.gameMode === 'dua') {
+                // For ayet and dua modes, give 10 hasene and don't count words learned
+                const haseneEarned = 10;
+                this.gameHasene = haseneEarned;
+                this.totalHasene += haseneEarned;
+                this.dailyHasene += haseneEarned;
+                
+                // Don't update wordsLearned for ayet/dua modes
+                
+                // Oyun modu sayacını güncelle
+                const modeKey = this.gameMode + 'Games'; // ayetGames, duaGames
+                const currentCount = parseInt(localStorage.getItem(modeKey)) || 0;
+                localStorage.setItem(modeKey, (currentCount + 1).toString());
+                
+                // Update hasene displays
+                localStorage.setItem('totalHasene', this.totalHasene.toString());
+                localStorage.setItem('dailyHasene', this.dailyHasene.toString());
+                
+                if (document.getElementById('haseneCount')) {
+                    document.getElementById('haseneCount').textContent = this.totalHasene;
+                }
+                if (document.getElementById('haseneCountBottom')) {
+                    document.getElementById('haseneCountBottom').textContent = this.totalHasene;
+                }
+                if (document.getElementById('dailyHasene')) {
+                    document.getElementById('dailyHasene').textContent = this.dailyHasene;
+                }
+                
+                // Update badges and achievements
+                this.updateGameStats();
+                return;
+            }
+            
             // ❌ Kalp kontrolü kaldırıldı - artık kalp bitince de oyun tamamlanabilir
-            // Calculate results
+            // Calculate results for normal game modes
             const totalQuestions = this.questions.length;
             const accuracy = Math.round((this.score / totalQuestions) * 100);
             
@@ -2312,7 +2334,7 @@ class ArabicLearningGame {
             this.totalHasene += this.gameHasene;
             this.dailyHasene += this.gameHasene;
             
-            // Update words learned (mastery-based calculation)
+            // Update words learned (mastery-based calculation) - only for normal game modes
             // Gerçekten öğrenilen kelimeleri hesapla (en az 10 kez doğru)
             this.wordsLearned = this.calculateMasteredWords();
             
@@ -2562,7 +2584,17 @@ class ArabicLearningGame {
     
     updateGameStats() {
         
-        // Update basic stats
+        // Skip stats update for ayet/dua modes except for achievements
+        if (this.gameMode === 'ayet' || this.gameMode === 'dua') {
+            // Only update hasene and check achievements for ayet/dua modes
+            this.stats.totalHasene = this.totalHasene;
+            this.stats.currentStreak = this.streak;
+            // Don't update gamesPlayed, perfectGames, or wordsLearned for ayet/dua
+            this.checkNewAchievements();
+            return;
+        }
+        
+        // Update basic stats (only for normal game modes)
         this.stats.gamesPlayed++;
         localStorage.setItem('gamesPlayed', this.stats.gamesPlayed);
         
@@ -2581,7 +2613,7 @@ class ArabicLearningGame {
         // 6. ✅ İSTATİSTİK ENTEGRASYONU - totalHasene değiştiğinde doğru güncelleme
         this.stats.totalHasene = this.totalHasene;
         this.stats.currentStreak = this.streak;
-        this.stats.wordsLearned = this.calculateMasteredWords(); // Dinamik hesaplama
+        this.stats.wordsLearned = this.calculateMasteredWords(); // Dinamik hesaplama - only for normal games
         this.stats.totalAnswers = this.totalAnswers;
         this.stats.correctAnswers = this.correctAnswers;
         
@@ -2700,47 +2732,27 @@ class ArabicLearningGame {
                 const isPerfectDay = this.isPerfectDay(dateString);
                 const hasStreakFreeze = this.hasStreakFreezeUsed(dateString);
                 
-                // Determine day status with enhanced Duolingo-style visualization
-                if (haseneData >= 500) { // Perfect day - Duolingo Crown level
-                    dayEl.classList.add('perfect', 'duolingo-perfect');
+                // Determine day status based on daily goal (1000 hasene)
+                if (haseneData >= 1000) { // Complete day - Goal achieved (Green)
+                    dayEl.classList.add('complete', 'duolingo-complete');
                     dayContent.innerHTML = `
-                        <div class="progress-ring perfect-ring">
+                        <div class="progress-ring complete-ring">
                             <div class="ring-fill"></div>
                         </div>
                         <div class="hasene-count">${haseneData}</div>
-                        <div class="perfect-badge animate-bounce">👑</div>
+                        <div class="complete-badge animate-bounce">✅</div>
                         ${isStreak ? '<div class="streak-flame animate-flame">🔥</div>' : ''}
                         <div class="achievement-glow"></div>
                     `;
-                } else if (haseneData >= 200) { // Great day - Duolingo Gold level
-                    dayEl.classList.add('great', 'duolingo-great');
-                    dayContent.innerHTML = `
-                        <div class="progress-ring great-ring">
-                            <div class="ring-fill"></div>
-                        </div>
-                        <div class="hasene-count">${haseneData}</div>
-                        <div class="great-badge animate-pulse">⭐</div>
-                        ${isStreak ? '<div class="streak-flame animate-flame">🔥</div>' : ''}
-                        <div class="progress-glow"></div>
-                    `;
-                } else if (haseneData >= 100) { // Good day - Duolingo Silver level
-                    dayEl.classList.add('good', 'duolingo-good');
-                    dayContent.innerHTML = `
-                        <div class="progress-ring good-ring">
-                            <div class="ring-fill" style="--progress: ${(haseneData/200)*100}%"></div>
-                        </div>
-                        <div class="hasene-count">${haseneData}</div>
-                        <div class="good-badge">💎</div>
-                        ${isStreak ? '<div class="streak-flame animate-flame">🔥</div>' : ''}
-                    `;
-                } else if (haseneData > 0) { // Partial completion - Duolingo Bronze level
+                } else if (haseneData > 0) { // Partial completion - Under goal (Orange)
                     dayEl.classList.add('partial', 'duolingo-partial');
+                    const progress = (haseneData / 1000) * 100;
                     dayContent.innerHTML = `
                         <div class="progress-ring partial-ring">
-                            <div class="ring-fill" style="--progress: ${(haseneData/100)*100}%"></div>
+                            <div class="ring-fill" style="--progress: ${progress}%"></div>
                         </div>
                         <div class="hasene-count">${haseneData}</div>
-                        <div class="partial-badge">🥉</div>
+                        <div class="partial-badge">📝</div>
                         ${isStreak ? '<div class="streak-flame animate-flame">🔥</div>' : ''}
                     `;
                 } else if (hasStreakFreeze) { // Streak freeze used - Duolingo Protection
@@ -3543,6 +3555,12 @@ class ArabicLearningGame {
             Math.round((this.stats.correctAnswers / this.stats.totalAnswers) * 100) : 0;
         document.getElementById('statAccuracyRate').textContent = accuracyRate + '%';
         
+        // Ayet ve Dua dinleme istatistikleri
+        const ayetGames = parseInt(localStorage.getItem('ayetGames')) || 0;
+        const duaGames = parseInt(localStorage.getItem('duaGames')) || 0;
+        document.getElementById('statAyetGames').textContent = ayetGames;
+        document.getElementById('statDuaGames').textContent = duaGames;
+        
         // Update charts
         this.updateWeeklyChart();
         this.updateGameModeStats();
@@ -3605,8 +3623,8 @@ class ArabicLearningGame {
         const listeningGames = parseInt(localStorage.getItem('listeningGames')) || 0;
         const speedGames = parseInt(localStorage.getItem('speedGames')) || 0;
         const fillblankGames = parseInt(localStorage.getItem('fillblankGames')) || 0;
-        const ayetListens = parseInt(localStorage.getItem('listenedDuaCount')) || 0;
-        const duaListens = parseInt(localStorage.getItem('duaListens')) || 0;
+        const ayetListens = parseInt(localStorage.getItem('ayetGames')) || 0;
+        const duaListens = parseInt(localStorage.getItem('duaGames')) || 0;
         
         const totalGames = translationGames + listeningGames + speedGames + fillblankGames + ayetListens + duaListens || 1; // 0'a bölme hatası önleme
         

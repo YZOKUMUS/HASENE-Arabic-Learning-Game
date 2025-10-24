@@ -2624,17 +2624,6 @@ input:focus {
     background: #e5e7eb;
     color: #9ca3af;
     border: 1px solid #d1d5db;
-    position: relative;
-}
-
-.calendar-day.empty::after {
-    content: '';
-    position: absolute;
-    width: 12px;
-    height: 12px;
-    background: #f3f4f6;
-    border: 2px solid #d1d5db;
-    border-radius: 50%;
 }
 
 .calendar-day.partial {
@@ -2642,23 +2631,6 @@ input:focus {
     color: white;
     border: 2px solid #f59e0b;
     box-shadow: 0 2px 4px rgba(251, 191, 36, 0.3);
-    position: relative;
-}
-
-.calendar-day.partial::after {
-    content: '⭐';
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    font-size: 0.6rem;
-    background: #f59e0b;
-    border-radius: 50%;
-    width: 14px;
-    height: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid white;
 }
 
 .calendar-day.complete {
@@ -2666,23 +2638,6 @@ input:focus {
     color: white;
     border: 2px solid #4ade80;
     box-shadow: 0 2px 4px rgba(88, 204, 2, 0.3);
-    position: relative;
-}
-
-.calendar-day.complete::after {
-    content: '🔥';
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    font-size: 0.6rem;
-    background: #16a34a;
-    border-radius: 50%;
-    width: 14px;
-    height: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid white;
 }
 
 .calendar-day.future {
