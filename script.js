@@ -2,8 +2,8 @@
 const APP_VERSION = {
     version: "2.1.20385",
     buildDate: "2025-10-24",
-    buildTime: "01:52",
-    buildNumber: "20251024-0152",
+    buildTime: "01:57",
+    buildNumber: "20251024-0157",
     codeStatus: "Auto Optimized",
     copyright: "© 2025 YZOKUMUS",
     features: ["Auto Build", "Size Optimized", "Cache Managed", "Production Ready"]
@@ -4860,11 +4860,12 @@ function createTestHaseneData() {
     const twoDaysAgo = new Date(today);
     twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
 
-    const todayStr = today.toISOString().split('T')[0]; // 2025-10-25
-    const yesterdayStr = yesterday.toISOString().split('T')[0]; // 2025-10-24
-    const twoDaysAgoStr = twoDaysAgo.toISOString().split('T')[0]; // 2025-10-23
+    // ⚠️ ÖNEMLI: Calendar toDateString() formatını bekliyor!
+    const todayStr = today.toDateString(); // "Fri Oct 25 2025"
+    const yesterdayStr = yesterday.toDateString(); // "Thu Oct 24 2025"  
+    const twoDaysAgoStr = twoDaysAgo.toDateString(); // "Wed Oct 23 2025"
 
-    // Test verileri oluştur
+    // Test verileri oluştur - doğru format ile
     const haseneData = {
         [twoDaysAgoStr]: 850,      // 2 gün önce: 850 hasene
         [yesterdayStr]: 1315,      // Dün: 1315 hasene  
@@ -4876,7 +4877,10 @@ function createTestHaseneData() {
     localStorage.setItem('totalHasene', '2235');
     localStorage.setItem('lastPlayDate', today.toDateString());
 
-    console.log('🧪 Test verisi oluşturuldu:', haseneData);
+    console.log('🧪 Test verisi oluşturuldu (toDateString format):', haseneData);
+    console.log('📅 Bugün:', todayStr);
+    console.log('📅 Dün:', yesterdayStr);
+    console.log('📅 2 gün önce:', twoDaysAgoStr);
     alert('✅ Test verisi oluşturuldu! Calendar\'a bakabilirsin.');
 }
 
