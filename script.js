@@ -1248,12 +1248,16 @@ class ArabicLearningGame {
         this.hearts = 5;
         this.gameHasene = 0;
         
-        // Hız modu için timer ayarları
+        // ⚡🛡️ HIZ MODU KORUMA BÖLGESI - KRİTİK! DEĞIŞIKLIK YASAK! 🛡️⚡
+        // Bu bölüm hız modunun çalışması için hayati önemde!
+        // Bug fix tarihi: 24 Ekim 2025 - Kontrolsüz geçiş sorunu çözüldü
+        // Değişiklik yapılacaksa önce tests/speed-mode-tests.js çalıştırın!
         this.isSpeedMode = (mode === 'speed');
-        this.questionTimer = null;
-        this.speedAutoNextTimer = null;
-        this.timeLeft = 0;
-        this.processingAnswer = false;
+        this.questionTimer = null;              // 10 saniye geri sayım timer'ı
+        this.speedAutoNextTimer = null;         // 2 saniye otomatik devam timer'ı  
+        this.timeLeft = 0;                      // Kalan süre sayacı
+        this.processingAnswer = false;          // Çift tetikleme koruması HAYATI!
+        // ⚡🛡️ HIZ MODU KORUMA BÖLGESI SONU 🛡️⚡
         
         // Sonsuz modu için ayarlar
         this.isEndlessMode = (mode === 'endless');
@@ -1841,17 +1845,21 @@ class ArabicLearningGame {
     }
     
     processAnswer(isCorrect, selectedButton = null) {
+        // 🛡️⚡ HIZ MODU KRİTİK KORUMA BAŞLANGIÇ ⚡🛡️
+        // Bu fonksiyon hız modunun kalbi! Değişiklik yaparken DİKKAT!
+        // Son güncelleme: 24 Ekim 2025 - Çift tetikleme bug fix
+        
         // Hız modunda timer'ı temizle
         if (this.isSpeedMode) {
             this.clearQuestionTimer();
         }
         
-        // Eğer bu fonksiyon zaten çalışıyorsa (çift tetikleme önleme)
+        // 🚨 KRİTİK: Çift tetikleme önleme sistemi (DOKUNMAYIN!)
         if (this.processingAnswer) {
             console.log('⚠️ processAnswer zaten çalışıyor, tekrar çalıştırılması engellendi');
             return;
         }
-        this.processingAnswer = true;
+        this.processingAnswer = true; // HAYATI ÖNEMLİ BAYRAK!
         
         // 🧠 Smart Learner için son cevabı kaydet
         this.lastAnswerCorrect = isCorrect;

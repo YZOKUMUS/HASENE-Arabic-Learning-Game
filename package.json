@@ -4,7 +4,10 @@
   "description": "🕌 İslami temalı Arapça öğrenme oyunu! Kelime çevir, ayet dinle, dua oku. Hasene topla, seviye atla!",
   "main": "index.html",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node tests/speed-mode-tests.js",
+    "test-speed-mode": "node tests/speed-mode-tests.js",
+    "health-check": "npm run test-speed-mode && echo \"✅ Kod sağlığı kontrolü BAŞARILI!\"",
+    "safe-build": "npm run health-check && npm run build-apk-simple",
     "build-apk": "node build-optimize.js",
     "build-apk-simple": "node build-optimize.js simple",
     "build-apk-version": "node build-optimize.js version", 
@@ -12,7 +15,7 @@
     "optimize": "node build-optimize.js",
     "clean-build": "node build-optimize.js && git push origin master",
     "quick-build": "npx cap sync android && cd android && .\\gradlew.bat assembleDebug",
-    "help": "echo \"🚀 APK Build Komutları:\" && echo \"📱 Test: npm run build-apk-simple\" && echo \"📅 Günlük: npm run build-apk\" && echo \"🏆 Release: npm run build-apk-release\" && echo \"📖 Detaylar: QUICK-APK-GUIDE.md\""
+    "help": "echo \"🚀 APK Build Komutları:\" && echo \"📱 Test: npm run build-apk-simple\" && echo \"📅 Günlük: npm run build-apk\" && echo \"🏆 Release: npm run build-apk-release\" && echo \"🧪 Güvenli: npm run safe-build\" && echo \"📖 Detaylar: QUICK-APK-GUIDE.md\""
   },
   "repository": {
     "type": "git",
