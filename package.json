@@ -6,6 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build-apk": "node build-optimize.js",
+    "build-apk-simple": "node build-optimize.js simple",
+    "build-apk-version": "node build-optimize.js version", 
+    "build-apk-release": "node build-optimize.js release",
     "optimize": "node build-optimize.js",
     "clean-build": "node build-optimize.js && git push origin master",
     "quick-build": "npx cap sync android && cd android && .\\gradlew.bat assembleDebug"

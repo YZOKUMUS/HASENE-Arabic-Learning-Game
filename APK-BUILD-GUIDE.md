@@ -4,17 +4,29 @@ Bu dosya her APK build işlemi öncesi otomatik optimizasyon yapar ve APK boyutu
 
 ## 📋 Kullanım
 
-### ⚡ Hızlı Build (Önerilen)
+### ⚡ APK Build Komutları:
+
 ```bash
+# 📅 Günlük APK (önerilen) - HASENE-Arabic-Learning-Game-FINAL-2025-10-24.apk
 npm run build-apk
+
+# 📱 Basit APK - HASENE-Arabic-Learning-Game-LATEST.apk  
+npm run build-apk-simple
+
+# 📊 Versiyonlu APK - HASENE-Arabic-Learning-Game-v2.1.19999.apk
+npm run build-apk-version
+
+# 🏆 Release APK - HASENE-Arabic-Learning-Game-RELEASE-v2.1.apk
+npm run build-apk-release
 ```
-Bu komut şunları yapar:
+
+Her komut şunları yapar:
 - ✅ Büyük dosyaları otomatik temizler (*.mp4 vs.)
 - ✅ JSON dosyaları minify eder  
 - ✅ Cache buster günceller
 - ✅ Version numarasını otomatik artırır
 - ✅ Capacitor sync + Android build
-- ✅ APK'yı otomatik kopyalar
+- ✅ APK'yı belirlenen isimle kopyalar
 - ✅ Git commit yapar
 
 ### 🔧 Diğer Komutlar
@@ -29,10 +41,17 @@ npm run clean-build
 npm run quick-build
 ```
 
-## 📱 Çıktı
-- **APK Dosyası**: `HASENE-Arabic-Learning-Game-v{version}-OPTIMIZED.apk`
-- **Boyut**: ~6-8 MB (optimize edilmiş)
-- **Otomatik versiyonlama**: Timestamp bazlı
+## 📱 APK İsimlendirme Sistemı
+
+| Komut | APK Dosya Adı | Açıklama |
+|-------|---------------|----------|
+| `npm run build-apk` | `HASENE-Arabic-Learning-Game-FINAL-2025-10-24.apk` | 📅 Günlük build (önerilen) |
+| `npm run build-apk-simple` | `HASENE-Arabic-Learning-Game-LATEST.apk` | 📱 Sabit isim (üzerine yazar) |
+| `npm run build-apk-version` | `HASENE-Arabic-Learning-Game-v2.1.19999.apk` | 📊 Version numaralı |
+| `npm run build-apk-release` | `HASENE-Arabic-Learning-Game-RELEASE-v2.1.apk` | 🏆 Release versiyonu |
+
+- **Boyut**: ~26-27 MB (Kuran veritabanı dahil)
+- **Format**: Otomatik isimlendirme
 
 ## 🎯 Optimizasyon Detayları
 

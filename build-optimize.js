@@ -11,6 +11,33 @@ const { execSync } = require('child_process');
 
 console.log('🔧 HASENE APK Optimizasyon Sistemi Başlatılıyor...\n');
 
+// 0. APK İsimlendirme Sistemi
+function getAPKName(mode = 'daily') {
+    const currentDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const timestamp = Math.floor(Date.now() / 1000);
+    const buildNumber = Math.floor(Date.now() / 86400000); // Günlük build
+    
+    switch(mode) {
+        case 'daily':
+            return `HASENE-Arabic-Learning-Game-FINAL-${currentDate}.apk`;
+            
+        case 'version':
+            return `HASENE-Arabic-Learning-Game-v2.1.${buildNumber}.apk`;
+            
+        case 'timestamp':
+            return `HASENE-Arabic-Learning-Game-${timestamp}.apk`;
+            
+        case 'simple':
+            return `HASENE-Arabic-Learning-Game-LATEST.apk`;
+            
+        case 'release':
+            return `HASENE-Arabic-Learning-Game-RELEASE-v2.1.apk`;
+            
+        default:
+            return `HASENE-Arabic-Learning-Game-FINAL-${currentDate}.apk`;
+    }
+}
+
 // 1. Büyük dosyaları kaldırma
 function removeLargeFiles() {
     console.log('📁 Büyük dosyalar temizleniyor...');
@@ -66,8 +93,9 @@ function minifyJsonFiles() {
 function updateCacheBuster() {
     console.log('🔄 Cache buster güncelleniyor...');
     
-    const timestamp = Date.now();
-    const version = `2.1.${Math.floor(timestamp / 1000)}`;
+    // Sabit versiyonlama: Major.Minor.BuildNumber
+    const buildNumber = Math.floor(Date.now() / 86400000); // Günlük build numarası
+    const version = `2.1.${buildNumber}`;
     
     // HTML dosyalarında version güncellemesi
     const htmlFiles = ['index.html', 'www/index.html'];
@@ -163,7 +191,7 @@ function generateSizeReport() {
 }
 
 // 6. Capacitor sync ve build
-function buildAPK(version) {
+function buildAPK(version, namingMode = 'daily') {
     console.log('\n🔨 APK Build işlemi başlıyor...');
     
     try {
@@ -175,9 +203,15 @@ function buildAPK(version) {
         console.log('📱 Android APK build...');
         execSync('cd android && .\\gradlew.bat assembleDebug', { stdio: 'inherit', shell: true });
         
-        // APK kopyalama
+        // APK isimlendirme - Modüler sistem
         const apkSource = 'android/app/build/outputs/apk/debug/app-debug.apk';
-        const apkTarget = `HASENE-Arabic-Learning-Game-v${version}-OPTIMIZED.apk`;
+        const apkTarget = getAPKName(namingMode);
+        
+        // Eski APK varsa sil
+        if (fs.existsSync(apkTarget)) {
+            fs.unlinkSync(apkTarget);
+            console.log('🗑️ Eski APK silindi');
+        }
         
         if (fs.existsSync(apkSource)) {
             fs.copyFileSync(apkSource, apkTarget);
@@ -219,6 +253,10 @@ function gitCommit(version, apkFile) {
 // Ana fonksiyon
 async function main() {
     try {
+        // Komut satırından naming mode al
+        const namingMode = process.argv[2] || 'daily';
+        console.log(`📱 APK İsimlendirme Modu: ${namingMode}\n`);
+        
         // Tüm optimizasyonları sırayla çalıştır
         removeLargeFiles();
         minifyJsonFiles();
@@ -226,7 +264,7 @@ async function main() {
         updateScriptVersion(version);
         generateSizeReport();
         
-        const apkFile = buildAPK(version);
+        const apkFile = buildAPK(version, namingMode);
         
         if (apkFile) {
             gitCommit(version, apkFile);
