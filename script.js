@@ -2,20 +2,28 @@
 const APP_VERSION = {
     version: "2.1.20385",
     buildDate: "2025-10-24",
-    buildTime: "23:13",
-    buildNumber: "20251024-2313",
+    buildTime: "23:21",
+    buildNumber: "20251024-2321",
     codeStatus: "Auto Optimized",
     copyright: "© 2025 YZOKUMUS",
     features: ["Auto Build", "Size Optimized", "Cache Managed", "Production Ready"]
 };
 
-// 🎯 Onboarding Check - Redirect to onboarding if first time user
+// 🎯 Onboarding Check - Mobile APK Fix
 function checkOnboarding() {
-    // Check if user has completed onboarding
+    // 📱 Mobile APK Fix: Skip onboarding in Capacitor environment
+    if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+        console.log('📱 Mobile APK detected - skipping onboarding');
+        localStorage.setItem('onboardingCompleted', 'true');
+        localStorage.setItem('userGoal', 'beginner');
+        return true;
+    }
+    
+    // Check if user has completed onboarding (web version)
     const onboardingCompleted = localStorage.getItem('onboardingCompleted');
     
     if (!onboardingCompleted || onboardingCompleted !== 'true') {
-        // First time user - redirect to onboarding
+        // First time user - redirect to onboarding (web only)
         window.location.href = 'onboarding.html';
         return false;
     }
