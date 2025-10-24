@@ -2,8 +2,8 @@
 const APP_VERSION = {
     version: "2.1.20385",
     buildDate: "2025-10-24",
-    buildTime: "01:43",
-    buildNumber: "20251024-0143",
+    buildTime: "01:47",
+    buildNumber: "20251024-0147",
     codeStatus: "Auto Optimized",
     copyright: "© 2025 YZOKUMUS",
     features: ["Auto Build", "Size Optimized", "Cache Managed", "Production Ready"]
@@ -3939,13 +3939,13 @@ ArabicLearningGame.prototype.loadGameData = function() {
     // 7. ✅ UNLOCK ACHIEVEMENTS YÜKLEME
     this.unlockedAchievements = JSON.parse(localStorage.getItem('unlockedAchievements')) || [];
     
-    // GameData varsa üzerine yaz (backup olarak)
+    // GameData varsa üzerine yaz (backup olarak) - ama dailyHasene için tarih kontrolü yap
     const saved = localStorage.getItem('gameData');
     if (saved) {
         try {
             const data = JSON.parse(saved);
             this.totalHasene = data.totalHasene || this.totalHasene;
-            this.dailyHasene = data.dailyHasene || this.dailyHasene;
+            // ⚠️ dailyHasene için tarih kontrolü yapılacak - henüz yükleme!
             this.streak = data.streak || this.streak;
             this.level = data.level || 1;
             this.difficulty = data.difficulty || 'medium';
@@ -3953,29 +3953,31 @@ ArabicLearningGame.prototype.loadGameData = function() {
             this.totalAnswers = data.totalAnswers || this.totalAnswers;
             this.lastPlayDate = data.lastPlayDate || this.lastPlayDate;
             this.unlockedAchievements = data.unlockedAchievements || this.unlockedAchievements;
-            return data;
         } catch (e) {
             console.error('❌ GameData parse hatası:', e);
         }
     }
     
-    
-    // 🛡️ GÜNLÜKHASENERe RESTORE SİSTEMİ - SADECE BUGÜN İLK KEZ OYUN BAŞLATIYORSA
+    // 🛡️ GÜNLÜK HASENE RESTORE SİSTEMİ - SADECE BUGÜN İLK KEZ OYUN BAŞLATIYORSA
     const today = new Date().toDateString();
     const lastPlayDate = this.lastPlayDate;
     
+    // Debug log
+    console.log(`🔄 Oyun başlangıç kontrolü: lastPlayDate=${lastPlayDate}, today=${today}, dailyHasene=${this.dailyHasene}`);
+    
     // Eğer son oyun tarihi bugün değilse, dailyHasene sıfırlanmalı
     if (lastPlayDate && lastPlayDate !== today) {
-        console.log(`🔄 Yeni gün tespit edildi: ${lastPlayDate} → ${today}`);
+        console.log(`🔄 Yeni gün tespit edildi: ${lastPlayDate} → ${today} - dailyHasene sıfırlanıyor`);
         this.dailyHasene = 0;
         localStorage.setItem('dailyHasene', '0');
     } else if (lastPlayDate === today) {
-        // Bugün zaten oyun oynandıysa, mevcut dailyHasene değerini koru
-        // Bu durumda loadGameData başında yüklenen değer doğru olmalı
+        // Bugün zaten oyun oynandıysa, localStorage'dan mevcut dailyHasene değerini al
+        const currentDaily = parseInt(localStorage.getItem('dailyHasene')) || 0;
+        this.dailyHasene = currentDaily;
         console.log(`📅 Bugün devam ediliyor: ${today} - dailyHasene: ${this.dailyHasene}`);
     } else {
         // İlk defa oyun oynuyorsa
-        console.log(`🎉 İlk oyun başlıyor: ${today}`);
+        console.log(`🎉 İlk oyun başlıyor: ${today} - dailyHasene: 0`);
         this.dailyHasene = 0;
         localStorage.setItem('dailyHasene', '0');
     }
