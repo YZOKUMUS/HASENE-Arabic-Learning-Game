@@ -2,8 +2,8 @@
 const APP_VERSION = {
     version: "2.1.20385",
     buildDate: "2025-10-24",
-    buildTime: "23:21",
-    buildNumber: "20251024-2321",
+    buildTime: "23:32",
+    buildNumber: "20251024-2332",
     codeStatus: "Auto Optimized",
     copyright: "© 2025 YZOKUMUS",
     features: ["Auto Build", "Size Optimized", "Cache Managed", "Production Ready"]
@@ -1251,7 +1251,9 @@ class ArabicLearningGame {
         // Hız modu için timer ayarları
         this.isSpeedMode = (mode === 'speed');
         this.questionTimer = null;
+        this.speedAutoNextTimer = null;
         this.timeLeft = 0;
+        this.processingAnswer = false;
         
         // Sonsuz modu için ayarlar
         this.isEndlessMode = (mode === 'endless');
@@ -1844,6 +1846,13 @@ class ArabicLearningGame {
             this.clearQuestionTimer();
         }
         
+        // Eğer bu fonksiyon zaten çalışıyorsa (çift tetikleme önleme)
+        if (this.processingAnswer) {
+            console.log('⚠️ processAnswer zaten çalışıyor, tekrar çalıştırılması engellendi');
+            return;
+        }
+        this.processingAnswer = true;
+        
         // 🧠 Smart Learner için son cevabı kaydet
         this.lastAnswerCorrect = isCorrect;
         
@@ -2016,25 +2025,20 @@ class ArabicLearningGame {
                 
                 // Hız modunda otomatik devam et (2 saniye sonra)
                 if (this.isSpeedMode) {
-                    setTimeout(() => {
-                        if (continueBtn.style.display !== 'none') {
-                            
-                            // Son soru kontrolü
-                            if (this.currentQuestion + 1 >= this.questions.length) {
-                                if (this.isEndlessMode && this.hearts > 0) {
-                                    this.nextQuestion();
-                                } else {
-                                    this.nextQuestion(); // completeGame'i çağıracak
-                                }
-                            } else {
-                                this.nextQuestion();
-                            }
+                    this.speedAutoNextTimer = setTimeout(() => {
+                        // Timer iptal edilmediyse devam et
+                        if (this.speedAutoNextTimer && continueBtn.style.display !== 'none') {
+                            console.log('⚡ Hız modu otomatik devam - 2 saniye sonra');
+                            this.nextQuestion();
                         }
                     }, 2000);
                 }
             } else {
                 console.error('Continue button not found!');
             }
+            
+            // İşlem tamamlandı, bayrak sıfırla
+            this.processingAnswer = false;
         }, 800);
         
         // ❌ Kalp kontrolü kaldırıldı - artık kalp bitince oyun devam eder, sadece hasene azalır
@@ -2124,6 +2128,12 @@ class ArabicLearningGame {
     }
     
     nextQuestion() {
+        
+        // Hız modu otomatik geçiş timer'ını temizle
+        if (this.speedAutoNextTimer) {
+            clearTimeout(this.speedAutoNextTimer);
+            this.speedAutoNextTimer = null;
+        }
         
         // Hide continue button
         document.getElementById('continueBtn').style.display = 'none';
