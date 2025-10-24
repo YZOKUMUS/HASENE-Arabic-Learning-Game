@@ -2,8 +2,8 @@
 const APP_VERSION = {
     version: "2.1.20385",
     buildDate: "2025-10-24",
-    buildTime: "01:57",
-    buildNumber: "20251024-0157",
+    buildTime: "02:02",
+    buildNumber: "20251024-0202",
     codeStatus: "Auto Optimized",
     copyright: "© 2025 YZOKUMUS",
     features: ["Auto Build", "Size Optimized", "Cache Managed", "Production Ready"]
@@ -4884,5 +4884,38 @@ function createTestHaseneData() {
     alert('✅ Test verisi oluşturuldu! Calendar\'a bakabilirsin.');
 }
 
+// 🔄 RESET FONKSİYONU - Oyunu sıfırdan başlat
+function resetGameData() {
+    if (confirm('⚠️ UYARI: Tüm ilerleme silinecek! Devam etmek istiyor musun?')) {
+        // Tüm localStorage verilerini temizle
+        const keysToRemove = [
+            'totalHasene', 'dailyHasene', 'streak', 'correctAnswers', 'totalAnswers',
+            'lastPlayDate', 'unlockedAchievements', 'gameData', 'difficulty',
+            'dailyHaseneData', 'streakData', 'perfectDaysData', 'dailyGamesData',
+            'streakFreezeData', 'learnedWords', 'wordStats', 'userGoal'
+        ];
+        
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+        
+        console.log('🔄 Oyun verileri temizlendi');
+        alert('✅ Oyun sıfırlandı! Sayfa yenilenecek.');
+        
+        // Sayfayı yenile
+        location.reload();
+    }
+}
+
+// 🎯 SADECE TEST VERİSİNİ TEMİZLE
+function clearTestData() {
+    if (confirm('Test verisini temizlemek istiyor musun?')) {
+        localStorage.removeItem('dailyHaseneData');
+        localStorage.setItem('dailyHasene', '0');
+        console.log('🧹 Test verisi temizlendi');
+        alert('✅ Test verisi temizlendi!');
+    }
+}
+
 // Global olarak erişilebilir yap
 window.createTestHaseneData = createTestHaseneData;
+window.resetGameData = resetGameData;
+window.clearTestData = clearTestData;
