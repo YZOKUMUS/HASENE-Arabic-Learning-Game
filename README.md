@@ -45,6 +45,30 @@ npm run quick-build     # Manuel build (optimizasyon yok)
 
 ---
 
+---
+
+## 🛡️ **YENİ! KOD KORUMA SİSTEMİ**
+
+### 🧪 **Güvenli Geliştirme**
+```bash
+# 🔍 Kod sağlığını kontrol et
+npm run health-check
+
+# 🧪 Hız modu testleri 
+npm run test-speed-mode
+
+# 🛡️ Güvenli APK build
+npm run safe-build
+```
+
+### 📋 **Güvenli Güncelleme**
+- 📖 **Rehber**: `SAFE-UPDATE-GUIDE.md`
+- 🧪 **Test Sistemi**: `tests/speed-mode-tests.js`
+- 🔒 **Korumalı Kod**: Kritik bölgeler işaretli
+- ✅ **%100 Test Başarısı**: Hız modu güvenli!
+
+---
+
 ## ✨ Özellikler
 
 ### 🎮 Oyun Mekanikleri

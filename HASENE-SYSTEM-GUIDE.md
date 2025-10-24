@@ -1,13 +1,31 @@
-HASENE Arabic Learning Game - Sistem Dokumentasyonu
+# 🕌 HASENE ARABIC LEARNING GAME REHBERİ
 
-# 🕌 HASENE ARABIC LEARNING GAME REHBERI
+> **Güncellenme: 24 Ekim 2025** - Hız modu bug fix tamamlandı! ✅
+
+## 🎉 **SON GÜNCELLEMELER (24 Ekim 2025)**
+
+### ⚡ **HIZ MODU BUG FIX**
+- ✅ **Problem**: Kontrolsüz soru geçişleri düzeltildi
+- ✅ **Çözüm**: Timer çakışması ve çift tetikleme önlendi  
+- ✅ **Test**: LiveServer ve telefon APK'da doğrulandı
+- ✅ **Koruma**: Kod koruma sistemi kuruldu
+
+### �️ **YENİ KOD KORUMA SİSTEMİ**
+- 🧪 **Test Sistemi**: `npm run test-speed-mode`
+- 📋 **Güvenli Rehber**: `SAFE-UPDATE-GUIDE.md`
+- 🔒 **Korumalı Kod**: Kritik bölgeler işaretlendi
+- ⚡ **Güvenli Build**: `npm run safe-build`
+
+---
 
 ## 📋 İÇİNDEKİLER
 1. Puan Sistemi (Hasene)
-2. Seviye Sistemi
+2. Seviye Sistemi  
 3. Günlük Hedefler
 4. Streak (Günlük Devamlılık) Sistemi
 5. Takvim Sistemi
+6. **YENİ!** Hız Modu Sistemi
+7. **YENİ!** Kod Koruma ve Test Sistemi
 6. Başarı (Achievement) Sistemi
 7. Mağaza (Store) Sistemi
 8. Kalp (Can) Sistemi
