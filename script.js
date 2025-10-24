@@ -2,8 +2,8 @@
 const APP_VERSION = {
     version: "2.1.20385",
     buildDate: "2025-10-24",
-    buildTime: "02:02",
-    buildNumber: "20251024-0202",
+    buildTime: "02:09",
+    buildNumber: "20251024-0209",
     codeStatus: "Auto Optimized",
     copyright: "© 2025 YZOKUMUS",
     features: ["Auto Build", "Size Optimized", "Cache Managed", "Production Ready"]
@@ -2866,8 +2866,6 @@ class ArabicLearningGame {
         const haseneData = JSON.parse(localStorage.getItem('dailyHaseneData') || '{}');
         const value = haseneData[dateString] || 0;
         
-        // Debug log
-        console.log(`📖 Calendar okunuyor: ${dateString} = ${value}`);
         return value;
     }
     
@@ -2877,9 +2875,6 @@ class ArabicLearningGame {
         const oldValue = haseneData[dateString] || 0;
         haseneData[dateString] = hasene; // Set total daily hasene, don't add
         localStorage.setItem('dailyHaseneData', JSON.stringify(haseneData));
-        
-        // Debug log
-        console.log(`💾 Calendar kaydedildi: ${dateString} = ${hasene} (eski: ${oldValue})`);
     }
     
     getDailyGames(dateString) {
@@ -3962,27 +3957,19 @@ ArabicLearningGame.prototype.loadGameData = function() {
     const today = new Date().toDateString();
     const lastPlayDate = this.lastPlayDate;
     
-    // Debug log
-    console.log(`🔄 Oyun başlangıç kontrolü: lastPlayDate=${lastPlayDate}, today=${today}, dailyHasene=${this.dailyHasene}`);
-    
-    // Eğer son oyun tarihi bugün değilse, dailyHasene sıfırlanmalı
-    if (lastPlayDate && lastPlayDate !== today) {
-        console.log(`🔄 Yeni gün tespit edildi: ${lastPlayDate} → ${today} - dailyHasene sıfırlanıyor`);
-        this.dailyHasene = 0;
-        localStorage.setItem('dailyHasene', '0');
-    } else if (lastPlayDate === today) {
-        // Bugün zaten oyun oynandıysa, localStorage'dan mevcut dailyHasene değerini al
-        const currentDaily = parseInt(localStorage.getItem('dailyHasene')) || 0;
-        this.dailyHasene = currentDaily;
-        console.log(`📅 Bugün devam ediliyor: ${today} - dailyHasene: ${this.dailyHasene}`);
-    } else {
-        // İlk defa oyun oynuyorsa
-        console.log(`🎉 İlk oyun başlıyor: ${today} - dailyHasene: 0`);
-        this.dailyHasene = 0;
-        localStorage.setItem('dailyHasene', '0');
-    }
-    
-    // UI'yi güncelle
+        // Eğer son oyun tarihi bugün değilse, dailyHasene sıfırlanmalı
+        if (lastPlayDate && lastPlayDate !== today) {
+            this.dailyHasene = 0;
+            localStorage.setItem('dailyHasene', '0');
+        } else if (lastPlayDate === today) {
+            // Bugün zaten oyun oynandıysa, localStorage'dan mevcut dailyHasene değerini al
+            const currentDaily = parseInt(localStorage.getItem('dailyHasene')) || 0;
+            this.dailyHasene = currentDaily;
+        } else {
+            // İlk defa oyun oynuyorsa
+            this.dailyHasene = 0;
+            localStorage.setItem('dailyHasene', '0');
+        }    // UI'yi güncelle
     this.updateUI();
     
     return null;
@@ -4852,70 +4839,3 @@ ArabicLearningGame.prototype.unlockAchievementWithEffects = function(achievement
     return true;
 };
 
-// 🧪 TEST FONKSİYONLARI - Calendar bug testi için
-function createTestHaseneData() {
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    const twoDaysAgo = new Date(today);
-    twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-
-    // ⚠️ ÖNEMLI: Calendar toDateString() formatını bekliyor!
-    const todayStr = today.toDateString(); // "Fri Oct 25 2025"
-    const yesterdayStr = yesterday.toDateString(); // "Thu Oct 24 2025"  
-    const twoDaysAgoStr = twoDaysAgo.toDateString(); // "Wed Oct 23 2025"
-
-    // Test verileri oluştur - doğru format ile
-    const haseneData = {
-        [twoDaysAgoStr]: 850,      // 2 gün önce: 850 hasene
-        [yesterdayStr]: 1315,      // Dün: 1315 hasene  
-        [todayStr]: 70             // Bugün: 70 hasene
-    };
-
-    localStorage.setItem('dailyHaseneData', JSON.stringify(haseneData));
-    localStorage.setItem('dailyHasene', '70');
-    localStorage.setItem('totalHasene', '2235');
-    localStorage.setItem('lastPlayDate', today.toDateString());
-
-    console.log('🧪 Test verisi oluşturuldu (toDateString format):', haseneData);
-    console.log('📅 Bugün:', todayStr);
-    console.log('📅 Dün:', yesterdayStr);
-    console.log('📅 2 gün önce:', twoDaysAgoStr);
-    alert('✅ Test verisi oluşturuldu! Calendar\'a bakabilirsin.');
-}
-
-// 🔄 RESET FONKSİYONU - Oyunu sıfırdan başlat
-function resetGameData() {
-    if (confirm('⚠️ UYARI: Tüm ilerleme silinecek! Devam etmek istiyor musun?')) {
-        // Tüm localStorage verilerini temizle
-        const keysToRemove = [
-            'totalHasene', 'dailyHasene', 'streak', 'correctAnswers', 'totalAnswers',
-            'lastPlayDate', 'unlockedAchievements', 'gameData', 'difficulty',
-            'dailyHaseneData', 'streakData', 'perfectDaysData', 'dailyGamesData',
-            'streakFreezeData', 'learnedWords', 'wordStats', 'userGoal'
-        ];
-        
-        keysToRemove.forEach(key => localStorage.removeItem(key));
-        
-        console.log('🔄 Oyun verileri temizlendi');
-        alert('✅ Oyun sıfırlandı! Sayfa yenilenecek.');
-        
-        // Sayfayı yenile
-        location.reload();
-    }
-}
-
-// 🎯 SADECE TEST VERİSİNİ TEMİZLE
-function clearTestData() {
-    if (confirm('Test verisini temizlemek istiyor musun?')) {
-        localStorage.removeItem('dailyHaseneData');
-        localStorage.setItem('dailyHasene', '0');
-        console.log('🧹 Test verisi temizlendi');
-        alert('✅ Test verisi temizlendi!');
-    }
-}
-
-// Global olarak erişilebilir yap
-window.createTestHaseneData = createTestHaseneData;
-window.resetGameData = resetGameData;
-window.clearTestData = clearTestData;
