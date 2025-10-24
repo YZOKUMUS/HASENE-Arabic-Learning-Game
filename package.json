@@ -11,7 +11,8 @@
     "build-apk-release": "node build-optimize.js release",
     "optimize": "node build-optimize.js",
     "clean-build": "node build-optimize.js && git push origin master",
-    "quick-build": "npx cap sync android && cd android && .\\gradlew.bat assembleDebug"
+    "quick-build": "npx cap sync android && cd android && .\\gradlew.bat assembleDebug",
+    "help": "echo \"🚀 APK Build Komutları:\" && echo \"📱 Test: npm run build-apk-simple\" && echo \"📅 Günlük: npm run build-apk\" && echo \"🏆 Release: npm run build-apk-release\" && echo \"📖 Detaylar: QUICK-APK-GUIDE.md\""
   },
   "repository": {
     "type": "git",

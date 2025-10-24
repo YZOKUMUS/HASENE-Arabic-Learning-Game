@@ -2,7 +2,48 @@
 
 **Duolingo tarzında, İslami temalarla geliştirilmiş interaktif Arapça öğrenme oyunu**
 
-![HASENE Logo](icon-TÜRK-KURAN-192.png)
+![HASENE Logo](icon-192-v4-RED-MUSHAF.png)
+
+---
+
+## 🚀 APK BUILD KILAVUZU - HIZLI ERİŞİM
+
+### 📱 **TEK KOMUT İLE APK OLUŞTURMA**
+
+| **Durum** | **Komut** | **APK Dosya Adı** | **Ne Zaman Kullan?** |
+|-----------|-----------|-------------------|---------------------|
+| 📱 **Test/WhatsApp** | `npm run build-apk-simple` | `HASENE-Arabic-Learning-Game-LATEST.apk` | WhatsApp'a gönderirken ✅ |
+| 📅 **Günlük Çalışma** | `npm run build-apk` | `HASENE-Arabic-Learning-Game-FINAL-2025-10-24.apk` | Geliştirme sırasında |
+| 🏆 **Final Sürüm** | `npm run build-apk-release` | `HASENE-Arabic-Learning-Game-RELEASE-v2.1.apk` | Dağıtım için |
+| 📊 **Version Takip** | `npm run build-apk-version` | `HASENE-Arabic-Learning-Game-v2.1.20385.apk` | Build numarası takibi |
+
+### ⚡ **EN ÇOK KULLANILAN**
+```bash
+# 🎯 Test için (Önerilen) - Aynı isim, karışıklık yok
+npm run build-apk-simple
+
+# 📅 Günlük build - Tarih ile versiyon
+npm run build-apk
+```
+
+### 🔧 **DİĞER KOMUTLAR**
+```bash
+npm run optimize        # Sadece optimizasyon (build yok)
+npm run clean-build     # Build + GitHub push
+npm run quick-build     # Manuel build (optimizasyon yok)
+```
+
+### 📊 **APK BİLGİLERİ**
+- **Boyut**: ~26-27 MB (Kuran 16,240 kelime dahil - Normal!)
+- **Build Süresi**: ~30 saniye
+- **Otomatik**: Optimizasyon + Cache temizleme + Git commit
+
+### ⚠️ **HATIRLATMALAR**
+- PowerShell kullanın (Windows)
+- İlk build'de gradle wrapper indirilir (~1 dk)
+- APK boyutu normal (Kuran uygulamaları 25-50 MB arası)
+
+---
 
 ## ✨ Özellikler
 
