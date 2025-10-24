@@ -2,8 +2,8 @@
 const APP_VERSION = {
     version: "2.1.20385",
     buildDate: "2025-10-24",
-    buildTime: "01:47",
-    buildNumber: "20251024-0147",
+    buildTime: "01:52",
+    buildNumber: "20251024-0152",
     codeStatus: "Auto Optimized",
     copyright: "© 2025 YZOKUMUS",
     features: ["Auto Build", "Size Optimized", "Cache Managed", "Production Ready"]
@@ -4852,6 +4852,33 @@ ArabicLearningGame.prototype.unlockAchievementWithEffects = function(achievement
     return true;
 };
 
+// 🧪 TEST FONKSİYONLARI - Calendar bug testi için
+function createTestHaseneData() {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const twoDaysAgo = new Date(today);
+    twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
 
+    const todayStr = today.toISOString().split('T')[0]; // 2025-10-25
+    const yesterdayStr = yesterday.toISOString().split('T')[0]; // 2025-10-24
+    const twoDaysAgoStr = twoDaysAgo.toISOString().split('T')[0]; // 2025-10-23
 
+    // Test verileri oluştur
+    const haseneData = {
+        [twoDaysAgoStr]: 850,      // 2 gün önce: 850 hasene
+        [yesterdayStr]: 1315,      // Dün: 1315 hasene  
+        [todayStr]: 70             // Bugün: 70 hasene
+    };
 
+    localStorage.setItem('dailyHaseneData', JSON.stringify(haseneData));
+    localStorage.setItem('dailyHasene', '70');
+    localStorage.setItem('totalHasene', '2235');
+    localStorage.setItem('lastPlayDate', today.toDateString());
+
+    console.log('🧪 Test verisi oluşturuldu:', haseneData);
+    alert('✅ Test verisi oluşturuldu! Calendar\'a bakabilirsin.');
+}
+
+// Global olarak erişilebilir yap
+window.createTestHaseneData = createTestHaseneData;
