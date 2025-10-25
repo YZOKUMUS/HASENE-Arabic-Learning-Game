@@ -1,9 +1,9 @@
 // 🏷️ Version Management System
 const APP_VERSION = {
-    version: "2.1.20385",
-    buildDate: "2025-10-24",
-    buildTime: "02:09",
-    buildNumber: "20251024-0209",
+    version: "2.1.20386",
+    buildDate: "2025-10-25",
+    buildTime: "12:10",
+    buildNumber: "20251025-1210",
     codeStatus: "Auto Optimized",
     copyright: "© 2025 YZOKUMUS",
     features: ["Auto Build", "Size Optimized", "Cache Managed", "Production Ready"]
@@ -2320,11 +2320,8 @@ class ArabicLearningGame {
             
             // Handle ayet and dua modes specially
             if (this.gameMode === 'ayet' || this.gameMode === 'dua') {
-                // For ayet and dua modes, give 10 hasene and don't count words learned
-                const haseneEarned = 10;
-                this.gameHasene = haseneEarned;
-                this.totalHasene += haseneEarned;
-                this.dailyHasene += haseneEarned;
+                // For ayet and dua modes, only set gameHasene (hasene already added in processAnswer)
+                this.gameHasene = 10; // Only for display purposes
                 
                 // Don't update wordsLearned for ayet/dua modes
                 
@@ -2357,9 +2354,7 @@ class ArabicLearningGame {
             const totalQuestions = this.questions.length;
             const accuracy = Math.round((this.score / totalQuestions) * 100);
             
-            // Award Hasene and update stats
-            this.totalHasene += this.gameHasene;
-            this.dailyHasene += this.gameHasene;
+            // ✅ HASENE ZATEn processAnswer'da eklendi - tekrar ekleme!
             
             // Update words learned (mastery-based calculation) - only for normal game modes
             // Gerçekten öğrenilen kelimeleri hesapla (en az 10 kez doğru)
