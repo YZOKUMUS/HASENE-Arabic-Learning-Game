@@ -30,11 +30,22 @@
     --border-radius-small: 8px;
     --border-radius-large: 16px;
     
-    /* 🏆 Achievement Animation Variables */
-    --achievement-primary: #ffd700;
-    --achievement-secondary: #ff8c00;
-    --achievement-glow: rgba(255, 215, 0, 0.6);
-    --particle-color: #ffeb3b;
+    /* 🕌 İslami Renk Paleti & Achievement Variables */
+    --islamic-gold: #DAA520;
+    --islamic-emerald: #50C878;
+    --islamic-sapphire: #0F52BA;
+    --islamic-pearl: #F8F6F0;
+    --islamic-ruby: #E0115F;
+    --crescent-silver: #C0C0C0;
+    --islamic-turquoise: #40E0D0;
+    --islamic-amber: #FFBF00;
+    
+    /* 🏆 Premium Achievement Variables */
+    --achievement-primary: var(--islamic-gold);
+    --achievement-secondary: var(--islamic-amber);
+    --achievement-glow: rgba(218, 165, 32, 0.6);
+    --achievement-divine: rgba(64, 224, 208, 0.4);
+    --particle-color: var(--islamic-gold);
 }
 
 * {
@@ -2082,8 +2093,19 @@ input:focus {
 .achievements-modal, .stats-modal, .calendar-modal {
     max-width: 600px;
     width: 95%;
-    max-height: 85vh;
+    max-height: 90vh;
+    min-height: 70vh;
     padding: 0;
+    /* 🎨 İslami Gradient Background */
+    background: linear-gradient(135deg, 
+        var(--islamic-pearl) 0%, 
+        rgba(248, 246, 240, 0.95) 50%, 
+        var(--islamic-pearl) 100%);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(218, 165, 32, 0.2);
+    /* 🔧 Düzgün Görünüm İçin */
+    display: flex;
+    flex-direction: column;
 }
 
 .modal-header {
@@ -2091,11 +2113,19 @@ input:focus {
     justify-content: space-between;
     align-items: center;
     padding: 20px 25px;
-    border-bottom: 1px solid var(--border-color);
-    background: linear-gradient(135deg, #0d8bd8, #9c27b0);
+    border-bottom: 1px solid rgba(218, 165, 32, 0.3);
+    /* 🕌 İslami Header Gradient */
+    background: linear-gradient(135deg, 
+        var(--islamic-gold) 0%, 
+        var(--islamic-emerald) 50%, 
+        var(--islamic-sapphire) 100%);
     color: white;
     border-radius: var(--border-radius-large) var(--border-radius-large) 0 0;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    box-shadow: 
+        0 2px 8px rgba(0,0,0,0.15),
+        0 0 20px rgba(218, 165, 32, 0.2);
+    /* 🔧 Header Sabit Yükseklik */
+    flex-shrink: 0;
 }
 
 .modal-header h2 {
@@ -2129,48 +2159,147 @@ input:focus {
 
 .achievements-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-    gap: 12px;
-    padding: 20px;
-    max-height: 450px;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 16px;
+    padding: 24px;
+    /* 🔧 Flexible Height - Modal içinde tam görünür */
+    flex: 1;
     overflow-y: auto;
+    /* 🌟 Transparent Background - Ana modaldan devralır */
+    background: transparent;
+    /* 📱 Minimum Height */
+    min-height: 0;
 }
 
 .achievement-item {
-    background: white;
-    border-radius: var(--border-radius);
-    padding: 12px 8px;
+    /* 🔮 Crystal Glass Effect */
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 16px 12px;
     text-align: center;
-    border: 2px solid var(--border-color);
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     cursor: pointer;
-    min-height: 120px;
+    min-height: 160px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    
+    /* 🌟 Divine Shadow */
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        0 4px 16px rgba(218, 165, 32, 0.1);
 }
 
 .achievement-item:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-light);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 
+        0 16px 48px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        0 8px 24px rgba(218, 165, 32, 0.2);
+    border-color: rgba(218, 165, 32, 0.4);
 }
 
 .achievement-item.unlocked {
-    border-color: var(--primary-green);
-    background: linear-gradient(135deg, #f0fff0, #e8f5e8);
+    /* 🌙 Unlocked Divine Glow */
+    background: linear-gradient(135deg, 
+        rgba(218, 165, 32, 0.25) 0%, 
+        rgba(80, 200, 120, 0.15) 50%, 
+        rgba(15, 82, 186, 0.20) 100%);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(218, 165, 32, 0.3);
+    color: var(--islamic-gold);
+    
+    /* ✨ Nur Işığı Animation */
+    animation: divineGlow 3s ease-in-out infinite alternate;
+}
+
+.achievement-item.unlocked:hover {
+    background: linear-gradient(135deg, 
+        rgba(218, 165, 32, 0.35) 0%, 
+        rgba(80, 200, 120, 0.25) 50%, 
+        rgba(15, 82, 186, 0.30) 100%);
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.2),
+        inset 0 2px 0 rgba(255, 255, 255, 0.5),
+        0 0 40px rgba(218, 165, 32, 0.3),
+        0 0 20px rgba(80, 200, 120, 0.2);
 }
 
 .achievement-item.locked {
-    opacity: 0.6;
-    background: #f8f8f8;
+    opacity: 0.4;
+    background: rgba(248, 246, 240, 0.1);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .achievement-item.ready {
-    background: linear-gradient(135deg, #fff3cd, #ffeaa7) !important;
-    border-color: #ffc107 !important;
+    /* 🔥 Ready to Unlock State */
+    background: linear-gradient(135deg, 
+        rgba(255, 193, 7, 0.3) 0%, 
+        rgba(218, 165, 32, 0.25) 50%, 
+        rgba(255, 235, 59, 0.2) 100%) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 2px solid rgba(255, 193, 7, 0.5) !important;
     opacity: 1;
     cursor: pointer;
     position: relative;
+    
+    /* 🌟 Pulse Animation */
+    animation: readyPulse 2s ease-in-out infinite;
+}
+
+/* ✨ Divine Glow Keyframes */
+@keyframes divineGlow {
+    0% {
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 0 20px rgba(218, 165, 32, 0.2);
+    }
+    100% {
+        box-shadow: 
+            0 12px 40px rgba(0, 0, 0, 0.15),
+            inset 0 2px 0 rgba(255, 255, 255, 0.4),
+            0 0 30px rgba(218, 165, 32, 0.4),
+            0 0 15px rgba(80, 200, 120, 0.3);
+    }
+}
+
+/* 🔥 Ready Pulse Keyframes */
+@keyframes readyPulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 20px rgba(255, 193, 7, 0.3);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 30px rgba(255, 193, 7, 0.5);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 20px rgba(255, 193, 7, 0.3);
+    }
+}
+
+/* 🌟 Icon Pulse Animation */
+@keyframes iconPulse {
+    0% {
+        transform: scale(1);
+        text-shadow: 0 0 5px rgba(255, 193, 7, 0.3);
+    }
+    50% {
+        transform: scale(1.15);
+        text-shadow: 0 0 15px rgba(255, 193, 7, 0.6);
+    }
+    100% {
+        transform: scale(1);
+        text-shadow: 0 0 5px rgba(255, 193, 7, 0.3);
+    }
 }
 
 .achievement-item.ready:hover {
@@ -2201,32 +2330,106 @@ input:focus {
 }
 
 .achievement-icon {
-    font-size: 2rem;
-    margin-bottom: 6px;
+    font-size: 2.2rem;
+    margin-bottom: 8px;
     display: block;
+    /* 🎨 Islamic Icon Enhancement */
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
 }
 
 .achievement-item.unlocked .achievement-icon {
-    color: var(--primary-yellow);
+    color: var(--islamic-gold);
+    text-shadow: 0 0 10px rgba(218, 165, 32, 0.3);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    transform: scale(1.1);
 }
 
 .achievement-item.locked .achievement-icon {
     color: #ccc;
+    opacity: 0.5;
+}
+
+.achievement-item.ready .achievement-icon {
+    color: #ffc107;
+    animation: iconPulse 1.5s ease-in-out infinite;
 }
 
 .achievement-title {
-    font-size: 0.7rem;
+    font-size: 0.8rem;
     font-weight: 700;
-    margin-bottom: 3px;
-    color: var(--text-dark);
-    line-height: 1.2;
+    margin-bottom: 6px;
+    color: #2c3e50;
+    line-height: 1.3;
+    /* 📖 Better Readability */
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 4px 8px;
+    border-radius: 8px;
+    border: 1px solid rgba(52, 152, 219, 0.3);
+}
+
+.achievement-item.unlocked .achievement-title {
+    color: #ffffff;
+    font-weight: 800;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    background: linear-gradient(135deg, 
+        rgba(241, 196, 15, 0.95) 0%, 
+        rgba(243, 156, 18, 0.9) 100%);
+    border: 2px solid rgba(241, 196, 15, 0.8);
+    box-shadow: 0 2px 8px rgba(241, 196, 15, 0.3);
+}
+
+.achievement-item.locked .achievement-title {
+    color: #ffffff;
+    opacity: 0.9;
+    background: rgba(127, 140, 141, 0.8);
+    border-color: rgba(127, 140, 141, 0.6);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 
 .achievement-desc {
-    font-size: 0.6rem;
-    color: var(--text-light);
-    line-height: 1.2;
-    margin-bottom: 4px;
+    font-size: 0.7rem;
+    color: #ffffff;
+    line-height: 1.4;
+    margin-bottom: 6px;
+    background: linear-gradient(135deg, 
+        rgba(17, 141, 87, 0.9) 0%, 
+        rgba(26, 188, 156, 0.85) 50%,
+        rgba(52, 152, 219, 0.9) 100%);
+    backdrop-filter: blur(8px);
+    padding: 8px 10px;
+    border-radius: 12px;
+    border: 2px solid rgba(26, 188, 156, 0.6);
+    /* 📖 Better Readability */
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(26, 188, 156, 0.3);
+}
+
+.achievement-item.unlocked .achievement-desc {
+    background: linear-gradient(135deg, 
+        rgba(241, 196, 15, 0.95) 0%, 
+        rgba(243, 156, 18, 0.9) 50%,
+        rgba(230, 126, 34, 0.95) 100%);
+    color: #ffffff;
+    border: 2px solid rgba(241, 196, 15, 0.8);
+    font-weight: 700;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    box-shadow: 
+        0 4px 16px rgba(241, 196, 15, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.achievement-item.locked .achievement-desc {
+    background: linear-gradient(135deg, 
+        rgba(127, 140, 141, 0.9) 0%, 
+        rgba(149, 165, 166, 0.85) 100%);
+    color: #ffffff;
+    border: 1px solid rgba(127, 140, 141, 0.6);
+    font-weight: 500;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 
 .achievement-progress {
@@ -5073,20 +5276,168 @@ input:focus {
     .build-info {
         font-size: 8px;
     }
-    
-    .loading-version-footer {
-        bottom: 25px;
+}
+
+/* ===============================================
+   🏆 ACHIEVEMENT SYSTEM - RESPONSIVE DESIGN 
+   =============================================== */
+
+/* 📱 Tablet Optimization (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+    .achievements-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 14px;
+        padding: 20px;
     }
     
-    .loading-version-info {
-        padding: 8px 14px;
+    .achievements-modal {
+        max-height: 85vh;
+        min-height: 60vh;
     }
     
-    .loading-version-text {
-        font-size: 12px;
+    .achievement-item {
+        min-height: 150px;
+        padding: 14px 10px;
     }
     
-    .loading-copyright {
-        font-size: 10px;
+    .achievement-icon {
+        font-size: 2.1rem;
     }
 }
+
+/* 📱 Mobile Responsive Design (max-width: 768px) */
+@media (max-width: 768px) {
+    .achievements-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 12px;
+        padding: 16px;
+    }
+    
+    .achievements-modal {
+        max-height: 85vh;
+        min-height: 50vh;
+        width: 98%;
+    }
+    
+    .achievement-item {
+        min-height: 140px;
+        padding: 12px 8px;
+        /* 👆 Touch Target Optimization (WCAG 2.1 AA) */
+        min-width: 44px;
+        min-height: 44px;
+    }
+    
+    .achievement-icon {
+        font-size: 2rem;
+        margin-bottom: 6px;
+    }
+    
+    .achievement-title {
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .achievement-desc {
+        font-size: 0.65rem;
+        padding: 4px 6px;
+        line-height: 1.3;
+    }
+}
+
+/* 📲 Small Mobile Optimization (max-width: 480px) */
+@media (max-width: 480px) {
+    .achievements-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 8px;
+        padding: 12px;
+    }
+    
+    .achievements-modal {
+        max-height: 80vh;
+        min-height: 40vh;
+        width: 100%;
+        margin: 0;
+    }
+    
+    .modal-header {
+        padding: 15px 20px;
+    }
+    
+    .achievement-item {
+        min-height: 120px;
+        padding: 10px 6px;
+        /* ✋ Larger Touch Targets for Small Screens */
+        min-width: 48px;
+        min-height: 48px;
+    }
+    
+    .achievement-icon {
+        font-size: 1.8rem;
+        margin-bottom: 4px;
+    }
+    
+    .achievement-title {
+        font-size: 0.7rem;
+        font-weight: 600;
+        margin-bottom: 3px;
+    }
+    
+    .achievement-desc {
+        font-size: 0.6rem;
+        padding: 3px 5px;
+        line-height: 1.3;
+    }
+}
+
+/* ♿ ACCESSIBILITY ENHANCEMENTS */
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    .achievement-item {
+        border-width: 2px;
+        border-color: #000;
+    }
+    
+    .achievement-item.unlocked {
+        background: #000;
+        color: #fff;
+        border-color: #fff;
+    }
+    
+    .achievement-item.unlocked .achievement-icon,
+    .achievement-item.unlocked .achievement-title,
+    .achievement-item.unlocked .achievement-desc {
+        color: #fff;
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    .achievement-item,
+    .achievement-icon,
+    .achievement-item.unlocked {
+        animation: none !important;
+        transition: none !important;
+    }
+    
+    .achievement-item:hover {
+        transform: none !important;
+    }
+}
+
+/* Focus Indicators for Keyboard Navigation */
+.achievement-item:focus {
+    outline: 3px solid var(--islamic-gold);
+    outline-offset: 2px;
+    box-shadow: 
+        0 0 0 3px rgba(218, 165, 32, 0.3),
+        0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.achievement-item:focus-visible {
+    outline: 3px solid var(--islamic-gold);
+    outline-offset: 2px;
+}
+
+/* ===============================================
+   ✅ END OF ACHIEVEMENTS CSS 
+   =============================================== */
