@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">HASENE Arabic RED-MUSHAF</string>
-    <string name="title_activity_main">HASENE Arabic RED-MUSHAF</string>
-    <string name="package_name">com.hasene.arabiclearning.redmushaf</string>
-    <string name="custom_url_scheme">com.hasene.arabiclearning.redmushaf</string>
-</resources>
