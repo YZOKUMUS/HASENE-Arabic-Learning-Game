@@ -1,21 +1,29 @@
 // 🏷️ Version Management System
 const APP_VERSION = {
-    version: "2.0.0",
-    buildDate: "2025-10-20",
-    buildTime: "00:26",
-    buildNumber: "1020-0026",
-    codeStatus: "Ultra Clean",
+    version: "2.1.20386",
+    buildDate: "2025-10-25",
+    buildTime: "12:10",
+    buildNumber: "20251025-1210",
+    codeStatus: "Auto Optimized",
     copyright: "© 2025 YZOKUMUS",
-    features: ["Console.log Cleanup", "RED-MUSHAF Icons", "Calendar Sync", "Production Ready"]
+    features: ["Auto Build", "Size Optimized", "Cache Managed", "Production Ready"]
 };
 
-// 🎯 Onboarding Check - Redirect to onboarding if first time user
+// 🎯 Onboarding Check - Mobile APK Fix
 function checkOnboarding() {
-    // Check if user has completed onboarding
+    // 📱 Mobile APK Fix: Skip onboarding in Capacitor environment
+    if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+        console.log('📱 Mobile APK detected - skipping onboarding');
+        localStorage.setItem('onboardingCompleted', 'true');
+        localStorage.setItem('userGoal', 'beginner');
+        return true;
+    }
+    
+    // Check if user has completed onboarding (web version)
     const onboardingCompleted = localStorage.getItem('onboardingCompleted');
     
     if (!onboardingCompleted || onboardingCompleted !== 'true') {
-        // First time user - redirect to onboarding
+        // First time user - redirect to onboarding (web only)
         window.location.href = 'onboarding.html';
         return false;
     }
@@ -517,58 +525,59 @@ class ArabicLearningGame {
     }
     
     initializeAchievements() {
+        // 🏆 Optimized Achievement System - Logical & Compact Badges
         this.achievements = {
             // 🎯 Beginner Badges
             firstSteps: {
                 id: 'firstSteps',
                 title: '🌱 İlk Adım',
                 description: 'Yolculuğa başladın!',
-                icon: 'fas fa-play',
+                icon: '🤲',
                 condition: () => this.stats.gamesPlayed >= 1
             },
             earlyBird: {
                 id: 'earlyBird',
                 title: '🐣 Erken Kuş',
                 description: '15 oyun tamamla',
-                icon: 'fas fa-egg',
+                icon: '🌙',
                 condition: () => this.stats.gamesPlayed >= 15
             },
             dedication: {
                 id: 'dedication',
-                title: '� Azim',
+                title: '🔥 Azim',
                 description: '7 gün streak',
-                icon: 'fas fa-fire',
+                icon: '⭐',
                 condition: () => this.stats.currentStreak >= 7
             },
             
             // 💎 Hasene Collection Badges
             collector: {
                 id: 'collector',
-                title: '� Toplayıcı',
+                title: '📿 Toplayıcı',
                 description: '150 hasene biriktir',
-                icon: 'fas fa-coins',
+                icon: '📿',
                 condition: () => this.stats.totalHasene >= 150
             },
             treasurer: {
                 id: 'treasurer',
-                title: '� Hazine',
+                title: '💎 Hazine',
                 description: '500 hasene biriktir',
-                icon: 'fas fa-gem',
+                icon: '💎',
                 condition: () => this.stats.totalHasene >= 500
             },
             magnate: {
                 id: 'magnate',
-                title: '� Sultan',
-                description: '500 hasene biriktir',
-                icon: 'fas fa-crown',
-                condition: () => this.stats.totalHasene >= 500
+                title: '👑 Sultan',
+                description: '1000 hasene biriktir',
+                icon: '👑',
+                condition: () => this.stats.totalHasene >= 1000
             },
             tycoon: {
                 id: 'tycoon',
                 title: '🏰 Padişah',
-                description: '1000 hasene biriktir',
-                icon: 'fas fa-chess-king',
-                condition: () => this.stats.totalHasene >= 1000
+                description: '2500 hasene biriktir',
+                icon: '🕌',
+                condition: () => this.stats.totalHasene >= 2500
             },
             
             // ⚡ Speed & Accuracy Badges
@@ -576,74 +585,74 @@ class ArabicLearningGame {
                 id: 'quickLearner',
                 title: '⚡ Çevik',
                 description: 'Ort. 4 saniye',
-                icon: 'fas fa-bolt',
+                icon: '⚡',
                 condition: () => this.stats.averageTime <= 4000
             },
             speedDemon: {
                 id: 'speedDemon',
                 title: '🚀 Hızlı',
                 description: 'Ort. 2 saniye',
-                icon: 'fas fa-rocket',
+                icon: '🚀',
                 condition: () => this.stats.averageTime <= 2000
             },
             perfectionist: {
                 id: 'perfectionist',
                 title: '⭐ Mükemmel',
-                description: '1 hatasız oyun',
-                icon: 'fas fa-star',
-                condition: () => this.stats.perfectGames >= 1
+                description: '3 hatasız oyun',
+                icon: '⭐',
+                condition: () => this.stats.perfectGames >= 3
             },
             flawless: {
                 id: 'flawless',
-                title: '� Kusursuz',
-                description: '5 hatasız oyun',
-                icon: 'fas fa-trophy',
-                condition: () => this.stats.perfectGames >= 5
+                title: '💫 Kusursuz',
+                description: '10 hatasız oyun',
+                icon: '💫',
+                condition: () => this.stats.perfectGames >= 10
             },
             
             // 📚 Learning Progress Badges
             wordsmith: {
                 id: 'wordsmith',
-                title: '� Kelimeci',
-                description: '25 kelime öğren',
-                icon: 'fas fa-pen',
-                condition: () => this.stats.wordsLearned >= 25
+                title: '📜 Kelimeci',
+                description: '50 kelime öğren',
+                icon: '📜',
+                condition: () => this.stats.wordsLearned >= 50
             },
             scholar: {
                 id: 'scholar',
                 title: '🎓 Bilgin',
-                description: '75 kelime öğren',
-                icon: 'fas fa-graduation-cap',
-                condition: () => this.stats.wordsLearned >= 75
+                description: '150 kelime öğren',
+                icon: '📖',
+                condition: () => this.stats.wordsLearned >= 150
             },
             master: {
                 id: 'master',
-                title: '�‍🏫 Üstad',
-                description: '150 kelime öğren',
-                icon: 'fas fa-user-graduate',
-                condition: () => this.stats.wordsLearned >= 150
+                title: '🧙‍♂️ Üstad',
+                description: '300 kelime öğren',
+                icon: '🧙‍♂️',
+                condition: () => this.stats.wordsLearned >= 300
             },
             
             // 🔄 Consistency Badges
             consistent: {
                 id: 'consistent',
-                title: '� Düzenli',
+                title: '📅 Düzenli',
                 description: '7 gün streak',
-                icon: 'fas fa-calendar-check',
+                icon: '📅',
                 condition: () => this.stats.currentStreak >= 7
             },
             persistent: {
                 id: 'persistent',
-                title: '� Sebatlı',
+                title: '💪 Sebatlı',
                 description: '15 gün streak',
-                icon: 'fas fa-dumbbell',
+                icon: '💪',
                 condition: () => this.stats.currentStreak >= 15
             },
             unstoppable: {
                 id: 'unstoppable',
-                title: '� Durdurulamaz',
+                title: '🔥 Durdurulamaz',
                 description: '30 gün streak',
-                icon: 'fas fa-fire-flame-curved',
+                icon: '🔥',
                 condition: () => this.stats.currentStreak >= 30
             },
             
@@ -651,52 +660,52 @@ class ArabicLearningGame {
             translator: {
                 id: 'translator',
                 title: '🌐 Çevirmen',
-                description: '20 çeviri oyunu',
-                icon: 'fas fa-language',
-                condition: () => (parseInt(localStorage.getItem('translationGames')) || 0) >= 20
+                description: '50 çeviri oyunu',
+                icon: '🌐',
+                condition: () => (parseInt(localStorage.getItem('translationGames')) || 0) >= 50
             },
             listener: {
                 id: 'listener',
-                title: '� Dinleyici',
-                description: '20 dinleme oyunu',
-                icon: 'fas fa-headphones',
-                condition: () => (parseInt(localStorage.getItem('listeningGames')) || 0) >= 20
+                title: '🎧 Dinleyici',
+                description: '50 dinleme oyunu',
+                icon: '🎧',
+                condition: () => (parseInt(localStorage.getItem('listeningGames')) || 0) >= 50
             },
             speedRunner: {
                 id: 'speedRunner',
                 title: '⏰ Hız Kurdu',
-                description: '20 hız modu oyunu',
-                icon: 'fas fa-stopwatch',
-                condition: () => (parseInt(localStorage.getItem('speedGames')) || 0) >= 20
+                description: '50 hız modu oyunu',
+                icon: '⏰',
+                condition: () => (parseInt(localStorage.getItem('speedGames')) || 0) >= 50
             },
             puzzler: {
                 id: 'puzzler',
                 title: '🧩 Bulmacacı',
-                description: '10 boşluk doldur',
-                icon: 'fas fa-puzzle-piece',
-                condition: () => (parseInt(localStorage.getItem('fillblankGames')) || 0) >= 10
+                description: '25 boşluk doldur',
+                icon: '🧩',
+                condition: () => (parseInt(localStorage.getItem('fillblankGames')) || 0) >= 25
             },
             ayetListener: {
                 id: 'ayetListener',
                 title: '📿 Ayet Dinleyici',
                 description: '20 ayet dinle',
-                icon: 'fas fa-quran',
+                icon: '☪️',
                 condition: () => (parseInt(localStorage.getItem('ayetGames')) || 0) >= 20
             },
             duaListener: {
                 id: 'duaListener',
                 title: '🤲 Dua Dinleyici',
                 description: '20 dua dinle',
-                icon: 'fas fa-hands-praying',
+                icon: '🤲',
                 condition: () => (parseInt(localStorage.getItem('duaGames')) || 0) >= 20
             },
             
             // 📖 Islamic Learning Badges
             ayahStudent: {
                 id: 'ayahStudent',
-                title: '� Ayet Öğrenci',
+                title: '📖 Ayet Öğrenci',
                 description: '5 ayet dinle',
-                icon: 'fas fa-book-open',
+                icon: '📖',
                 condition: () => {
                     let ayetHasene = parseInt(localStorage.getItem('ayetHasene')) || 0;
                     return ayetHasene >= 50; // 5 ayet x 10 hasene
@@ -706,37 +715,37 @@ class ArabicLearningGame {
                 id: 'prayerful',
                 title: '🤲 Duacı',
                 description: '5 dua dinle',
-                icon: 'fas fa-pray',
+                icon: '🤲',
                 condition: () => (parseInt(localStorage.getItem('listenedDuaCount')) || 0) >= 5
             },
             quranLover: {
                 id: 'quranLover',
-                title: '� Kuran Sevdalısı',
+                title: '🕋 Kuran Sevdalısı',
                 description: '5 farklı sureden kel.',
-                icon: 'fas fa-quran',
+                icon: '🕋',
                 condition: () => this.getUniqueSuras() >= 5
             },
             
             // 🧠 Special Achievement Badges
             smartLearner: {
                 id: 'smartLearner',
-                title: '� Zeki Öğrenci',
+                title: '💡 Zeki Öğrenci',
                 description: 'Hatayı düzelt',
-                icon: 'fas fa-lightbulb',
+                icon: '💡',
                 condition: () => false // Özel kontrol
             },
             comeback: {
                 id: 'comeback',
                 title: '💪 Geri Dönüş',
                 description: 'Kalp bitince devam et',
-                icon: 'fas fa-heart',
+                icon: '❤️',
                 condition: () => (parseInt(localStorage.getItem('heartsRefilled')) || 0) >= 1
             },
             explorer: {
                 id: 'explorer',
-                title: '�️ Kaşif',
+                title: '🧭 Kaşif',
                 description: 'Tüm oyun modlarını oyna',
-                icon: 'fas fa-compass',
+                icon: '🧭',
                 condition: () => {
                     const translation = (parseInt(localStorage.getItem('translationGames')) || 0) > 0;
                     const listening = (parseInt(localStorage.getItem('listeningGames')) || 0) > 0;
@@ -751,25 +760,25 @@ class ArabicLearningGame {
                 id: 'veteran',
                 title: '🎖️ Veteran',
                 description: '100 oyun tamamla',
-                icon: 'fas fa-medal',
+                icon: '🎖️',
                 condition: () => this.stats.gamesPlayed >= 100
             },
             legend: {
                 id: 'legend',
                 title: '🏆 Efsane',
                 description: '250 oyun tamamla',
-                icon: 'fas fa-trophy',
+                icon: '🏆',
                 condition: () => this.stats.gamesPlayed >= 250
             },
             champion: {
                 id: 'champion',
-                title: '� Şampiyon',
+                title: '👑 Şampiyon',
                 description: '500 oyun tamamla',
-                icon: 'fas fa-crown',
+                icon: '👑',
                 condition: () => this.stats.gamesPlayed >= 500
             }
         };
-
+        
         // İstatistikler
         this.stats = {
             gamesPlayed: parseInt(localStorage.getItem('gamesPlayed')) || 0,
@@ -799,9 +808,8 @@ class ArabicLearningGame {
         const today = new Date();
         const dateString = today.toDateString();
         
-        // Update daily hasene
-        const currentHasene = this.getDailyHasene(dateString);
-        this.storeDailyHasene(dateString, currentHasene + this.gameHasene);
+        // ✅ Daily hasene is already updated in processAnswer() - no need to add again
+        // Removed: this.storeDailyHasene(dateString, currentHasene + this.gameHasene);
         
         // Update daily games count
         const currentGames = this.getDailyGames(dateString);
@@ -814,133 +822,6 @@ class ArabicLearningGame {
         
         // Update streak data
         this.updateStreakData(dateString, true);
-    }
-    
-    getDailyGames(dateString) {
-        // Get daily games played count
-        const gamesData = JSON.parse(localStorage.getItem('dailyGamesData') || '{}');
-        return gamesData[dateString] || 0;
-    }
-    
-    storeDailyGames(dateString, count) {
-        // Store daily games count
-        const gamesData = JSON.parse(localStorage.getItem('dailyGamesData') || '{}');
-        gamesData[dateString] = count;
-        localStorage.setItem('dailyGamesData', JSON.stringify(gamesData));
-    }
-    
-    isPerfectDay(dateString) {
-        // Check if this was a perfect day (high hasene, no mistakes)
-        const perfectData = JSON.parse(localStorage.getItem('perfectDaysData') || '{}');
-        return perfectData[dateString] === true;
-    }
-    
-    storePerfectDay(dateString, isPerfect) {
-        // Store perfect day status
-        const perfectData = JSON.parse(localStorage.getItem('perfectDaysData') || '{}');
-        perfectData[dateString] = isPerfect;
-        localStorage.setItem('perfectDaysData', JSON.stringify(perfectData));
-    }
-    
-    hasStreakFreezeUsed(dateString) {
-        // Check if streak freeze was used on this day
-        const freezeData = JSON.parse(localStorage.getItem('streakFreezeData') || '{}');
-        return freezeData[dateString] === true;
-    }
-    
-    storeStreakFreeze(dateString, used) {
-        // Store streak freeze usage
-        const freezeData = JSON.parse(localStorage.getItem('streakFreezeData') || '{}');
-        freezeData[dateString] = used;
-        localStorage.setItem('streakFreezeData', JSON.stringify(freezeData));
-    }
-    
-    renderMonthlyStats() {
-        // Add monthly statistics panel to calendar
-        const modal = document.getElementById('calendarModal');
-        let statsPanel = modal.querySelector('.monthly-stats-panel');
-        
-        if (!statsPanel) {
-            statsPanel = document.createElement('div');
-            statsPanel.className = 'monthly-stats-panel';
-            modal.querySelector('.calendar-modal-content').appendChild(statsPanel);
-        }
-        
-        // Calculate monthly statistics
-        const monthStats = this.calculateMonthlyStats();
-        
-        statsPanel.innerHTML = `
-            <h3><i class="fas fa-chart-bar"></i> Bu Ayın Özeti</h3>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">🔥</div>
-                    <div class="stat-info">
-                        <div class="stat-value">${monthStats.streakDays}</div>
-                        <div class="stat-label">Streak Günü</div>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">💎</div>
-                    <div class="stat-info">
-                        <div class="stat-value">${monthStats.totalHasene}</div>
-                        <div class="stat-label">Toplam Hasene</div>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">👑</div>
-                    <div class="stat-info">
-                        <div class="stat-value">${monthStats.perfectDays}</div>
-                        <div class="stat-label">Mükemmel Gün</div>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">🎮</div>
-                    <div class="stat-info">
-                        <div class="stat-value">${monthStats.activeDays}</div>
-                        <div class="stat-label">Aktif Gün</div>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-    
-    calculateMonthlyStats() {
-        const firstDay = new Date(this.currentCalendarYear, this.currentCalendarMonth, 1);
-        const lastDay = new Date(this.currentCalendarYear, this.currentCalendarMonth + 1, 0);
-        
-        let streakDays = 0;
-        let totalHasene = 0;
-        let perfectDays = 0;
-        let activeDays = 0;
-        
-        for (let day = 1; day <= lastDay.getDate(); day++) {
-            const date = new Date(this.currentCalendarYear, this.currentCalendarMonth, day);
-            const dateString = date.toDateString();
-            
-            // Skip future days
-            if (date > new Date()) continue;
-            
-            const hasene = this.getDailyHasene(dateString);
-            if (hasene > 0) {
-                activeDays++;
-                totalHasene += hasene;
-                
-                if (this.isStreakDay(dateString)) {
-                    streakDays++;
-                }
-                
-                if (this.isPerfectDay(dateString)) {
-                    perfectDays++;
-                }
-            }
-        }
-        
-        return {
-            streakDays,
-            totalHasene,
-            perfectDays,
-            activeDays
-        };
     }
     
     setupAchievementListeners() {
@@ -1366,10 +1247,16 @@ class ArabicLearningGame {
         this.hearts = 5;
         this.gameHasene = 0;
         
-        // Hız modu için timer ayarları
+        // ⚡🛡️ HIZ MODU KORUMA BÖLGESI - KRİTİK! DEĞIŞIKLIK YASAK! 🛡️⚡
+        // Bu bölüm hız modunun çalışması için hayati önemde!
+        // Bug fix tarihi: 24 Ekim 2025 - Kontrolsüz geçiş sorunu çözüldü
+        // Değişiklik yapılacaksa önce tests/speed-mode-tests.js çalıştırın!
         this.isSpeedMode = (mode === 'speed');
-        this.questionTimer = null;
-        this.timeLeft = 0;
+        this.questionTimer = null;              // 10 saniye geri sayım timer'ı
+        this.speedAutoNextTimer = null;         // 2 saniye otomatik devam timer'ı  
+        this.timeLeft = 0;                      // Kalan süre sayacı
+        this.processingAnswer = false;          // Çift tetikleme koruması HAYATI!
+        // ⚡🛡️ HIZ MODU KORUMA BÖLGESI SONU 🛡️⚡
         
         // Sonsuz modu için ayarlar
         this.isEndlessMode = (mode === 'endless');
@@ -1653,6 +1540,7 @@ class ArabicLearningGame {
         };
         document.getElementById('questionType').textContent = questionTypeTexts[this.gameMode];
     }
+
     startQuestionTimer() {
         if (!this.isSpeedMode) return;
         
@@ -1956,10 +1844,21 @@ class ArabicLearningGame {
     }
     
     processAnswer(isCorrect, selectedButton = null) {
+        // 🛡️⚡ HIZ MODU KRİTİK KORUMA BAŞLANGIÇ ⚡🛡️
+        // Bu fonksiyon hız modunun kalbi! Değişiklik yaparken DİKKAT!
+        // Son güncelleme: 24 Ekim 2025 - Çift tetikleme bug fix
+        
         // Hız modunda timer'ı temizle
         if (this.isSpeedMode) {
             this.clearQuestionTimer();
         }
+        
+        // 🚨 KRİTİK: Çift tetikleme önleme sistemi (DOKUNMAYIN!)
+        if (this.processingAnswer) {
+            console.log('⚠️ processAnswer zaten çalışıyor, tekrar çalıştırılması engellendi');
+            return;
+        }
+        this.processingAnswer = true; // HAYATI ÖNEMLİ BAYRAK!
         
         // 🧠 Smart Learner için son cevabı kaydet
         this.lastAnswerCorrect = isCorrect;
@@ -2008,6 +1907,7 @@ class ArabicLearningGame {
             
             // 7. ✅ CALENDAR GÜNCELLEME - her doğru cevaptan sonra
             const today = new Date().toDateString();
+            console.log(`📅 Hasene güncellendi: ${today} -> ${this.dailyHasene} (+${earnedHasene})`);
             this.storeDailyHasene(today, this.dailyHasene);
             
             // Play correct sound
@@ -2133,25 +2033,20 @@ class ArabicLearningGame {
                 
                 // Hız modunda otomatik devam et (2 saniye sonra)
                 if (this.isSpeedMode) {
-                    setTimeout(() => {
-                        if (continueBtn.style.display !== 'none') {
-                            
-                            // Son soru kontrolü
-                            if (this.currentQuestion + 1 >= this.questions.length) {
-                                if (this.isEndlessMode && this.hearts > 0) {
-                                    this.nextQuestion();
-                                } else {
-                                    this.nextQuestion(); // completeGame'i çağıracak
-                                }
-                            } else {
-                                this.nextQuestion();
-                            }
+                    this.speedAutoNextTimer = setTimeout(() => {
+                        // Timer iptal edilmediyse devam et
+                        if (this.speedAutoNextTimer && continueBtn.style.display !== 'none') {
+                            console.log('⚡ Hız modu otomatik devam - 2 saniye sonra');
+                            this.nextQuestion();
                         }
                     }, 2000);
                 }
             } else {
                 console.error('Continue button not found!');
             }
+            
+            // İşlem tamamlandı, bayrak sıfırla
+            this.processingAnswer = false;
         }, 800);
         
         // ❌ Kalp kontrolü kaldırıldı - artık kalp bitince oyun devam eder, sadece hasene azalır
@@ -2241,6 +2136,12 @@ class ArabicLearningGame {
     }
     
     nextQuestion() {
+        
+        // Hız modu otomatik geçiş timer'ını temizle
+        if (this.speedAutoNextTimer) {
+            clearTimeout(this.speedAutoNextTimer);
+            this.speedAutoNextTimer = null;
+        }
         
         // Hide continue button
         document.getElementById('continueBtn').style.display = 'none';
@@ -2413,16 +2314,16 @@ class ArabicLearningGame {
     
     completeGame() {
         try {
+            // Get today's date for streak calculations
+            const today = new Date().toDateString();
+            
             // Clear any running timers
             this.clearQuestionTimer();
             
             // Handle ayet and dua modes specially
             if (this.gameMode === 'ayet' || this.gameMode === 'dua') {
-                // For ayet and dua modes, give 10 hasene and don't count words learned
-                const haseneEarned = 10;
-                this.gameHasene = haseneEarned;
-                this.totalHasene += haseneEarned;
-                this.dailyHasene += haseneEarned;
+                // For ayet and dua modes, only set gameHasene (hasene already added in processAnswer)
+                this.gameHasene = 10; // Only for display purposes
                 
                 // Don't update wordsLearned for ayet/dua modes
                 
@@ -2455,9 +2356,7 @@ class ArabicLearningGame {
             const totalQuestions = this.questions.length;
             const accuracy = Math.round((this.score / totalQuestions) * 100);
             
-            // Award Hasene and update stats
-            this.totalHasene += this.gameHasene;
-            this.dailyHasene += this.gameHasene;
+            // ✅ HASENE ZATEn processAnswer'da eklendi - tekrar ekleme!
             
             // Update words learned (mastery-based calculation) - only for normal game modes
             // Gerçekten öğrenilen kelimeleri hesapla (en az 10 kez doğru)
@@ -2485,9 +2384,7 @@ class ArabicLearningGame {
             localStorage.setItem('dailyHasene', this.dailyHasene.toString());
             localStorage.setItem('streak', this.streak.toString());
             
-            // Store daily hasene in calendar data
-            const today = new Date().toDateString();
-            this.storeDailyHasene(today, this.dailyHasene); // dailyHasene kullan, gameHasene değil!
+            // ✅ Calendar zaten processAnswer'da güncelleniyor - tekrar güncelleme!
             
             // 🔥 STREAK UPDATE: Oyun tamamlanması = streak güncellemesi
             const hasPlayedToday = this.hasPlayedToday(today);
@@ -2545,8 +2442,8 @@ class ArabicLearningGame {
         this.saveGameData();
         this.updateUI();
         
-        // Track game mode completion for achievements
-        this.trackGameModeCompletion();
+        // ✅ Game mode tracking is already done below in completeGame() - avoid duplication
+        // Removed: this.trackGameModeCompletion();
         
         // Update enhanced calendar data
         this.updateCalendarData(totalQuestions, accuracy);
@@ -2889,7 +2786,7 @@ class ArabicLearningGame {
                         <div class="freeze-badge animate-shield">🛡️</div>
                         <div class="protection-text">Korundu</div>
                     `;
-                } else { // Empty day - Duolingo style empty
+                } else { // Empty day - Duolingo style empty with ice icons
                     dayEl.classList.add('empty', 'duolingo-empty');
                     dayContent.innerHTML = `
                         <div class="empty-ring"></div>
@@ -2962,20 +2859,62 @@ class ArabicLearningGame {
     getDailyHasene(dateString) {
         // Get stored daily hasene data from localStorage
         const haseneData = JSON.parse(localStorage.getItem('dailyHaseneData') || '{}');
-        return haseneData[dateString] || 0;
+        const value = haseneData[dateString] || 0;
+        
+        return value;
     }
     
     storeDailyHasene(dateString, hasene) {
         // Store daily hasene data (set total, don't add)
         const haseneData = JSON.parse(localStorage.getItem('dailyHaseneData') || '{}');
+        const oldValue = haseneData[dateString] || 0;
         haseneData[dateString] = hasene; // Set total daily hasene, don't add
         localStorage.setItem('dailyHaseneData', JSON.stringify(haseneData));
+    }
+    
+    getDailyGames(dateString) {
+        // Get daily games played count
+        const gamesData = JSON.parse(localStorage.getItem('dailyGamesData') || '{}');
+        return gamesData[dateString] || 0;
+    }
+    
+    storeDailyGames(dateString, count) {
+        // Store daily games count
+        const gamesData = JSON.parse(localStorage.getItem('dailyGamesData') || '{}');
+        gamesData[dateString] = count;
+        localStorage.setItem('dailyGamesData', JSON.stringify(gamesData));
     }
     
     isStreakDay(dateString) {
         // Check if this day is part of current streak
         const streakData = JSON.parse(localStorage.getItem('streakData') || '{}');
         return streakData[dateString] === true;
+    }
+    
+    isPerfectDay(dateString) {
+        // Check if this was a perfect day (high hasene, no mistakes)
+        const perfectData = JSON.parse(localStorage.getItem('perfectDaysData') || '{}');
+        return perfectData[dateString] === true;
+    }
+    
+    storePerfectDay(dateString, isPerfect) {
+        // Store perfect day status
+        const perfectData = JSON.parse(localStorage.getItem('perfectDaysData') || '{}');
+        perfectData[dateString] = isPerfect;
+        localStorage.setItem('perfectDaysData', JSON.stringify(perfectData));
+    }
+    
+    hasStreakFreezeUsed(dateString) {
+        // Check if streak freeze was used on this day
+        const freezeData = JSON.parse(localStorage.getItem('streakFreezeData') || '{}');
+        return freezeData[dateString] === true;
+    }
+    
+    storeStreakFreeze(dateString, used) {
+        // Store streak freeze usage
+        const freezeData = JSON.parse(localStorage.getItem('streakFreezeData') || '{}');
+        freezeData[dateString] = used;
+        localStorage.setItem('streakFreezeData', JSON.stringify(freezeData));
     }
     
     hasPlayedToday(dateString) {
@@ -2989,6 +2928,95 @@ class ArabicLearningGame {
         const streakData = JSON.parse(localStorage.getItem('streakData') || '{}');
         streakData[dateString] = isStreak;
         localStorage.setItem('streakData', JSON.stringify(streakData));
+    }
+    
+    renderMonthlyStats() {
+        // Add monthly statistics panel to calendar
+        const modal = document.getElementById('calendarModal');
+        let statsPanel = modal.querySelector('.monthly-stats-panel');
+        
+        if (!statsPanel) {
+            statsPanel = document.createElement('div');
+            statsPanel.className = 'monthly-stats-panel';
+            modal.querySelector('.calendar-modal-content').appendChild(statsPanel);
+        }
+        
+        // Calculate monthly statistics
+        const monthStats = this.calculateMonthlyStats();
+        
+        statsPanel.innerHTML = `
+            <h3><i class="fas fa-chart-bar"></i> Bu Ayın Özeti</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">🔥</div>
+                    <div class="stat-info">
+                        <div class="stat-value">${monthStats.streakDays}</div>
+                        <div class="stat-label">Streak Günü</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💎</div>
+                    <div class="stat-info">
+                        <div class="stat-value">${monthStats.totalHasene}</div>
+                        <div class="stat-label">Toplam Hasene</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">👑</div>
+                    <div class="stat-info">
+                        <div class="stat-value">${monthStats.perfectDays}</div>
+                        <div class="stat-label">Mükemmel Gün</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🎮</div>
+                    <div class="stat-info">
+                        <div class="stat-value">${monthStats.activeDays}</div>
+                        <div class="stat-label">Aktif Gün</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    calculateMonthlyStats() {
+        const firstDay = new Date(this.currentCalendarYear, this.currentCalendarMonth, 1);
+        const lastDay = new Date(this.currentCalendarYear, this.currentCalendarMonth + 1, 0);
+        
+        let streakDays = 0;
+        let perfectDays = 0;
+        let activeDays = 0;
+        
+        for (let day = 1; day <= lastDay.getDate(); day++) {
+            const date = new Date(this.currentCalendarYear, this.currentCalendarMonth, day);
+            const dateString = date.toDateString();
+            
+            // Skip future days
+            if (date > new Date()) continue;
+            
+            const hasene = this.getDailyHasene(dateString);
+            if (hasene > 0) {
+                activeDays++;
+                
+                if (this.isStreakDay(dateString)) {
+                    streakDays++;
+                }
+                
+                if (this.isPerfectDay(dateString)) {
+                    perfectDays++;
+                }
+            }
+        }
+        
+        // ✅ Use main totalHasene instead of summing daily values to avoid duplication
+        const totalHasene = this.totalHasene;
+        
+        return {
+            streakDays,
+            totalHasene,
+            perfectDays,
+            activeDays
+        };
     }
     
     // Loading Animation Functions
@@ -3228,34 +3256,6 @@ class ArabicLearningGame {
             margin: 0 !important;
         `;
 
-        // Create copyright text  
-        const copyrightText = document.createElement('div');
-        copyrightText.textContent = 'YZOKUMUS';
-        copyrightText.style.cssText = `
-            font-size: 9px !important;
-            color: rgba(255, 255, 255, 0.8) !important;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 1) !important;
-            font-weight: 500 !important;
-            letter-spacing: 0.3px !important;
-            margin: 0 !important;
-        `;
-
-        // Append elements
-        footer.appendChild(versionText);
-        footer.appendChild(copyrightText);
-
-        // Add to body (always visible)
-        document.body.appendChild(footer);
-
-        // Auto hide after 5 seconds on main menu
-        if (screenId === 'mainMenu') {
-            setTimeout(() => {
-                if (footer && footer.parentNode) {
-                    footer.style.opacity = '0.3';
-                }
-            }, 5000);
-        }
-
         // Loading screen için özel konumlandırma
         if (screenId === 'loadingScreen') {
             footer.style.bottom = '40px';
@@ -3297,12 +3297,7 @@ class ArabicLearningGame {
                         }, 300);
                     }
                     
-                    if (this.progressBar) {
-                        this.progressBar.style.width = progress + '%';
-                    }
-                    if (this.loadingPercentage) {
-                        this.loadingPercentage.textContent = Math.round(progress) + '%';
-                    }
+                    // Progress is now handled by the spinner animation
                 }, 30);
             }
         };
@@ -3359,40 +3354,78 @@ class ArabicLearningGame {
         
         grid.innerHTML = '';
         
-        Object.values(this.achievements).forEach(achievement => {
+        // 🎯 SADECE KAZANILAN VE AÇILMAYA HAZIR ROZETLER GÖSTER
+        const availableAchievements = Object.values(this.achievements).filter(achievement => {
             const isUnlocked = this.unlockedAchievements.includes(achievement.id);
-            const progress = this.getAchievementProgress(achievement);
             const conditionMet = this.checkAchievementCondition(achievement);
-            
-            const item = document.createElement('div');
-            item.className = `achievement-item ${isUnlocked ? 'unlocked' : (conditionMet ? 'ready' : 'locked')}`;
-            
-            // Special styling for completed but not yet unlocked
-            if (conditionMet && !isUnlocked) {
-                item.style.background = 'linear-gradient(135deg, #fff3cd, #ffeaa7)';
-                item.style.borderColor = '#ffc107';
-                item.style.animation = 'achievementReady 2s ease-in-out infinite';
-            }
-            
-            item.innerHTML = `
-                <i class="${achievement.icon} achievement-icon"></i>
-                <div class="achievement-title">${achievement.title}</div>
-                <div class="achievement-desc">${achievement.description}</div>
-                ${!isUnlocked && progress ? `<div class="achievement-progress">${progress}</div>` : ''}
-                ${conditionMet && !isUnlocked ? `<div class="achievement-ready">🎉 Hazır!</div>` : ''}
-            `;
-            
-            // Add click handler for ready achievements
-            if (conditionMet && !isUnlocked) {
-                item.style.cursor = 'pointer';
-                item.onclick = () => {
-                    this.unlockAchievementWithEffects(achievement.id);
-                    this.showAchievements(); // Refresh the modal
-                };
-            }
-            
-            grid.appendChild(item);
+            return isUnlocked || conditionMet; // Sadece kazanılan veya hazır olanlar
         });
+        
+        // Eğer hiç rozet yoksa bilgilendirici mesaj göster
+        if (availableAchievements.length === 0) {
+            const emptyMessage = document.createElement('div');
+            emptyMessage.className = 'achievements-empty';
+            emptyMessage.innerHTML = `
+                <div style="text-align: center; padding: 20px; color: #666;">
+                    <i class="fas fa-trophy" style="font-size: 48px; margin-bottom: 10px; color: #ddd;"></i>
+                    <h3>Henüz rozet yok!</h3>
+                    <p>Oyun oynayarak rozetler kazanmaya başla!</p>
+                </div>
+            `;
+            grid.appendChild(emptyMessage);
+        } else {
+            // Sadece mevcut rozetleri göster
+            availableAchievements.forEach(achievement => {
+                const isUnlocked = this.unlockedAchievements.includes(achievement.id);
+                const conditionMet = this.checkAchievementCondition(achievement);
+                
+                const item = document.createElement('div');
+                item.className = `achievement-item ${isUnlocked ? 'unlocked' : 'ready'}`;
+                
+                // Special styling for completed but not yet unlocked
+                if (conditionMet && !isUnlocked) {
+                    item.style.background = 'linear-gradient(135deg, #fff3cd, #ffeaa7)';
+                    item.style.borderColor = '#ffc107';
+                    item.style.animation = 'achievementReady 2s ease-in-out infinite';
+                }
+                
+                // ✨ İslami İkon Desteği - FontAwesome yerine Unicode emoji kullan
+                const iconDisplay = achievement.icon.startsWith('fa') ? '🏆' : achievement.icon;
+                
+                item.innerHTML = `
+                    <div class="achievement-icon">${iconDisplay}</div>
+                    <div class="achievement-title">${achievement.title}</div>
+                    <div class="achievement-desc">${achievement.description}</div>
+                    ${conditionMet && !isUnlocked ? `<div class="achievement-ready">🎉 Tıkla ve Kap!</div>` : ''}
+                `;
+                
+                // 🌟 ARIA Accessibility Support
+                item.setAttribute('role', 'button');
+                item.setAttribute('tabindex', '0');
+                item.setAttribute('aria-label', `${achievement.title}: ${achievement.description}${isUnlocked ? ' - Tamamlandı' : ' - Açılmaya hazır'}`);
+                
+                // ⌨️ Keyboard Navigation Support
+                item.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        if (conditionMet && !isUnlocked) {
+                            item.click();
+                        }
+                    }
+                });
+                
+                // Add click handler for ready achievements
+                if (conditionMet && !isUnlocked) {
+                    item.style.cursor = 'pointer';
+                    item.onclick = () => {
+                        this.unlockAchievementWithEffects(achievement.id);
+                        this.showAchievements(); // Refresh the modal
+                    };
+                }
+                
+                grid.appendChild(item);
+            });
+        }
         
         modal.style.display = 'flex';
     }
@@ -3575,7 +3608,7 @@ class ArabicLearningGame {
         this.stats.wordsLearned = this.calculateMasteredWords();
         
         // Update all stat numbers
-        document.getElementById('statTotalGames').textContent = this.stats.gamesPlayed;
+        document.getElementById('statTotalGames').textContent = this.correctAnswers;
         document.getElementById('statTotalHasene').textContent = this.stats.totalHasene;
         document.getElementById('statMaxStreak').textContent = this.stats.currentStreak;
         document.getElementById('statCurrentStreak').textContent = this.stats.currentStreak + ' gün';
@@ -3935,13 +3968,13 @@ ArabicLearningGame.prototype.loadGameData = function() {
     // 7. ✅ UNLOCK ACHIEVEMENTS YÜKLEME
     this.unlockedAchievements = JSON.parse(localStorage.getItem('unlockedAchievements')) || [];
     
-    // GameData varsa üzerine yaz (backup olarak)
+    // GameData varsa üzerine yaz (backup olarak) - ama dailyHasene için tarih kontrolü yap
     const saved = localStorage.getItem('gameData');
     if (saved) {
         try {
             const data = JSON.parse(saved);
             this.totalHasene = data.totalHasene || this.totalHasene;
-            this.dailyHasene = data.dailyHasene || this.dailyHasene;
+            // ⚠️ dailyHasene için tarih kontrolü yapılacak - henüz yükleme!
             this.streak = data.streak || this.streak;
             this.level = data.level || 1;
             this.difficulty = data.difficulty || 'medium';
@@ -3949,26 +3982,28 @@ ArabicLearningGame.prototype.loadGameData = function() {
             this.totalAnswers = data.totalAnswers || this.totalAnswers;
             this.lastPlayDate = data.lastPlayDate || this.lastPlayDate;
             this.unlockedAchievements = data.unlockedAchievements || this.unlockedAchievements;
-            return data;
         } catch (e) {
             console.error('❌ GameData parse hatası:', e);
         }
     }
     
-    
-    // ✅ CALENDAR DATA RESTORE - oyun başlarken bugünkü hasene'yi restore et
+    // 🛡️ GÜNLÜK HASENE RESTORE SİSTEMİ - SADECE BUGÜN İLK KEZ OYUN BAŞLATIYORSA
     const today = new Date().toDateString();
-    const calendarData = JSON.parse(localStorage.getItem('dailyHaseneData') || '{}');
-    const todaysCalendarHasene = calendarData[today] || 0;
+    const lastPlayDate = this.lastPlayDate;
     
-    // Eğer calendar'da bugün için veri varsa ve dailyHasene ile uyuşmuyorsa
-    if (todaysCalendarHasene > 0 && todaysCalendarHasene !== this.dailyHasene) {
-        this.dailyHasene = todaysCalendarHasene;
-        // localStorage'ı da güncelle
-        localStorage.setItem('dailyHasene', this.dailyHasene.toString());
-    }
-    
-    // UI'yi güncelle
+        // Eğer son oyun tarihi bugün değilse, dailyHasene sıfırlanmalı
+        if (lastPlayDate && lastPlayDate !== today) {
+            this.dailyHasene = 0;
+            localStorage.setItem('dailyHasene', '0');
+        } else if (lastPlayDate === today) {
+            // Bugün zaten oyun oynandıysa, localStorage'dan mevcut dailyHasene değerini al
+            const currentDaily = parseInt(localStorage.getItem('dailyHasene')) || 0;
+            this.dailyHasene = currentDaily;
+        } else {
+            // İlk defa oyun oynuyorsa
+            this.dailyHasene = 0;
+            localStorage.setItem('dailyHasene', '0');
+        }    // UI'yi güncelle
     this.updateUI();
     
     return null;
@@ -4837,7 +4872,4 @@ ArabicLearningGame.prototype.unlockAchievementWithEffects = function(achievement
     
     return true;
 };
-
-
-
 
