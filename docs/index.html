@@ -10,7 +10,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon-192-v4-RED-MUSHAF.png">
     <link rel="apple-touch-icon" href="icon-192-v4-RED-MUSHAF.png">
-    <link rel="stylesheet" href="style.css?v=173300">
+        <link rel="stylesheet" href="style.css?v=174400">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -891,36 +891,12 @@
         <!-- Placeholder for level up sound -->
     </audio>
 
-    <!-- Debug Panel (Hidden by default) -->
-    <div id="debugPanel" style="display: none; position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.9); color: white; padding: 15px; border-radius: 10px; z-index: 10000; font-size: 12px; max-width: 300px;">
-        <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 10px;">
-            <h4 style="margin: 0; color: #00ff00;">🔧 DEBUG PANEL</h4>
-            <button onclick="window.debugManager.togglePanel()" style="background: #ff4444; color: white; border: none; border-radius: 3px; padding: 2px 6px; cursor: pointer;">✕</button>
-        </div>
-        
-        <div id="debugStats" style="margin-bottom: 10px;">
-            <div><strong>localStorage Data:</strong></div>
-            <div id="debugLocalStorage" style="font-size: 10px; background: #222; padding: 5px; border-radius: 3px; margin: 5px 0;"></div>
-        </div>
-        
-        <div style="margin-bottom: 10px;">
-            <strong>Quick Actions:</strong><br>
-            <button onclick="window.debugManager.resetStreak()" style="margin: 2px; padding: 3px 6px; font-size: 10px;">Reset Streak</button>
-            <button onclick="window.debugManager.addFakeStats()" style="margin: 2px; padding: 3px 6px; font-size: 10px;">+100 Stats</button><br>
-            <button onclick="window.debugManager.addFakeLearnedWords()" style="margin: 2px; padding: 3px 6px; font-size: 10px;">+30 Words</button>
-            <button onclick="window.debugManager.clearAllData()" style="margin: 2px; padding: 3px 6px; font-size: 10px;">Clear All</button><br>
-            <button onclick="window.debugManager.exportData()" style="margin: 2px; padding: 3px 6px; font-size: 10px;">Export</button>
-        </div>
-        
-        <div>
-            <input type="text" id="debugCommand" placeholder="Debug command..." style="width: 90%; padding: 3px; font-size: 10px;" onkeypress="if(event.key==='Enter') window.debugManager.executeCommand(this.value)">
-        </div>
-    </div>
+    <!-- Debug Panel removed for production build -->
 
-    <script src="sounds/audio-generator.js?v=2.0.1"></script>
-    <script src="party-effects.js?v=2.0.1"></script>
-    <script src="script.js?v=2.0.1"></script>
-    <script src="debug-manager.js?v=2.0.1"></script>
-    <script src="onboarding-test.js?v=2.0.1"></script>
+    <script src="sounds/audio-generator.js?v=2.1.20386"></script>
+    <script src="party-effects.js?v=2.1.20386"></script>
+    <script src="script.js?v=2.1.20386"></script>
+    <script src="docs/word-learning-analyzer.js?v=2.1.20386"></script>
+    <!-- Debug and test scripts removed for production build -->
 </body>
 </html>

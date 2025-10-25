@@ -2184,6 +2184,11 @@ input:focus {
     background: transparent;
     min-height: 0;
     justify-content: flex-start;
+    /* 🚀 Ultra Performance Scroll Optimization */
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    will-change: scroll-position;
+    transform: translateZ(0); /* GPU acceleration */
 }
 
 /* Boş rozet paneli - Duolingo tarzı */
@@ -2218,12 +2223,12 @@ input:focus {
     color: #6c757d;
 }
 
-/* Duolingo tarzı rozet kartı */
+/* 🎨 Ayın Özeti Tarzı Premium Rozet Kartı */
 .achievement-item {
-    background: #fff;
-    border: 3px solid #e9ecef;
+    background: linear-gradient(135deg, #C0C0C0, #E5E5E5); /* Varsayılan gri gradient */
+    border: none;
     border-radius: 16px;
-    padding: 12px 8px;
+    padding: 15px 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -2231,13 +2236,13 @@ input:focus {
     text-align: center;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    height: 100px;
-    width: 85px;
+    height: 110px;
+    width: 95px;
     flex-shrink: 0;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
     position: relative;
     overflow: hidden;
-    color: #333;
+    color: white;
 }
 
 .achievement-item:hover {
@@ -2246,20 +2251,18 @@ input:focus {
     border-color: #4CAF50;
 }
 
-/* Duolingo renk sistemi */
+/* 🌟 Premium Gradient Renk Sistemi - Ayın Özeti Tarzı */
 .achievement-item.unlocked {
-    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-    border-color: #45a049;
-    color: #000;
-    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    background: linear-gradient(135deg, #DAA520, #FFBF00); /* İslami Altın */
+    color: white;
+    box-shadow: 0 4px 16px rgba(218, 165, 32, 0.4);
 }
 
 .achievement-item.ready {
-    background: linear-gradient(135deg, #FFC107 0%, #FF9800 100%);
-    border-color: #FF9800;
-    color: #000;
+    background: linear-gradient(135deg, #50C878, #40E0D0); /* İslami Zümrüt */
+    color: white;
     animation: duolingoGlow 2s ease-in-out infinite alternate;
-    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+    box-shadow: 0 4px 16px rgba(80, 200, 120, 0.4);
 }
 
 @keyframes duolingoGlow {
@@ -2274,43 +2277,78 @@ input:focus {
 }
 
 .achievement-item.locked {
-    background: #f8f9fa;
-    border-color: #e9ecef;
-    color: #6c757d;
-    opacity: 0.7;
+    background: linear-gradient(135deg, #C0C0C0, #E5E5E5); /* Gümüş Gradient */
+    color: #666;
+    opacity: 0.8;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-/* Duolingo tarzı ikon */
+/* 🌟 Özel Premium Rozet Türleri */
+.achievement-item.special {
+    background: linear-gradient(135deg, #E0115F, #FF4500); /* İslami Yakut */
+    color: white;
+    box-shadow: 0 4px 16px rgba(224, 17, 95, 0.4);
+    animation: specialGlow 3s ease-in-out infinite alternate;
+}
+
+.achievement-item.legendary {
+    background: linear-gradient(135deg, #0F52BA, #1CB0F6); /* İslami Safir */
+    color: white;
+    box-shadow: 0 4px 16px rgba(15, 82, 186, 0.4);
+}
+
+.achievement-item.divine {
+    background: linear-gradient(135deg, #CE82FF, #9C27B0); /* İslami Mor */
+    color: white;
+    box-shadow: 0 4px 16px rgba(206, 130, 255, 0.4);
+}
+
+@keyframes specialGlow {
+    from { 
+        box-shadow: 0 4px 16px rgba(224, 17, 95, 0.4);
+        transform: scale(1);
+    }
+    to { 
+        box-shadow: 0 6px 24px rgba(224, 17, 95, 0.6);
+        transform: scale(1.03);
+    }
+}
+
+/* 🎨 Premium İkon - Ayın Özeti Tarzı */
 .achievement-icon {
-    font-size: 1.4rem;
-    width: 32px;
-    height: 32px;
+    font-size: 2.2rem;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-    color: #1976d2;
-    margin: 0 auto 6px auto;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    background: rgba(255,255,255,0.2);
+    color: white;
+    margin: 0 auto 8px auto;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     transition: all 0.3s ease;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
 .achievement-item.unlocked .achievement-icon {
-    background: linear-gradient(135deg, #fff 0%, #e8f5e8 100%);
-    color: #2e7d32;
-    box-shadow: 0 3px 12px rgba(46, 125, 50, 0.2);
+    background: rgba(255,255,255,0.3);
+    color: white;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.3);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.4);
 }
 
 .achievement-item.ready .achievement-icon {
-    background: linear-gradient(135deg, #fff 0%, #fff8e1 100%);
-    color: #f57c00;
+    background: rgba(255,255,255,0.3);
+    color: white;
     animation: iconPulse 1.5s ease-in-out infinite;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.4);
 }
 
 .achievement-item.locked .achievement-icon {
-    background: #f1f3f4;
-    color: #9e9e9e;
+    background: rgba(255,255,255,0.1);
+    color: #999;
+    text-shadow: none;
 }
 
 @keyframes iconPulse {
@@ -2318,25 +2356,26 @@ input:focus {
     50% { transform: scale(1.1); }
 }
 
-/* Duolingo tarzı başlık */
+/* 🎨 Premium Yazı Stili - Ayın Özeti Tarzı */
 .achievement-title {
-    font-size: 0.65rem;
-    font-weight: 700;
-    margin: 0 0 3px 0;
+    font-size: 0.7rem;
+    font-weight: 800;
+    margin: 0 0 4px 0;
     line-height: 1.1;
-    color: inherit;
+    color: white;
     text-align: center;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
-/* Duolingo tarzı açıklama */
 .achievement-desc {
-    font-size: 0.5rem;
+    font-size: 0.55rem;
     margin: 0;
     line-height: 1.2;
-    opacity: 0.85;
-    color: inherit;
+    opacity: 0.95;
+    color: white;
     text-align: center;
     padding: 0 2px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
 /* Hazır durumu - Duolingo tarzı */
@@ -5276,28 +5315,26 @@ input:focus {
     }
     
     .achievement-item {
-        width: calc((100vw - 48px) / 3 - 5px); /* Kırmızı çizgilerdeki boyut */
-        max-width: 90px;
-        min-width: 75px;
-        min-height: 70px;
-        padding: 4px 2px;
-        border-width: 2px;
-        border-radius: 12px;
-        /* ✋ Küçük kompakt rozetler */
+        width: calc((100vw - 48px) / 3 - 5px); /* Samsung M33 3-sütun */
+        max-width: 95px; /* Yeni büyük boyut */
+        min-width: 80px;
+        min-height: 80px; /* Premium boyut */
+        padding: 6px 3px;
+        border-radius: 14px;
     }
     
     .achievement-icon {
-        font-size: 1.1rem;
-        width: 24px;
-        height: 24px;
-        margin-bottom: 2px;
+        font-size: 1.6rem; /* Daha büyük ikon */
+        width: 32px;
+        height: 32px;
+        margin-bottom: 4px;
     }
     
     .achievement-title {
-        font-size: 0.55rem;
-        font-weight: 600;
-        margin-bottom: 1px;
-        line-height: 1;
+        font-size: 0.6rem;
+        font-weight: 700; /* Daha kalın */
+        margin-bottom: 2px;
+        line-height: 1.1;
     }
     
     .achievement-desc {
