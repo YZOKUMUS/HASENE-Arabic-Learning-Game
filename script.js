@@ -422,6 +422,7 @@ class ArabicLearningGame {
         this.loadGameData();
         
         this.streak = parseInt(localStorage.getItem('streak')) || 0;
+        this.maxStreak = parseInt(localStorage.getItem('maxStreak')) || 0;
         // Progressive level system - Her seviye daha zor
         this.level = this.calculateLevel(this.totalHasene);
         this.xp = this.totalHasene;
@@ -784,6 +785,7 @@ class ArabicLearningGame {
             gamesPlayed: parseInt(localStorage.getItem('gamesPlayed')) || 0,
             totalHasene: this.totalHasene,
             currentStreak: this.streak,
+            maxStreak: this.maxStreak,
             perfectGames: parseInt(localStorage.getItem('perfectGames')) || 0,
             averageTime: parseInt(localStorage.getItem('averageTime')) || 0,
             wordsLearned: this.wordsLearned,
@@ -1051,6 +1053,12 @@ class ArabicLearningGame {
                 // Ardışık gün - streak artır
                 const oldStreak = this.streak;
                 this.streak++;
+                
+                // 🏆 Max streak güncelle
+                if (this.streak > this.maxStreak) {
+                    this.maxStreak = this.streak;
+                    localStorage.setItem('maxStreak', this.maxStreak.toString());
+                }
                 
                 // 🔥 Streak milestone fanfarı çal
                 this.checkStreakMilestone(oldStreak, this.streak);
@@ -1894,21 +1902,20 @@ class ArabicLearningGame {
             
             this.gameHasene += earnedHasene;
             
-            // 4. ✅ DOĞRU CEVAP - HASENE KAZANIMI
-            this.totalHasene += earnedHasene;
+            // 4. ✅ DOĞRU CEVAP - HASENE KAZANIMI (sadece günlük hasene)
             this.dailyHasene += earnedHasene;
             
-            // 5. ✅ ANLIK KAYDETME - her doğru cevaptan sonra
+            // 5. ✅ CALENDAR GÜNCELLEME - her doğru cevaptan sonra (totalHasene otomatik hesaplanacak)
+            const today = new Date().toDateString();
+            console.log(`📅 Hasene güncellendi: ${today} -> ${this.dailyHasene} (+${earnedHasene})`);
+            this.storeDailyHasene(today, this.dailyHasene); // Bu fonksiyon totalHasene'yi güncelleyecek
+            
+            // 6. ✅ ANLIK KAYDETME - her doğru cevaptan sonra
             this.saveGameData();
             this.updateUI(); // UI'yi hemen güncelle
             
-            // 6. ✅ İSTATİSTİK GÜNCELLEME - totalHasene değiştiğinde
+            // 7. ✅ İSTATİSTİK GÜNCELLEME - totalHasene değiştiğinde
             this.updateGameStats();
-            
-            // 7. ✅ CALENDAR GÜNCELLEME - her doğru cevaptan sonra
-            const today = new Date().toDateString();
-            console.log(`📅 Hasene güncellendi: ${today} -> ${this.dailyHasene} (+${earnedHasene})`);
-            this.storeDailyHasene(today, this.dailyHasene);
             
             // Play correct sound
             if (window.soundManager) {
@@ -2398,6 +2405,13 @@ class ArabicLearningGame {
                     // Normal günlük streak kontrolü
                     this.checkDailyStreak();
                 }
+                
+                // 🏆 Max streak güncelle
+                if (this.streak > this.maxStreak) {
+                    this.maxStreak = this.streak;
+                    localStorage.setItem('maxStreak', this.maxStreak.toString());
+                }
+                
                 this.updateStreakData(today, true);
             }
             
@@ -2611,6 +2625,7 @@ class ArabicLearningGame {
             // Only update hasene and check achievements for ayet/dua modes
             this.stats.totalHasene = this.totalHasene;
             this.stats.currentStreak = this.streak;
+            this.stats.maxStreak = this.maxStreak;
             // Don't update gamesPlayed, perfectGames, or wordsLearned for ayet/dua
             this.checkNewAchievements();
             return;
@@ -2635,6 +2650,7 @@ class ArabicLearningGame {
         // 6. ✅ İSTATİSTİK ENTEGRASYONU - totalHasene değiştiğinde doğru güncelleme
         this.stats.totalHasene = this.totalHasene;
         this.stats.currentStreak = this.streak;
+        this.stats.maxStreak = this.maxStreak;
         this.stats.wordsLearned = this.calculateMasteredWords(); // Dinamik hesaplama - only for normal games
         this.stats.totalAnswers = this.totalAnswers;
         this.stats.correctAnswers = this.correctAnswers;
@@ -2870,6 +2886,25 @@ class ArabicLearningGame {
         const oldValue = haseneData[dateString] || 0;
         haseneData[dateString] = hasene; // Set total daily hasene, don't add
         localStorage.setItem('dailyHaseneData', JSON.stringify(haseneData));
+        
+        // 🔥 TOPLAM HASENE GÜNCELLEME - Tüm günlerin toplamı
+        this.calculateTotalHaseneFromDaily();
+    }
+
+    calculateTotalHaseneFromDaily() {
+        // Tüm günlük hasene verilerinin toplamını hesapla
+        const haseneData = JSON.parse(localStorage.getItem('dailyHaseneData') || '{}');
+        let totalFromDaily = 0;
+        
+        for (const date in haseneData) {
+            totalFromDaily += haseneData[date];
+        }
+        
+        // Toplam hasene'yi güncelle
+        this.totalHasene = totalFromDaily;
+        localStorage.setItem('totalHasene', this.totalHasene.toString());
+        
+        console.log(`🔄 Toplam hasene güncellendi: ${this.totalHasene} (günlük toplamlardan)`);
     }
     
     getDailyGames(dateString) {
@@ -3610,7 +3645,7 @@ class ArabicLearningGame {
         // Update all stat numbers
         document.getElementById('statTotalGames').textContent = this.correctAnswers;
         document.getElementById('statTotalHasene').textContent = this.stats.totalHasene;
-        document.getElementById('statMaxStreak').textContent = this.stats.currentStreak;
+        document.getElementById('statMaxStreak').textContent = this.stats.maxStreak;
         document.getElementById('statCurrentStreak').textContent = this.stats.currentStreak + ' gün';
         document.getElementById('statWordsLearned').textContent = this.stats.wordsLearned;
         
@@ -3960,6 +3995,9 @@ ArabicLearningGame.prototype.loadGameData = function() {
     // 3. ✅ TUTARLI YÜKLEME - önce localStorage, sonra gameData
     this.totalHasene = parseInt(localStorage.getItem('totalHasene')) || 0;
     this.dailyHasene = parseInt(localStorage.getItem('dailyHasene')) || 0;
+    
+    // 🔥 TOPLAM HASENE DOĞRULAMA - Günlük toplamlardan hesapla
+    this.calculateTotalHaseneFromDaily();
     this.streak = parseInt(localStorage.getItem('streak')) || 0;
     this.correctAnswers = parseInt(localStorage.getItem('correctAnswers')) || 0;
     this.totalAnswers = parseInt(localStorage.getItem('totalAnswers')) || 0;
