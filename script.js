@@ -808,9 +808,8 @@ class ArabicLearningGame {
         const today = new Date();
         const dateString = today.toDateString();
         
-        // Update daily hasene
-        const currentHasene = this.getDailyHasene(dateString);
-        this.storeDailyHasene(dateString, currentHasene + this.gameHasene);
+        // ✅ Daily hasene is already updated in processAnswer() - no need to add again
+        // Removed: this.storeDailyHasene(dateString, currentHasene + this.gameHasene);
         
         // Update daily games count
         const currentGames = this.getDailyGames(dateString);
@@ -2315,6 +2314,9 @@ class ArabicLearningGame {
     
     completeGame() {
         try {
+            // Get today's date for streak calculations
+            const today = new Date().toDateString();
+            
             // Clear any running timers
             this.clearQuestionTimer();
             
@@ -2382,9 +2384,7 @@ class ArabicLearningGame {
             localStorage.setItem('dailyHasene', this.dailyHasene.toString());
             localStorage.setItem('streak', this.streak.toString());
             
-            // Store daily hasene in calendar data
-            const today = new Date().toDateString();
-            this.storeDailyHasene(today, this.dailyHasene); // dailyHasene kullan, gameHasene değil!
+            // ✅ Calendar zaten processAnswer'da güncelleniyor - tekrar güncelleme!
             
             // 🔥 STREAK UPDATE: Oyun tamamlanması = streak güncellemesi
             const hasPlayedToday = this.hasPlayedToday(today);
@@ -2442,8 +2442,8 @@ class ArabicLearningGame {
         this.saveGameData();
         this.updateUI();
         
-        // Track game mode completion for achievements
-        this.trackGameModeCompletion();
+        // ✅ Game mode tracking is already done below in completeGame() - avoid duplication
+        // Removed: this.trackGameModeCompletion();
         
         // Update enhanced calendar data
         this.updateCalendarData(totalQuestions, accuracy);
@@ -2984,7 +2984,6 @@ class ArabicLearningGame {
         const lastDay = new Date(this.currentCalendarYear, this.currentCalendarMonth + 1, 0);
         
         let streakDays = 0;
-        let totalHasene = 0;
         let perfectDays = 0;
         let activeDays = 0;
         
@@ -2998,7 +2997,6 @@ class ArabicLearningGame {
             const hasene = this.getDailyHasene(dateString);
             if (hasene > 0) {
                 activeDays++;
-                totalHasene += hasene;
                 
                 if (this.isStreakDay(dateString)) {
                     streakDays++;
@@ -3009,6 +3007,9 @@ class ArabicLearningGame {
                 }
             }
         }
+        
+        // ✅ Use main totalHasene instead of summing daily values to avoid duplication
+        const totalHasene = this.totalHasene;
         
         return {
             streakDays,
@@ -3569,7 +3570,7 @@ class ArabicLearningGame {
         this.stats.wordsLearned = this.calculateMasteredWords();
         
         // Update all stat numbers
-        document.getElementById('statTotalGames').textContent = this.stats.gamesPlayed;
+        document.getElementById('statTotalGames').textContent = this.correctAnswers;
         document.getElementById('statTotalHasene').textContent = this.stats.totalHasene;
         document.getElementById('statMaxStreak').textContent = this.stats.currentStreak;
         document.getElementById('statCurrentStreak').textContent = this.stats.currentStreak + ' gün';
