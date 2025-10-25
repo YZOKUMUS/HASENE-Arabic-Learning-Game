@@ -3354,58 +3354,78 @@ class ArabicLearningGame {
         
         grid.innerHTML = '';
         
-        Object.values(this.achievements).forEach(achievement => {
+        // 🎯 SADECE KAZANILAN VE AÇILMAYA HAZIR ROZETLER GÖSTER
+        const availableAchievements = Object.values(this.achievements).filter(achievement => {
             const isUnlocked = this.unlockedAchievements.includes(achievement.id);
-            const progress = this.getAchievementProgress(achievement);
             const conditionMet = this.checkAchievementCondition(achievement);
-            
-            const item = document.createElement('div');
-            item.className = `achievement-item ${isUnlocked ? 'unlocked' : (conditionMet ? 'ready' : 'locked')}`;
-            
-            // Special styling for completed but not yet unlocked
-            if (conditionMet && !isUnlocked) {
-                item.style.background = 'linear-gradient(135deg, #fff3cd, #ffeaa7)';
-                item.style.borderColor = '#ffc107';
-                item.style.animation = 'achievementReady 2s ease-in-out infinite';
-            }
-            
-            // ✨ İslami İkon Desteği - FontAwesome yerine Unicode emoji kullan
-            const iconDisplay = achievement.icon.startsWith('fa') ? '🏆' : achievement.icon;
-            
-            item.innerHTML = `
-                <div class="achievement-icon">${iconDisplay}</div>
-                <div class="achievement-title">${achievement.title}</div>
-                <div class="achievement-desc">${achievement.description}</div>
-                ${!isUnlocked && progress ? `<div class="achievement-progress">${progress}</div>` : ''}
-                ${conditionMet && !isUnlocked ? `<div class="achievement-ready">🎉 Hazır!</div>` : ''}
-            `;
-            
-            // 🌟 ARIA Accessibility Support
-            item.setAttribute('role', 'button');
-            item.setAttribute('tabindex', '0');
-            item.setAttribute('aria-label', `${achievement.title}: ${achievement.description}${isUnlocked ? ' - Tamamlandı' : conditionMet ? ' - Açılmaya hazır' : ''}`);
-            
-            // ⌨️ Keyboard Navigation Support
-            item.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    if (conditionMet && !isUnlocked) {
-                        item.click();
-                    }
-                }
-            });
-            
-            // Add click handler for ready achievements
-            if (conditionMet && !isUnlocked) {
-                item.style.cursor = 'pointer';
-                item.onclick = () => {
-                    this.unlockAchievementWithEffects(achievement.id);
-                    this.showAchievements(); // Refresh the modal
-                };
-            }
-            
-            grid.appendChild(item);
+            return isUnlocked || conditionMet; // Sadece kazanılan veya hazır olanlar
         });
+        
+        // Eğer hiç rozet yoksa bilgilendirici mesaj göster
+        if (availableAchievements.length === 0) {
+            const emptyMessage = document.createElement('div');
+            emptyMessage.className = 'achievements-empty';
+            emptyMessage.innerHTML = `
+                <div style="text-align: center; padding: 20px; color: #666;">
+                    <i class="fas fa-trophy" style="font-size: 48px; margin-bottom: 10px; color: #ddd;"></i>
+                    <h3>Henüz rozet yok!</h3>
+                    <p>Oyun oynayarak rozetler kazanmaya başla!</p>
+                </div>
+            `;
+            grid.appendChild(emptyMessage);
+        } else {
+            // Sadece mevcut rozetleri göster
+            availableAchievements.forEach(achievement => {
+                const isUnlocked = this.unlockedAchievements.includes(achievement.id);
+                const conditionMet = this.checkAchievementCondition(achievement);
+                
+                const item = document.createElement('div');
+                item.className = `achievement-item ${isUnlocked ? 'unlocked' : 'ready'}`;
+                
+                // Special styling for completed but not yet unlocked
+                if (conditionMet && !isUnlocked) {
+                    item.style.background = 'linear-gradient(135deg, #fff3cd, #ffeaa7)';
+                    item.style.borderColor = '#ffc107';
+                    item.style.animation = 'achievementReady 2s ease-in-out infinite';
+                }
+                
+                // ✨ İslami İkon Desteği - FontAwesome yerine Unicode emoji kullan
+                const iconDisplay = achievement.icon.startsWith('fa') ? '🏆' : achievement.icon;
+                
+                item.innerHTML = `
+                    <div class="achievement-icon">${iconDisplay}</div>
+                    <div class="achievement-title">${achievement.title}</div>
+                    <div class="achievement-desc">${achievement.description}</div>
+                    ${conditionMet && !isUnlocked ? `<div class="achievement-ready">🎉 Tıkla ve Kap!</div>` : ''}
+                `;
+                
+                // 🌟 ARIA Accessibility Support
+                item.setAttribute('role', 'button');
+                item.setAttribute('tabindex', '0');
+                item.setAttribute('aria-label', `${achievement.title}: ${achievement.description}${isUnlocked ? ' - Tamamlandı' : ' - Açılmaya hazır'}`);
+                
+                // ⌨️ Keyboard Navigation Support
+                item.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        if (conditionMet && !isUnlocked) {
+                            item.click();
+                        }
+                    }
+                });
+                
+                // Add click handler for ready achievements
+                if (conditionMet && !isUnlocked) {
+                    item.style.cursor = 'pointer';
+                    item.onclick = () => {
+                        this.unlockAchievementWithEffects(achievement.id);
+                        this.showAchievements(); // Refresh the modal
+                    };
+                }
+                
+                grid.appendChild(item);
+            });
+        }
         
         modal.style.display = 'flex';
     }

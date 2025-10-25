@@ -494,6 +494,21 @@ body {
     100% { background-position: 200% 0; }
 }
 
+@keyframes pulse {
+    0% { 
+        transform: scale(1);
+        box-shadow: 0 3px 10px rgba(243, 156, 18, 0.3);
+    }
+    50% { 
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(243, 156, 18, 0.5);
+    }
+    100% { 
+        transform: scale(1);
+        box-shadow: 0 3px 10px rgba(243, 156, 18, 0.3);
+    }
+}
+
 .loading-text {
     color: white;
     font-size: 1.1rem;
@@ -2099,10 +2114,10 @@ input:focus {
     /* 🎨 İslami Gradient Background */
     background: linear-gradient(135deg, 
         var(--islamic-pearl) 0%, 
-        rgba(248, 246, 240, 0.95) 50%, 
+        rgba(8, 8, 7, 0.027) 50%, 
         var(--islamic-pearl) 100%);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(218, 165, 32, 0.2);
+    border: 1px solid rgba(151, 109, 3, 0.2);
     /* 🔧 Düzgün Görünüm İçin */
     display: flex;
     flex-direction: column;
@@ -2157,286 +2172,184 @@ input:focus {
     transform: scale(1.1);
 }
 
+/* 🦉 DUOLINGO-STYLE ROZET SİSTEMİ - Estetik & Mobil Dostu ✨ */
+
 .achievements-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 16px;
-    padding: 24px;
-    /* 🔧 Flexible Height - Modal içinde tam görünür */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    padding: 20px;
     flex: 1;
     overflow-y: auto;
-    /* 🌟 Transparent Background - Ana modaldan devralır */
     background: transparent;
-    /* 📱 Minimum Height */
     min-height: 0;
+    justify-content: flex-start;
 }
 
-.achievement-item {
-    /* 🔮 Crystal Glass Effect */
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 20px;
-    padding: 16px 12px;
+/* Boş rozet paneli - Duolingo tarzı */
+.achievements-empty {
+    grid-column: 1 / -1;
     text-align: center;
-    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-    cursor: pointer;
-    min-height: 160px;
+    padding: 40px 20px;
+    color: #777;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 16px;
+    border: none;
+    margin: 10px 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.achievements-empty i {
+    font-size: 48px !important;
+    margin-bottom: 15px !important;
+    color: #dee2e6 !important;
+}
+
+.achievements-empty h3 {
+    font-size: 18px;
+    margin-bottom: 8px;
+    color: #495057;
+    font-weight: 600;
+}
+
+.achievements-empty p {
+    font-size: 14px;
+    margin: 0;
+    color: #6c757d;
+}
+
+/* Duolingo tarzı rozet kartı */
+.achievement-item {
+    background: #fff;
+    border: 3px solid #e9ecef;
+    border-radius: 16px;
+    padding: 12px 8px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    height: 100px;
+    width: 85px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     position: relative;
     overflow: hidden;
-    
-    /* 🌟 Divine Shadow */
-    box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3),
-        0 4px 16px rgba(218, 165, 32, 0.1);
+    color: #333;
 }
 
 .achievement-item:hover {
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: 
-        0 16px 48px rgba(0, 0, 0, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.4),
-        0 8px 24px rgba(218, 165, 32, 0.2);
-    border-color: rgba(218, 165, 32, 0.4);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    border-color: #4CAF50;
 }
 
+/* Duolingo renk sistemi */
 .achievement-item.unlocked {
-    /* 🌙 Unlocked Divine Glow */
-    background: linear-gradient(135deg, 
-        rgba(218, 165, 32, 0.25) 0%, 
-        rgba(80, 200, 120, 0.15) 50%, 
-        rgba(15, 82, 186, 0.20) 100%);
-    backdrop-filter: blur(16px);
-    border: 1px solid rgba(218, 165, 32, 0.3);
-    color: var(--islamic-gold);
-    
-    /* ✨ Nur Işığı Animation */
-    animation: divineGlow 3s ease-in-out infinite alternate;
-}
-
-.achievement-item.unlocked:hover {
-    background: linear-gradient(135deg, 
-        rgba(218, 165, 32, 0.35) 0%, 
-        rgba(80, 200, 120, 0.25) 50%, 
-        rgba(15, 82, 186, 0.30) 100%);
-    box-shadow: 
-        0 20px 60px rgba(0, 0, 0, 0.2),
-        inset 0 2px 0 rgba(255, 255, 255, 0.5),
-        0 0 40px rgba(218, 165, 32, 0.3),
-        0 0 20px rgba(80, 200, 120, 0.2);
-}
-
-.achievement-item.locked {
-    opacity: 0.4;
-    background: rgba(248, 246, 240, 0.1);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    border-color: #45a049;
+    color: #000;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
 }
 
 .achievement-item.ready {
-    /* 🔥 Ready to Unlock State */
-    background: linear-gradient(135deg, 
-        rgba(255, 193, 7, 0.3) 0%, 
-        rgba(218, 165, 32, 0.25) 50%, 
-        rgba(255, 235, 59, 0.2) 100%) !important;
-    backdrop-filter: blur(12px) !important;
-    border: 2px solid rgba(255, 193, 7, 0.5) !important;
-    opacity: 1;
-    cursor: pointer;
-    position: relative;
-    
-    /* 🌟 Pulse Animation */
-    animation: readyPulse 2s ease-in-out infinite;
+    background: linear-gradient(135deg, #FFC107 0%, #FF9800 100%);
+    border-color: #FF9800;
+    color: #000;
+    animation: duolingoGlow 2s ease-in-out infinite alternate;
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
 }
 
-/* ✨ Divine Glow Keyframes */
-@keyframes divineGlow {
-    0% {
-        box-shadow: 
-            0 8px 32px rgba(0, 0, 0, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.3),
-            0 0 20px rgba(218, 165, 32, 0.2);
-    }
-    100% {
-        box-shadow: 
-            0 12px 40px rgba(0, 0, 0, 0.15),
-            inset 0 2px 0 rgba(255, 255, 255, 0.4),
-            0 0 30px rgba(218, 165, 32, 0.4),
-            0 0 15px rgba(80, 200, 120, 0.3);
-    }
-}
-
-/* 🔥 Ready Pulse Keyframes */
-@keyframes readyPulse {
-    0% {
+@keyframes duolingoGlow {
+    from { 
+        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
         transform: scale(1);
-        box-shadow: 0 0 20px rgba(255, 193, 7, 0.3);
     }
-    50% {
-        transform: scale(1.05);
-        box-shadow: 0 0 30px rgba(255, 193, 7, 0.5);
-    }
-    100% {
-        transform: scale(1);
-        box-shadow: 0 0 20px rgba(255, 193, 7, 0.3);
+    to { 
+        box-shadow: 0 6px 20px rgba(255, 193, 7, 0.6);
+        transform: scale(1.02);
     }
 }
 
-/* 🌟 Icon Pulse Animation */
-@keyframes iconPulse {
-    0% {
-        transform: scale(1);
-        text-shadow: 0 0 5px rgba(255, 193, 7, 0.3);
-    }
-    50% {
-        transform: scale(1.15);
-        text-shadow: 0 0 15px rgba(255, 193, 7, 0.6);
-    }
-    100% {
-        transform: scale(1);
-        text-shadow: 0 0 5px rgba(255, 193, 7, 0.3);
-    }
+.achievement-item.locked {
+    background: #f8f9fa;
+    border-color: #e9ecef;
+    color: #6c757d;
+    opacity: 0.7;
 }
 
-.achievement-item.ready:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(255, 193, 7, 0.3);
-}
-
-.achievement-ready {
-    color: #856404;
-    font-weight: bold;
-    font-size: 0.8rem;
-    margin-top: 5px;
-    animation: pulse 1.5s ease-in-out infinite;
-}
-
-@keyframes achievementReady {
-    0%, 100% { 
-        box-shadow: 0 0 5px rgba(255, 193, 7, 0.5);
-    }
-    50% { 
-        box-shadow: 0 0 20px rgba(255, 193, 7, 0.8);
-    }
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-}
-
+/* Duolingo tarzı ikon */
 .achievement-icon {
-    font-size: 2.2rem;
-    margin-bottom: 8px;
-    display: block;
-    /* 🎨 Islamic Icon Enhancement */
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-size: 1.4rem;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    color: #1976d2;
+    margin: 0 auto 6px auto;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     transition: all 0.3s ease;
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
 }
 
 .achievement-item.unlocked .achievement-icon {
-    color: var(--islamic-gold);
-    text-shadow: 0 0 10px rgba(218, 165, 32, 0.3);
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
-    transform: scale(1.1);
-}
-
-.achievement-item.locked .achievement-icon {
-    color: #ccc;
-    opacity: 0.5;
+    background: linear-gradient(135deg, #fff 0%, #e8f5e8 100%);
+    color: #2e7d32;
+    box-shadow: 0 3px 12px rgba(46, 125, 50, 0.2);
 }
 
 .achievement-item.ready .achievement-icon {
-    color: #ffc107;
+    background: linear-gradient(135deg, #fff 0%, #fff8e1 100%);
+    color: #f57c00;
     animation: iconPulse 1.5s ease-in-out infinite;
 }
 
+.achievement-item.locked .achievement-icon {
+    background: #f1f3f4;
+    color: #9e9e9e;
+}
+
+@keyframes iconPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* Duolingo tarzı başlık */
 .achievement-title {
-    font-size: 0.8rem;
+    font-size: 0.65rem;
     font-weight: 700;
-    margin-bottom: 6px;
-    color: #2c3e50;
-    line-height: 1.3;
-    /* 📖 Better Readability */
-    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9);
-    background: rgba(255, 255, 255, 0.9);
-    padding: 4px 8px;
-    border-radius: 8px;
-    border: 1px solid rgba(52, 152, 219, 0.3);
+    margin: 0 0 3px 0;
+    line-height: 1.1;
+    color: inherit;
+    text-align: center;
 }
 
-.achievement-item.unlocked .achievement-title {
-    color: #ffffff;
-    font-weight: 800;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
-    background: linear-gradient(135deg, 
-        rgba(241, 196, 15, 0.95) 0%, 
-        rgba(243, 156, 18, 0.9) 100%);
-    border: 2px solid rgba(241, 196, 15, 0.8);
-    box-shadow: 0 2px 8px rgba(241, 196, 15, 0.3);
-}
-
-.achievement-item.locked .achievement-title {
-    color: #ffffff;
-    opacity: 0.9;
-    background: rgba(127, 140, 141, 0.8);
-    border-color: rgba(127, 140, 141, 0.6);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
-}
-
+/* Duolingo tarzı açıklama */
 .achievement-desc {
+    font-size: 0.5rem;
+    margin: 0;
+    line-height: 1.2;
+    opacity: 0.85;
+    color: inherit;
+    text-align: center;
+    padding: 0 2px;
+}
+
+/* Hazır durumu - Duolingo tarzı */
+.achievement-ready {
     font-size: 0.7rem;
-    color: #ffffff;
-    line-height: 1.4;
-    margin-bottom: 6px;
-    background: linear-gradient(135deg, 
-        rgba(17, 141, 87, 0.9) 0%, 
-        rgba(26, 188, 156, 0.85) 50%,
-        rgba(52, 152, 219, 0.9) 100%);
-    backdrop-filter: blur(8px);
-    padding: 8px 10px;
+    color: #000;
+    font-weight: bold;
+    margin: 6px 0 0 0;
+    line-height: 1.2;
+    background: rgba(255,255,255,0.7);
+    padding: 4px 8px;
     border-radius: 12px;
-    border: 2px solid rgba(26, 188, 156, 0.6);
-    /* 📖 Better Readability */
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
-    font-weight: 600;
-    box-shadow: 0 4px 12px rgba(26, 188, 156, 0.3);
-}
-
-.achievement-item.unlocked .achievement-desc {
-    background: linear-gradient(135deg, 
-        rgba(241, 196, 15, 0.95) 0%, 
-        rgba(243, 156, 18, 0.9) 50%,
-        rgba(230, 126, 34, 0.95) 100%);
-    color: #ffffff;
-    border: 2px solid rgba(241, 196, 15, 0.8);
-    font-weight: 700;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
-    box-shadow: 
-        0 4px 16px rgba(241, 196, 15, 0.4),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
-}
-
-.achievement-item.locked .achievement-desc {
-    background: linear-gradient(135deg, 
-        rgba(127, 140, 141, 0.9) 0%, 
-        rgba(149, 165, 166, 0.85) 100%);
-    color: #ffffff;
-    border: 1px solid rgba(127, 140, 141, 0.6);
-    font-weight: 500;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
-}
-
-.achievement-progress {
-    margin-top: 4px;
-    font-size: 0.55rem;
-    color: var(--primary-blue);
-    font-weight: 600;
+    backdrop-filter: blur(4px);
 }
 
 /* Calendar Modal */
@@ -3831,7 +3744,6 @@ input:focus {
     }
     
     .achievements-grid {
-        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
         gap: 10px;
         padding: 15px;
         max-height: calc(100vh - 80px);
@@ -3839,6 +3751,8 @@ input:focus {
     
     .achievement-item {
         padding: 10px;
+        width: 100px;
+        min-height: 120px;
     }
     
     .achievement-icon {
@@ -5308,7 +5222,6 @@ input:focus {
 /* 📱 Mobile Responsive Design (max-width: 768px) */
 @media (max-width: 768px) {
     .achievements-grid {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
         gap: 12px;
         padding: 16px;
     }
@@ -5320,11 +5233,10 @@ input:focus {
     }
     
     .achievement-item {
-        min-height: 140px;
+        width: 110px;
+        min-height: 130px;
         padding: 12px 8px;
         /* 👆 Touch Target Optimization (WCAG 2.1 AA) */
-        min-width: 44px;
-        min-height: 44px;
     }
     
     .achievement-icon {
@@ -5344,48 +5256,95 @@ input:focus {
     }
 }
 
-/* 📲 Small Mobile Optimization (max-width: 480px) */
+/* 📲 Samsung M33 Optimization (max-width: 480px) - 3 sütun 12 satır */
 @media (max-width: 480px) {
     .achievements-grid {
-        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-        gap: 8px;
-        padding: 12px;
+        gap: 4px;
+        padding: 6px;
+        justify-content: space-evenly;
     }
     
     .achievements-modal {
-        max-height: 80vh;
-        min-height: 40vh;
+        max-height: 85vh;
+        min-height: 60vh;
         width: 100%;
         margin: 0;
     }
     
     .modal-header {
-        padding: 15px 20px;
+        padding: 12px 16px;
     }
     
     .achievement-item {
-        min-height: 120px;
-        padding: 10px 6px;
-        /* ✋ Larger Touch Targets for Small Screens */
-        min-width: 48px;
-        min-height: 48px;
+        width: calc((100vw - 48px) / 3 - 5px); /* Kırmızı çizgilerdeki boyut */
+        max-width: 90px;
+        min-width: 75px;
+        min-height: 70px;
+        padding: 4px 2px;
+        border-width: 2px;
+        border-radius: 12px;
+        /* ✋ Küçük kompakt rozetler */
     }
     
     .achievement-icon {
-        font-size: 1.8rem;
-        margin-bottom: 4px;
+        font-size: 1.1rem;
+        width: 24px;
+        height: 24px;
+        margin-bottom: 2px;
     }
     
     .achievement-title {
-        font-size: 0.7rem;
+        font-size: 0.55rem;
         font-weight: 600;
-        margin-bottom: 3px;
+        margin-bottom: 1px;
+        line-height: 1;
     }
     
     .achievement-desc {
-        font-size: 0.6rem;
-        padding: 3px 5px;
-        line-height: 1.3;
+        font-size: 0.45rem;
+        padding: 1px 2px;
+        line-height: 1.1;
+        display: none; /* Çok küçük ekranda açıklamayı gizle */
+    }
+}
+
+/* 📱 Samsung M33 Extra Compact (max-width: 420px) - 3 sütun optimize */
+@media (max-width: 420px) {
+    .achievements-grid {
+        gap: 3px;
+        padding: 4px;
+        justify-content: space-evenly;
+    }
+    
+    .achievement-item {
+        width: calc((100vw - 30px) / 3 - 3px);
+        max-width: 85px;
+        min-width: 70px;
+        min-height: 65px;
+        padding: 3px 1px;
+        border-radius: 10px;
+    }
+    
+    .achievement-icon {
+        font-size: 1rem;
+        width: 20px;
+        height: 20px;
+        margin-bottom: 2px;
+    }
+    
+    .achievement-title {
+        font-size: 0.5rem;
+        font-weight: 600;
+        margin-bottom: 0px;
+        line-height: 0.9;
+    }
+    
+    .achievement-desc {
+        display: none; /* Çok küçük ekranda gizle */
+    }
+    
+    .achievements-modal {
+        max-height: 90vh;
     }
 }
 
@@ -5440,4 +5399,140 @@ input:focus {
 
 /* ===============================================
    ✅ END OF ACHIEVEMENTS CSS 
+   =============================================== */
+
+/* ===============================================
+   📱 RESPONSIVE ACHIEVEMENT BADGES
+   =============================================== */
+
+/* 📱 Mobil cihazlar için - Duolingo responsive */
+@media (max-width: 768px) {
+    .achievements-grid {
+        grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
+        gap: 12px;
+        padding: 15px;
+    }
+    
+    .achievement-item {
+        min-height: 120px;
+        padding: 12px 8px;
+    }
+    
+    .achievement-icon {
+        font-size: 1.8rem;
+        width: 40px;
+        height: 40px;
+        margin-bottom: 8px;
+    }
+    
+    .achievement-title {
+        font-size: 0.8rem;
+    }
+    
+    .achievement-desc {
+        font-size: 0.7rem;
+    }
+    
+    .achievement-ready {
+        font-size: 0.65rem;
+        padding: 3px 6px;
+    }
+}
+
+/* 📱 Çok küçük ekranlar için - Ultra compact */
+@media (max-width: 480px) {
+    .achievements-grid {
+        grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+        gap: 10px;
+        padding: 12px;
+    }
+    
+    .achievement-item {
+        min-height: 100px;
+        padding: 10px 6px;
+    }
+    
+    .achievement-icon {
+        font-size: 1.6rem;
+        width: 35px;
+        height: 35px;
+        margin-bottom: 6px;
+    }
+    
+    .achievement-title {
+        font-size: 0.75rem;
+        margin-bottom: 4px;
+    }
+    
+    .achievement-desc {
+        font-size: 0.65rem;
+        line-height: 1.2;
+    }
+    
+    .achievement-ready {
+        font-size: 0.6rem;
+        padding: 2px 5px;
+    }
+}
+
+/* 📟 Tabletler için - Orta boyut optimizasyonu */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .achievements-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 18px;
+        padding: 25px;
+    }
+    
+    .achievement-item {
+        min-height: 160px;
+        padding: 18px 14px;
+    }
+    
+    .achievement-icon {
+        font-size: 2.5rem;
+        width: 55px;
+        height: 55px;
+        margin-bottom: 14px;
+    }
+    
+    .achievement-title {
+        font-size: 1rem;
+    }
+    
+    .achievement-desc {
+        font-size: 0.8rem;
+    }
+}
+
+/* 💻 Büyük ekranlar için - Desktop optimizasyonu */
+@media (min-width: 1025px) {
+    .achievements-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 20px;
+        padding: 30px;
+    }
+    
+    .achievement-item {
+        min-height: 170px;
+        padding: 20px 16px;
+    }
+    
+    .achievement-icon {
+        font-size: 2.8rem;
+        width: 60px;
+        height: 60px;
+        margin-bottom: 16px;
+    }
+    
+    .achievement-title {
+        font-size: 1.1rem;
+    }
+    
+    .achievement-desc {
+        font-size: 0.85rem;
+    }
+}
+
+/* ===============================================
+   📱 END OF RESPONSIVE ACHIEVEMENTS 
    =============================================== */
